@@ -2,6 +2,8 @@ import Image from "next/image";
 import React from "react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
+import FormTemplates from "@/components/FormTemplates";
+import FeaturesSection from "@/components/FeaturesSection";
 const page = () => {
   return (
     <div>
@@ -48,6 +50,10 @@ const page = () => {
         </div>
         <div className="w-full flex justify-center items-center">
           <HeroSection />
+        </div>
+        <div className="mt-20">
+          <FormTemplates />
+          <FeaturesSection />
         </div>
       </div>
     </div>
