@@ -29,13 +29,7 @@ const page = () => {
           alt="bg"
           className="mx-auto absolute left-0 top-0 blur-md"
         />
-        <Image
-          src="/images/stars.png"
-          height={100}
-          width={800}
-          alt="bg"
-          className="mx-auto absolute left-40 top-32 opacity- "
-        />
+        
         <Image
           src="/images/circle.png"
           height={100}

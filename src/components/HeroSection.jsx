@@ -23,8 +23,8 @@ const HeroSection = () => {
         </div>
       </div>
       <div className="flex justify-center mt-6 space-x-4">
-        <button className="bg-blue-600 text-white px-6 py-2 rounded-md">Get Started</button>
-        <button className="bg-[#2A2A2A] text-white px-6 py-2 rounded-md">Learn More</button>
+        <button className="bg-[#146EF5] text-white px-6 py-2 rounded-md">Get Started</button>
+        <button className="bg-[#3D3D3D] text-white px-6 py-2 rounded-md">Learn More</button>
       </div>
       <div className="text-center text-[#8D8D8D] text-sm mt-4">
         No credit card required • FREE 14-day trial
