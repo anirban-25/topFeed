@@ -31,7 +31,7 @@ const FeaturesSection = () => {
       </div>
 
       <div className="flex justify-between items-center mb-10 mt-10">
-        <div className="relative w-1/2">
+        <div className="relative w-1/3">
           
           <div className="relative p-4 bg-gray-800 rounded-lg">
             <Image 
@@ -39,7 +39,7 @@ const FeaturesSection = () => {
               width={650}
               height={450}
               alt="Real-Time Updates"
-              className="rounded-lg"
+              className="rounded-lg filter grayscale"
             />
           </div>
         </div>
@@ -99,7 +99,7 @@ const FeaturesSection = () => {
             </li>
           </ul>
         </div>
-        <div className="relative w-1/2">
+        <div className="relative w-1/3">
           
           <div className="relative p-4 bg-gray-800 rounded-lg">
             <Image 
@@ -107,14 +107,14 @@ const FeaturesSection = () => {
               width={650}
               height={450}
               alt="Real-Time Updates"
-              className="rounded-lg"
+              className="rounded-lg filter grayscale"
             />
           </div>
         </div>
       </div>
 
       <div className="flex justify-between items-center mb-10 mt-10">
-        <div className="relative w-1/2">
+        <div className="relative w-1/3">
           
           <div className="relative p-4 bg-gray-800 rounded-lg">
             <Image 
@@ -122,7 +122,7 @@ const FeaturesSection = () => {
               width={650}
               height={450}
               alt="Real-Time Updates"
-              className="rounded-lg"
+              className="rounded-lg filter grayscale"
             />
           </div>
         </div>
