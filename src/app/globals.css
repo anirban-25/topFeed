@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body{
-  background-color: #0C0F15;
+  background-color: #0B0B0B;
 }
 
 @font-face {
@@ -30,6 +30,16 @@ body{
   font-family: 'Gilroy-Regular';
   src: url('/fonts/Gilroy-Regular.woff') format('woff');
   /* Add additional font properties if needed */
+}
+/* styles.css */
+/* styles.css */
+.border-gradient {
+  border-width: 2px;
+  border-style: solid;
+  border-color: black;
+  border-image-slice: 5;
+  border-radius: 1rem; /* Adjust this value to your desired roundness */
+  overflow: hidden; /* Ensure rounded corners are applied */
 }
 
 .slider {

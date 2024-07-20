@@ -7,11 +7,11 @@ const Star = ({ stars }) => {
     return (
       <span key={i}>
         {stars >= i + 1 ? (
-          <FaStar className=" text-yellow-600 text-xs md:text-sm"/>
+          <FaStar className="text- bg-clip-text bg-gradient-to-r from-[#55A3F8]  to-[#7567D9] text-xs md:text-sm"/>
         ) : stars >= number ? (
-          <FaStarHalfAlt className=" text-yellow-600 text-xs md:text-sm"/>
+          <FaStarHalfAlt className="text- bg-clip-text bg-gradient-to-r from-white via-[#55A3F8] to-[#7567D9] text-xs md:text-sm"/>
         ) : (
-          <AiOutlineStar className=" text-yellow-600 text-xs md:text-sm"/>
+          <AiOutlineStar className="text- bg-clip-text bg-gradient-to-r from-white via-[#55A3F8] to-[#7567D9] text-xs md:text-sm"/>
         )}
       </span>
     );

@@ -21,6 +21,7 @@ const config: Config = withMT({
     "./node_modules/@material-tailwind/react/components/**/*.{js,ts,jsx,tsx}",
     "./node_modules/@material-tailwind/react/theme/components/**/*.{js,ts,jsx,tsx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/utils/**/*.{js}"
   ],
   theme: {
     screens: {
@@ -39,6 +40,14 @@ const config: Config = withMT({
       "gilroy-light": ["Gilroy-Light", "sans"],
       "gilroy-medium": ["Gilroy-Medium", "sans"],
       "gilroy-regular": ["Gilroy-Regular", "sans"],
+      "kumbh-sans": ["KumbhSans-Black", "sans"],
+      "kumbh-sans-bold": ["KumbhSans-Bold", "sans"],
+      "kumbh-sans-extrabold": ["KumbhSans-ExtraBold", "sans"],
+      "kumbh-sans-extralight": ["KumbhSans-ExtraLight", "sans"],
+      "kumbh-sans-light": ["KumbhSans-Light", "sans"],
+      "kumbh-sans-medium": ["KumbhSans-Medium", "sans"],
+      "kumbh-sans-regular": ["KumbhSans-Regular", "sans"],
+      "kumbh-sans-semibold": ["KumbhSans-SemiBoldZ", "sans"],
       custom2: ["FontFamily2", "sans"],
     },
     extend: {
