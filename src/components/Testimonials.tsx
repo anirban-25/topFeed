@@ -2,6 +2,7 @@
 import Star from "@/utils/Star";
 import Image from "next/image";
 import React, { useState } from "react";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 type Props = {};
 const reviews = [
@@ -48,9 +49,14 @@ const Testimonials = (props: Props) => {
   const handleNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % reviews.length);
   };
+  const handlePrev = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? reviews.length - 1 : prevIndex - 1
+    );
+  };
   const calculateOpacity = (index: number) => {
     const distance = Math.abs(currentIndex - index);
-    return 1 - distance * 0.35; // Opacity decreases by 25% per card distance
+    return 1 - distance * 0.65; // Opacity decreases by 25% per card distance
   };
   return (
     <div className="relative flex">
@@ -79,20 +85,33 @@ const Testimonials = (props: Props) => {
               <div className="text-sm">{review.description}</div>
               <div className="mt-4">
                 <div className="text-xs">{review.author}</div>
-                <div className="text-xs text-[#B3B3B3]">
-                  {review.position}
-                </div>
+                <div className="text-xs text-[#B3B3B3]">{review.position}</div>
               </div>
             </div>
           ))}
         </div>
       </div>
-      <button
-        onClick={handleNext}
-        className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-blue-500 text-white px-4 py-2"
-      >
-        Next
-      </button>
+      <div>
+        <div className="tracking-widest text-xs mb-5 text-[#8D8D8D]">TESTIMONIALS</div>
+        <div className=" text-5xl w-[30rem] font-bold">
+          We are the{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFFFFF] via-[#55A3F8] to-[#7567D9]">
+            talk of the town!
+          </span>
+        </div>
+        <div className="text-left mb-2 mt-2 w-[34rem] text-[#B8B8B8] text-sm">
+          These are the stories of some of our very early customers about their
+          experience of using Newsly.
+        </div>
+        <div className="flex space-x-6 mt-10">
+          <div className="bg-[#2A2A2A] border border-[#3D3D3D] p-4 rounded-full" onClick={handlePrev}>
+            <FaArrowLeft />
+          </div>
+          <div className="bg-blue-600 p-4 rounded-full" onClick={handleNext}>
+            <FaArrowRight />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

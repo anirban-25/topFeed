@@ -1,6 +1,8 @@
 import React from "react";
 import Image from "next/image";
 import { FaClock, FaCheck } from "react-icons/fa";
+import Faqs from "@/components/Faqs";
+import Banner from "@/components/Banner"
 import { GiCheckMark } from "react-icons/gi";
 import Testimonials from "./Testimonials";
 const FeaturesSection = () => {
@@ -198,7 +200,7 @@ const FeaturesSection = () => {
               width={64}
               height={64}
             />
-            
+
             <h2 className="text-lg mt-4">Personalize feed</h2>
             <p className="mt-2">
               Use category filters and tags to browse specific topics or find
@@ -222,8 +224,27 @@ const FeaturesSection = () => {
         </div>
       </div>
 
+      <div className="mt-20 mb-32">
+        <Testimonials />
+      </div>
+      <div className=" flex justify-center mb-20 mt-12">
+        <div className="w-[50rem] text-center">
+          <div className="text-sm mb-5 text-[#8D8D8D]">
+            FREQUENTLY ASKED QUESTIONS
+          </div>
+          <div className="text-5xl font-semibold ">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFFFFF] via-[#55A3F8]  to-[#7567D9]">
+              Everything
+            </span>{" "}
+            you need to know about our product
+          </div>
+        </div>
+      </div>
+      <div className="px-20">
+        <Faqs />
+      </div>
       <div className="mt-20">
-        <Testimonials/>
+        <Banner/>
       </div>
     </div>
   );

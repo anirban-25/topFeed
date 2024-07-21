@@ -62,6 +62,7 @@
     "react-select": "^5.8.0",
     "react-slider": "^2.0.4",
     "react-split": "^2.0.14",
+    "react-transition-group": "^4.4.5",
     "sharp": "^0.33.2",
     "stripe": "^14.23.0",
     "styled-components": "^6.1.11",
