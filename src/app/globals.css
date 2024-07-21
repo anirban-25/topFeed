@@ -2,33 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-body{
-  background-color: #0B0B0B;
+body {
+  background-color: #0b0b0b;
 }
 
 @font-face {
-  font-family: 'Gilroy-Bold';
-  src: url('/fonts/Gilroy-Bold.woff') format('woff');
+  font-family: "Gilroy-Bold";
+  src: url("/fonts/Gilroy-Bold.woff") format("woff");
   /* Add additional font properties if needed */
 }
 @font-face {
-  font-family: 'Gilroy-Heavy';
-  src: url('/fonts/Gilroy-Heavy.woff') format('woff');
+  font-family: "Gilroy-Heavy";
+  src: url("/fonts/Gilroy-Heavy.woff") format("woff");
   /* Add additional font properties if needed */
 }
 @font-face {
-  font-family: 'Gilroy-Light';
-  src: url('/fonts/Gilroy-Light.woff') format('woff');
+  font-family: "Gilroy-Light";
+  src: url("/fonts/Gilroy-Light.woff") format("woff");
   /* Add additional font properties if needed */
 }
 @font-face {
-  font-family: 'Gilroy-Medium';
-  src: url('/fonts/Gilroy-Medium.woff') format('woff');
+  font-family: "Gilroy-Medium";
+  src: url("/fonts/Gilroy-Medium.woff") format("woff");
   /* Add additional font properties if needed */
 }
 @font-face {
-  font-family: 'Gilroy-Regular';
-  src: url('/fonts/Gilroy-Regular.woff') format('woff');
+  font-family: "Gilroy-Regular";
+  src: url("/fonts/Gilroy-Regular.woff") format("woff");
   /* Add additional font properties if needed */
 }
 /* styles.css */
@@ -41,6 +41,46 @@ body{
   border-radius: 1rem; /* Adjust this value to your desired roundness */
   overflow: hidden; /* Ensure rounded corners are applied */
 }
+.border-gradient-2 {
+  border-width: 1px;
+  border-style: solid;
+  border-top: 1px solid;
+
+  border-image-source: linear-gradient(
+    90deg,
+    rgba(191, 200, 216, 0) -14.16%,
+    #686d76 47.11%,
+    rgba(194, 203, 220, 0) 116.65%
+  );
+
+  border-top: 1px solid;
+
+  border-image-source: linear-gradient(
+    90deg,
+    rgba(191, 200, 216, 0) -14.16%,
+    #686d76 47.11%,
+    rgba(194, 203, 220, 0) 116.65%
+  );
+
+  border-image-slice: 5;
+  border-radius: 1rem; /* Adjust this value to your desired roundness */
+  overflow: hidden; /* Ensure rounded corners are applied */
+}
+.border-gradient-3 {
+  border-style: solid;
+  border-top: 1px solid;
+
+  border-image-source: linear-gradient(
+    90deg,
+    rgba(191, 200, 216, 0) -14.16%,
+    rgba(104, 109, 118, 0.5) 47.11%,
+    rgba(194, 203, 220, 0) 116.65%
+  );
+
+  border-image-slice: 1;
+  border-radius: 1rem; /* Adjust this value to your desired roundness */
+  overflow: hidden; /* Ensure rounded corners are applied */
+}
 
 .slider {
   position: relative;
@@ -50,12 +90,12 @@ body{
   border-radius: 5px;
   margin-top: 10px;
   margin-bottom: 20px;
-   /* Ensures that the track fits within the slider bounds */
+  /* Ensures that the track fits within the slider bounds */
 }
 
 /* Style for the selected range track */
-.slider .slider-track-2{
-  background-color: #7850FF; /* Selected region color */
+.slider .slider-track-2 {
+  background-color: #7850ff; /* Selected region color */
   height: 100%; /* Full height of the slider */
   border-radius: 5px;
 }
@@ -66,13 +106,12 @@ body{
   width: 20px;
   border-radius: 50%;
   top: 4px;
-  background-color: #7850FF;
+  background-color: #7850ff;
   border: 1px solid #361e88;
   cursor: grab;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   padding-bottom: 20px;
   transform: translateY(-50%);
-  
 }
 
 /* Style for the active thumb */
@@ -86,24 +125,18 @@ body{
   padding: 50px 20px;
   width: full;
   text-align: center;
-  
-  
 }
 
 .help-title {
   font-size: 27px;
   font-weight: 700;
   margin-bottom: 40px;
-  
-  text-align: center;
-  
-  
 
-  
+  text-align: center;
 }
 
 .highlight {
-  color: #DCFD82; 
+  color: #dcfd82;
 }
 
 .help-features {
@@ -111,7 +144,6 @@ body{
   justify-content: center;
   gap: 20px;
   flex-wrap: wrap;
-  
 }
 
 .feature-item {
@@ -119,9 +151,9 @@ body{
 }
 .feature-number-box {
   background-color: #2c0e5e;
-  border: 2px solid #DCFD82; 
+  border: 2px solid #dcfd82;
   border-radius: 20%;
-  
+
   display: inline-block;
   padding: 30px;
   width: 40px;
@@ -133,15 +165,14 @@ body{
 }
 
 .feature-number {
-  color: #DCFD82;
+  color: #dcfd82;
   font-size: 24px;
   font-weight: 700;
   align-items: center;
-  
 }
 
 .feature-title {
-  color: #DCFD82;
+  color: #dcfd82;
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 10px;

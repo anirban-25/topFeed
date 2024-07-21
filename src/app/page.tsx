@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import FormTemplates from "@/components/FormTemplates";
 import FeaturesSection from "@/components/FeaturesSection";
+import Footer from "@/components/Footer";
 const page = () => {
   return (
     <div>
@@ -29,7 +30,7 @@ const page = () => {
           alt="bg"
           className="mx-auto absolute left-0 top-0 blur-md"
         />
-        
+
         <Image
           src="/images/circle.png"
           height={100}
@@ -49,6 +50,10 @@ const page = () => {
           <FormTemplates />
           <FeaturesSection />
         </div>
+      </div>
+      <div className=" w-full border-gradient-2 mt-44" />
+      <div className="">
+        <Footer />
       </div>
     </div>
   );
