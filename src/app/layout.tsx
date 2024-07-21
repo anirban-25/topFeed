@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import AuthRouter from "./authRouter";
-const inter = Inter({ subsets: ["latin"] });
 import Script from "next/script";
+import ClientSessionProvider from "@/components/ClientSessionProvider"; 
+
+const inter = Inter({ subsets: ["latin"] });
+
 export const metadata: Metadata = {
   title:
     "FavTutor AI Learning - Master Programming with Personalized AI-Powered Tool",
@@ -17,24 +19,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="=">
+    <html lang="en">
       <head>
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-T6C8KG03Q6"
         ></Script>
-        <Script id="google analytics">
+        <Script id="google-analytics">
           {`
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
 
-  gtag('config', 'G-T6C8KG03Q6');
-  `}
+            gtag('config', 'G-T6C8KG03Q6');
+          `}
         </Script>
       </head>
       <body className={inter.className}>
-        <div className=" min-h-screen">{children}</div>
+        <ClientSessionProvider>
+          <div className="min-h-screen">{children}</div>
+        </ClientSessionProvider>
       </body>
     </html>
   );

@@ -232,7 +232,7 @@ const FeaturesSection = () => {
           <div className="text-sm mb-5 text-[#8D8D8D]">
             FREQUENTLY ASKED QUESTIONS
           </div>
-          <div className="text-5xl font-semibold ">
+          <div className="text-3xl font-semibold ">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFFFFF] via-[#55A3F8]  to-[#7567D9]">
               Everything
             </span>{" "}

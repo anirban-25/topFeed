@@ -93,7 +93,7 @@ const Testimonials = (props: Props) => {
       </div>
       <div>
         <div className="tracking-widest text-xs mb-5 text-[#8D8D8D]">TESTIMONIALS</div>
-        <div className=" text-5xl w-[30rem] font-bold">
+        <div className=" text-4xl w-[30rem] font-bold">
           We are the{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFFFFF] via-[#55A3F8] to-[#7567D9]">
             talk of the town!
