@@ -52,7 +52,7 @@ export default function FAQ() {
             <button
               className={clsx(" text-white font-bold  ", visibleIndex === index? 'text-[#146EF5]': 'text-[#98A2B3]')}
             >
-              {visibleIndex === index ? <CiCircleMinus size={20}/> : <CiCirclePlus size={20} />}
+              {visibleIndex === index ? <CiCircleMinus size={20} color='#146EF5'/> : <CiCirclePlus size={20} />}
             </button>
           </div>
           <div

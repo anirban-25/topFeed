@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { FaClock, FaCheck } from "react-icons/fa";
 import Faqs from "@/components/Faqs";
-import Banner from "@/components/Banner"
+import Banner from "@/components/Banner";
 import { GiCheckMark } from "react-icons/gi";
 import Testimonials from "./Testimonials";
 const FeaturesSection = () => {
@@ -178,45 +178,55 @@ const FeaturesSection = () => {
       </div>
 
       <div className="mt-12 ">
-        <div className="flex justify-around b text-white p-8 items-center">
-          <div className="text-left relative">
-            <Image
-              src="/images/step-1.svg"
-              alt="Set Preferences"
-              width={64}
-              height={64}
-            />
-            <h2 className="text-lg mt-4">Set Preferences</h2>
-            <p className="mt-2">
+        <div className="flex justify-around text-white p-8 items-center ">
+          <div className="text-left ">
+            <div className="relative">
+              <Image
+                src="/images/step-1.svg"
+                alt="Set Preferences"
+                width={64}
+                height={64}
+                className="relative  z-10"
+              />
+              <div className="z-0 absolute left-0 right-0 h-px bg-[#4D4D4D] top-1/2 transform -translate-y-1/2"></div>
+            </div>
+            <div className="mt-4 text-[#8D8D8D]">01</div>
+            <h2 className="text-lg mt-2 font-bold">Set Preferences</h2>
+            <p className="mt-2 text-sm text-[#8D8D8D]">
               Customize your dashboard and notification settings to receive
               updates that are most relevant to you.
             </p>
           </div>
-          <div className="flex-grow mx-4 h-px bg-gray-500"></div>
-          <div className="text-left">
-            <Image
-              src="/images/step-1.svg"
-              alt="Personalize Feed"
-              width={64}
-              height={64}
-            />
-
-            <h2 className="text-lg mt-4">Personalize feed</h2>
-            <p className="mt-2">
+          <div className="text-left ml-5">
+            <div className="relative">
+              <Image
+                src="/images/personalized_feed.svg"
+                alt="Personalize Feed"
+                width={64}
+                height={64}
+                className="relative z-10"
+              />
+              <div className="z-0 absolute left-0 right-0 h-px bg-[#4D4D4D] top-1/2 transform -translate-y-1/2"></div>
+            </div>
+            
+            <div className="mt-4 text-[#8D8D8D]">02</div>
+            <h2 className="text-lg mt-2 font-bold">Personalize feed</h2>
+            <p className="mt-2 text-[#8D8D8D] text-sm">
               Use category filters and tags to browse specific topics or find
               articles related to particular subjects.
             </p>
           </div>
-          <div className="flex-grow mx-4 h-px bg-gray-500"></div>
-          <div className="text-left">
+          <div className="text-left ml-5">
             <Image
-              src="/images/step-1.svg"
+              src="/images/chat.svg"
               alt="Interact"
               width={64}
               height={64}
             />
-            <h2 className="text-lg mt-4">Interact</h2>
-            <p className="mt-2">
+            
+            <div className="mt-4 text-[#8D8D8D]">03</div>
+            <h2 className="text-lg mt-2 font-bold">Interact</h2>
+            <p className="mt-2 text-sm text-[#8D8D8D]">
               Like, comment, and share articles. Participate in discussions and
               engage with other users to gain different perspectives.
             </p>
@@ -244,7 +254,7 @@ const FeaturesSection = () => {
         <Faqs />
       </div>
       <div className="mt-20">
-        <Banner/>
+        <Banner />
       </div>
     </div>
   );
