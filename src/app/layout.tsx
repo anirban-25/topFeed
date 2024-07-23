@@ -21,6 +21,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+
+      <meta name="robots" content="noindex" />
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-T6C8KG03Q6"
