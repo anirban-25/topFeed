@@ -45,7 +45,7 @@ const page = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h2 className="text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-white via-[#55A3F8] to-[#7567D9]">Contact Us</h2>
         <p className="mt-4 text-lg text-center text-gray-500">
-          We'd love to hear from you! Please fill out the form below and we'll get in touch with you as soon as possible.
+          We&apos;d love to hear from you! Please fill out the form below and we&apos;ll get in touch with you as soon as possible.
         </p>
 
         <div className="mt-10">
