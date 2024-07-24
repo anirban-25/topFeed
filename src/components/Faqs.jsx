@@ -56,13 +56,18 @@ export default function FAQ() {
             </button>
           </div>
           <div
-            className={clsx(
-              'transition-all duration-300 text-sm transform text-[#CCCCCC]',
-              visibleIndex === index ? 'opacity-100 max-h-40 translate-y-0' : 'opacity-0 max-h-0 -translate-y-2 overflow-hidden'
-            )}
-          >
-            <p>{item.answer}</p>
-          </div>
+  className={clsx(
+    'transition-opacity duration-300 text-sm text-[#CCCCCC]',
+    visibleIndex === index ? 'opacity-100 max-h-40' : 'opacity-0 max-h-0 overflow-hidden'
+  )}
+  style={{
+    transform: visibleIndex === index ? 'translateY(0)' : 'translateY(-0.5rem)',
+    transition: 'opacity 0.3s, max-height 0.3s, transform 0.3s',
+  }}
+>
+  <p>{item.answer}</p>
+</div>
+
         </div>
       ))}
     </div>
