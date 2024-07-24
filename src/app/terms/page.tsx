@@ -61,7 +61,7 @@ const TermsPage = () => {
           <h2 className="text-2xl font-semibold mb-4">2. Use of Service</h2>
           <p>
             You agree to use TopFeed only for lawful purposes and in a way that
-            does not infringe the rights of, restrict or inhibit anyone else's
+            does not infringe the rights of, restrict or inhibit anyone else&apos;s
             use and enjoyment of the website.
           </p>
         </section>
