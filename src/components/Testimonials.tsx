@@ -99,7 +99,7 @@ const Testimonials = (props: Props) => {
             talk of the town!
           </span>
         </div>
-        <div className="text-left mb-2 mt-2 w-[34rem] text-[#B8B8B8] text-sm">
+        <div className="text-left mb-2 mt-2 max-w-[34rem] text-[#B8B8B8] text-sm">
           These are the stories of some of our very early customers about their
           experience of using Newsly.
         </div>
