@@ -46,13 +46,13 @@ const page = () => {
         <div className=" w-full  justify-center items-center">
           <HeroSection />
         </div>
-        <div className="mt-20 hidden md:block">
-          <FormTemplates />
+        <div className="mt-20 block">
+          {/* <FormTemplates /> */}
           <FeaturesSection />
         </div>
       </div>
       <div className=" w-full border-gradient-2 mt-44" />
-      <div className="hidden md:block">
+      <div className="">
         <Footer />
       </div>
     </div>

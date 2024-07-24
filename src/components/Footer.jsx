@@ -1,17 +1,20 @@
+import Link from "next/link";
 import React from "react";
+import { FaXTwitter, FaLinkedin } from "react-icons/fa6";
+import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className=" text-white py-8 px-20">
+    <footer className=" text-white py-8 md:px-20 pl-5">
       <div className="container mx-auto">
         <div className="flex flex-col w-full md:flex-row justify-between items-start mb-20">
           <div className="mb-6 md:mb-0">
-            <h2 className="text-xl font-bold mb-4">Stay up to date</h2>
+            <h2 className="text-base md:text-xl font-bold mb-4">Stay up to date</h2>
             <form className="flex space-x-3">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="bg-white text-black px-4 py-2 rounded-md w-64"
+                className="bg-white text-black px-4 py-2 rounded-md w-48  md:w-64"
               />
               <button
                 type="submit"
@@ -25,8 +28,12 @@ const Footer = () => {
             <div>
               <h3 className="font-bold mb-2">Learn More</h3>
               <ul className="space-y-2">
-                <li className="text-[#B8B8B8] text-sm">Privacy</li>
-                <li className="text-[#B8B8B8] text-sm">Terms</li>
+                <li className="text-[#B8B8B8] text-sm hover:text-white hover:shadow-md shadow-white">
+                  <a href="/privacy">Privacy</a>
+                </li>
+                <li className="text-[#B8B8B8] text-sm  hover:text-white hover:shadow-md shadow-white">
+                  <a href="/terms">Terms</a>
+                </li>
                 <li className="text-[#B8B8B8] text-sm hover:text-white hover:shadow-md shadow-white">
                   <a href="/contact-us">Contact Us</a>
                 </li>
@@ -39,15 +46,20 @@ const Footer = () => {
             © 2024 TOPFEED. All rights reserved.
           </p>
           <div className="flex space-x-4 mt-4 md:mt-0 text-sm">
-            <a href="#" className="text-[#B8B8B8] hover:underline">
-              Terms
-            </a>
-            <a href="#" className="text-[#B8B8B8] hover:underline">
-              Privacy
-            </a>
-            <a href="#" className="text-[#B8B8B8] hover:underline">
-              Cookies
-            </a>
+            <div className="p-1 border-white/[0.4] border-[1px] hover:text-[#202123] transition hover:bg-white">
+              <Link href="https://www.facebook.com/topfeedai" target="_blank">
+                <FaFacebookF className="h-5 w-5" />
+              </Link>
+            </div>
+
+            <div className="p-1 border-white/[0.4] border-[1px] hover:text-[#202123] transition hover:bg-white">
+              <Link
+                href="https://www.linkedin.com/company/topfeedai/"
+                target="_blank"
+              >
+                <FaLinkedin className="h-5 w-5" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>

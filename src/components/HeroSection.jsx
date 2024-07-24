@@ -3,7 +3,7 @@ import { PiStarFourFill } from "react-icons/pi";
 const HeroSection = () => {
   return (
     <div>
-      <h1 className="flex text-xl md:text-6xl text-center justify-center font-kumbh-sans-bold mt-10 text-white ">
+      <h1 className="flex text-2xl md:text-6xl text-center justify-center font-kumbh-sans-bold mt-10 text-white ">
         <div className="">
           <span
             className="bg-clip-text text-transparent"

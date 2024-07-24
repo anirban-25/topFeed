@@ -38,7 +38,7 @@ export default function FAQ() {
   };
 
   return (
-    <div className="p-6 rounded-lg shadow-lg">
+    <div className="md:p-6 rounded-lg shadow-lg">
       {questions.map((item, index) => (
         <div
           key={index}
@@ -48,7 +48,7 @@ export default function FAQ() {
           )}
         >
           <div className="flex justify-between items-center mb-2 cursor-pointer" onClick={() => toggleVisibility(index)}>
-            <h2 className="text-lg ">{item.question}</h2>
+            <h2 className="text-base md:text-lg ">{item.question}</h2>
             <button
               className={clsx(" text-white font-bold  ", visibleIndex === index? 'text-[#146EF5]': 'text-[#98A2B3]')}
             >
