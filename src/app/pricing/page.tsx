@@ -103,7 +103,7 @@ const page = () => {
           to affordable AI news feed
         </div>
         <div className="text-center text-[#E6E6E6] font-kumbh-sans-light mt-5">
-          Whether you're just getting started or are a large enterprise, we have
+          Whether you&apos;re just getting started or are a large enterprise, we have
           a plan for you.
         </div>
       </div>
