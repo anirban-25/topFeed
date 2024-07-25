@@ -47,7 +47,7 @@ const config: Config = withMT({
       "kumbh-sans-light": ["KumbhSans-Light", "sans"],
       "kumbh-sans-medium": ["KumbhSans-Medium", "sans"],
       "kumbh-sans-regular": ["KumbhSans-Regular", "sans"],
-      "kumbh-sans-semibold": ["KumbhSans-SemiBoldZ", "sans"],
+      "kumbh-sans-semibold": ["KumbhSans-SemiBold", "sans"],
       custom2: ["FontFamily2", "sans"],
     },
     extend: {

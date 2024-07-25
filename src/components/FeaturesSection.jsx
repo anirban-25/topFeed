@@ -82,7 +82,7 @@ const FeaturesSection = () => {
         </div>
 
         <div className="md:flex md:justify-between items-center md:mb-10 space-x-32 mt-10">
-          <div className="relative md:w-1/2 mb-5 md:mb-0">
+          <div className="md:hidden relative md:w-1/2 mb-5 md:mb-0">
             <div className="relative p-4 bg-gray-800 rounded-lg">
               <Image
                 src="/images/followimage.png"

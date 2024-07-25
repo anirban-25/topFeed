@@ -4,6 +4,7 @@
 
 body {
   background-color: #0b0b0b;
+  
 }
 @font-face {
   font-family: "KumbhSans-Black";
@@ -26,8 +27,20 @@ body {
   src: url("/fonts/KumbhSans-ExtraLight.woff") format("woff");
 }
 @font-face {
+  font-family: "KumbhSans-ExtraLight";
+  src: url("/fonts/KumbhSans-ExtraLight.woff") format("woff");
+}
+@font-face {
   font-family: "KumbhSans-Light";
   src: url("/fonts/KumbhSans-Light.woff") format("woff");
+}
+@font-face {
+  font-family: "KumbhSans-Regular";
+  src: url("/fonts/KumbhSans-Regular.woff") format("woff");
+}
+@font-face {
+  font-family: "KumbhSans-Medium";
+  src: url("/fonts/KumbhSans-Medium.woff") format("woff");
 }
 @font-face {
   font-family: "Gilroy-Bold";
