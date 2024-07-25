@@ -36,18 +36,18 @@ const page = () => {
           height={100}
           width={800}
           alt="bg"
-          className="mx-auto absolute left-36 top-0 "
+          className="mx-auto absolute w-[234px] md:w-[800px] top-10 left-20 md:left-36 md:top-0 "
         />
       </div>
-      <div className=" px-20">
+      <div className="px-5 md:px-20">
         <div className="w-full flex justify-center items-center">
           <Navbar />
         </div>
-        <div className="w-full flex justify-center items-center">
+        <div className=" w-full  justify-center items-center">
           <HeroSection />
         </div>
-        <div className="mt-20">
-          <FormTemplates />
+        <div className="mt-20 block">
+          {/* <FormTemplates /> */}
           <FeaturesSection />
         </div>
       </div>

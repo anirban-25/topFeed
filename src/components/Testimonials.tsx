@@ -59,8 +59,8 @@ const Testimonials = (props: Props) => {
     return 1 - distance * 0.65; // Opacity decreases by 25% per card distance
   };
   return (
-    <div className="relative flex">
-      <div className="overflow-hidden w-[60%]">
+    <div className="relative md:flex">
+      <div className="overflow-hidden mb-5 md:mb-0 md:w-[60%]">
         <div
           className="flex space-x-6 transition-transform duration-300"
           style={{
@@ -92,19 +92,24 @@ const Testimonials = (props: Props) => {
         </div>
       </div>
       <div>
-        <div className="tracking-widest text-xs mb-5 text-[#8D8D8D]">TESTIMONIALS</div>
-        <div className=" text-4xl w-[30rem] font-bold">
+        <div className="tracking-widest text-xs mb-5 text-[#8D8D8D]">
+          TESTIMONIALS
+        </div>
+        <div className="text-xl text-left md:text-4xl max-w-[30rem] font-bold">
           We are the{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFFFFF] via-[#55A3F8] to-[#7567D9]">
             talk of the town!
           </span>
         </div>
-        <div className="text-left mb-2 mt-2 w-[34rem] text-[#B8B8B8] text-sm">
+        <div className="text-left mb-2 mt-2 max-w-[34rem] text-[#B8B8B8] text-sm">
           These are the stories of some of our very early customers about their
           experience of using Newsly.
         </div>
         <div className="flex space-x-6 mt-10">
-          <div className="bg-[#2A2A2A] border border-[#3D3D3D] p-4 rounded-full" onClick={handlePrev}>
+          <div
+            className="bg-[#2A2A2A] border border-[#3D3D3D] p-4 rounded-full"
+            onClick={handlePrev}
+          >
             <FaArrowLeft />
           </div>
           <div className="bg-blue-600 p-4 rounded-full" onClick={handleNext}>

@@ -25,6 +25,7 @@
     "@tsparticles/engine": "^3.3.0",
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.3.0",
+    "antd": "^5.19.3",
     "axios": "^1.6.7",
     "body-parser": "^1.20.2",
     "chart.js": "^4.4.3",
