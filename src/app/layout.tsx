@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
-import ClientSessionProvider from "@/components/ClientSessionProvider"; 
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -38,9 +38,8 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={inter.className}>
-        <ClientSessionProvider>
-          <div className="min-h-screen">{children}</div>
-        </ClientSessionProvider>
+        <div className="min-h-screen">{children}</div>
+        
       </body>
     </html>
   );
