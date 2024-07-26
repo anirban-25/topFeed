@@ -6,7 +6,7 @@ import { getAuth } from "firebase/auth";
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAc8bW2CHBoV6PO4Y2g3bPRcskxOGI3HYE",
-  authDomain: "topfeed-123.firebaseapp.com",
+  authDomain: "auth.topfeed.ai",
   projectId: "topfeed-123",
   storageBucket: "topfeed-123.appspot.com",
   messagingSenderId: "1074359159074",

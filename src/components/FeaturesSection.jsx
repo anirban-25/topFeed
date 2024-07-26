@@ -81,9 +81,9 @@ const FeaturesSection = () => {
           </div>
         </div>
 
-        <div className="md:flex md:justify-between items-center md:mb-10 space-x-32 mt-10">
-          <div className="md:hidden relative md:w-1/2 mb-5 md:mb-0">
-            <div className="relative p-4 bg-gray-800 rounded-lg">
+        <div className="md:flex md:justify-between items-center md:mb-10  mt-10">
+          <div className="block md:hidden relative mb-5 md:mb-0">
+            <div className="relative p-4  bg-gray-800 rounded-lg">
               <Image
                 src="/images/followimage.png"
                 width={650}
@@ -93,38 +93,40 @@ const FeaturesSection = () => {
               />
             </div>
           </div>
-
-          <div className="md:ml-10 text-lg">
-            <div className="flex items-center mb-4">
-              <FaClock
-                className="text-blue-500 mr-2 w-[19px] md:w-[24px]"
-                size={24}
-              />
-              <h3 className="text-lg md:text-3xl font-bold ">
-                Real-Time Updates
-              </h3>
+          <div className="flex space-x-32">
+            <div className="md:ml-10 text-lg">
+              <div className="flex items-center mb-4">
+                <FaClock
+                  className="text-blue-500 mr-2 w-[19px] md:w-[24px]"
+                  size={24}
+                />
+                <h3 className="text-lg md:text-3xl font-bold ">
+                  Real-Time Updates
+                </h3>
+              </div>
+              <p className="mb-1 md:mb-4 text-base md:text-lg">
+                Stay informed with instant updates on the latest news and
+                trends.
+              </p>
+              <ul className="text-sm md:text-lg list-none">
+                <li className="flex items-center mb-2">
+                  <GiCheckMark className="text-blue-500 mr-2" size={20} />
+                  Unlimited blog sites
+                </li>
+                <li className="flex items-center mb-2">
+                  <GiCheckMark className="text-blue-500 mr-2" size={20} />
+                  Custom domain for each site
+                </li>
+                <li className="flex items-center mb-2">
+                  <GiCheckMark className="text-blue-500 mr-2" size={20} />
+                  Analytics for each site
+                </li>
+                <li className="flex items-center mb-2">
+                  <GiCheckMark className="text-blue-500 mr-2" size={20} />
+                  Pricing based on page views
+                </li>
+              </ul>
             </div>
-            <p className="mb-1 md:mb-4 text-base md:text-lg">
-              Stay informed with instant updates on the latest news and trends.
-            </p>
-            <ul className="text-sm md:text-lg list-none">
-              <li className="flex items-center mb-2">
-                <GiCheckMark className="text-blue-500 mr-2" size={20} />
-                Unlimited blog sites
-              </li>
-              <li className="flex items-center mb-2">
-                <GiCheckMark className="text-blue-500 mr-2" size={20} />
-                Custom domain for each site
-              </li>
-              <li className="flex items-center mb-2">
-                <GiCheckMark className="text-blue-500 mr-2" size={20} />
-                Analytics for each site
-              </li>
-              <li className="flex items-center mb-2">
-                <GiCheckMark className="text-blue-500 mr-2" size={20} />
-                Pricing based on page views
-              </li>
-            </ul>
           </div>
           <div className="hidden md:block relative w-1/2">
             <div className="relative p-4 bg-gray-800 rounded-lg">
@@ -258,62 +260,63 @@ const FeaturesSection = () => {
         </div>
       </div>
       <div className="md:hidden mt-12 flex justify-center">
-      <div className="w-full space-y-7 text-white">
-      <div className="items-center flex justify-between text-center relative">
-        <div className="relative">
-          <Image
-            src="/images/step-1.svg"
-            alt="Set Preferences"
-            width={64}
-            height={64}
-            className="relative w-[54px] z-10 mb-3"
-          />
+        <div className="w-full space-y-7 text-white">
+          <div className="items-center flex justify-between text-center relative">
+            <div className="relative">
+              <Image
+                src="/images/step-1.svg"
+                alt="Set Preferences"
+                width={64}
+                height={64}
+                className="relative w-[54px] z-10 mb-3"
+              />
+            </div>
+            <div>
+              <div className="mt-4 text-sm text-[#8D8D8D]">01</div>
+              <h2 className="text-base mt-2 font-bold">Set Preferences</h2>
+              <p className="mt-2 text-xs text-[#8D8D8D] max-w-64">
+                Customize your dashboard and notification settings to receive
+              </p>
+            </div>
+            <div className="absolute left-[27px] top-[54px] w-[1px] h-[calc(100%+28px)] bg-gray-600 -z-10"></div>
+          </div>
+          <div className="items-center flex justify-between text-center relative">
+            <div className="relative">
+              <Image
+                src="/images/personalized_feed.svg"
+                alt="Personalize Feed"
+                width={64}
+                height={64}
+                className="relative w-[54px] z-10"
+              />
+            </div>
+            <div>
+              <div className="mt-4 text-sm text-[#8D8D8D]">02</div>
+              <h2 className="text-base mt-2 font-bold">Personalize feed</h2>
+              <p className="mt-2 text-[#8D8D8D] text-xs max-w-64">
+                Use category filters and tags to browse specific topics or find
+              </p>
+            </div>
+            <div className="absolute left-[27px] top-[54px] w-[1px] h-[calc(100%+28px)] bg-gray-600 -z-10"></div>
+          </div>
+          <div className="items-center flex justify-between text-center">
+            <Image
+              src="/images/chat.svg"
+              alt="Interact"
+              width={64}
+              height={64}
+              className="relative w-[54px] z-10 mt-4"
+            />
+            <div>
+              <div className="mt-4 text-sm text-[#8D8D8D]">03</div>
+              <h2 className="mt-2 text-base font-bold">Interact</h2>
+              <p className="mt-2 text-xs text-[#8D8D8D] max-w-64">
+                Like, comment, and share articles. Participate in discussions
+                and
+              </p>
+            </div>
+          </div>
         </div>
-        <div>
-          <div className="mt-4 text-sm text-[#8D8D8D]">01</div>
-          <h2 className="text-base mt-2 font-bold">Set Preferences</h2>
-          <p className="mt-2 text-xs text-[#8D8D8D] max-w-64">
-            Customize your dashboard and notification settings to receive
-          </p>
-        </div>
-        <div className="absolute left-[27px] top-[54px] w-[1px] h-[calc(100%+28px)] bg-gray-600 -z-10"></div>
-      </div>
-      <div className="items-center flex justify-between text-center relative">
-        <div className="relative">
-          <Image
-            src="/images/personalized_feed.svg"
-            alt="Personalize Feed"
-            width={64}
-            height={64}
-            className="relative w-[54px] z-10"
-          />
-        </div>
-        <div>
-          <div className="mt-4 text-sm text-[#8D8D8D]">02</div>
-          <h2 className="text-base mt-2 font-bold">Personalize feed</h2>
-          <p className="mt-2 text-[#8D8D8D] text-xs max-w-64">
-            Use category filters and tags to browse specific topics or find
-          </p>
-        </div>
-        <div className="absolute left-[27px] top-[54px] w-[1px] h-[calc(100%+28px)] bg-gray-600 -z-10"></div>
-      </div>
-      <div className="items-center flex justify-between text-center">
-        <Image
-          src="/images/chat.svg"
-          alt="Interact"
-          width={64}
-          height={64}
-          className="relative w-[54px] z-10 mt-4"
-        />
-        <div>
-          <div className="mt-4 text-sm text-[#8D8D8D]">03</div>
-          <h2 className="mt-2 text-base font-bold">Interact</h2>
-          <p className="mt-2 text-xs text-[#8D8D8D] max-w-64">
-            Like, comment, and share articles. Participate in discussions and
-          </p>
-        </div>
-      </div>
-    </div>
       </div>
       <div className="mt-20 mb-20 md:mb-32">
         <Testimonials />

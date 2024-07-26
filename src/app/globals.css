@@ -19,8 +19,8 @@ body {
   src: url("/fonts/KumbhSans-ExtraBold.woff") format("woff");
 }
 @font-face {
-  font-family: "KumbhSans-ExtraBold";
-  src: url("/fonts/KumbhSans-ExtraBold.woff") format("woff");
+  font-family: "KumbhSans-SemiBold";
+  src: url("/fonts/KumbhSans-SemiBold.woff") format("woff");
 }
 @font-face {
   font-family: "KumbhSans-ExtraLight";
@@ -113,8 +113,7 @@ body {
     rgba(194, 203, 220, 0) 116.65%
   );
 
-  border-image-slice: 1;
-  border-radius: 1rem; /* Adjust this value to your desired roundness */
+  border-image-slice: 1; /* Adjust this value to your desired roundness */
   overflow: hidden; /* Ensure rounded corners are applied */
 }
 
