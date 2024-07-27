@@ -49,8 +49,9 @@ const Navbar = () => {
         </Link>
         <div className=" items-center  space-x-5 md:space-x-20 font-semibold text-sm hidden md:flex">
           <div>HOME</div>
-          <div className="text-[#8D8D8D]">MY FEED</div>
-          <div className="text-[#8D8D8D]">PRICING</div>
+          
+          <a href="/pricing">
+          <div className="text-[#8D8D8D] cursor-pointer">PRICING</div></a>
         </div>
         <div>
           <Link href="/login">
