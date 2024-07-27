@@ -9,6 +9,8 @@ const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingG, setLoadingG] = useState(false);
+  
   const [error, setError] = useState("");
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
@@ -34,7 +36,7 @@ const LoginForm = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
+    setLoadingG(true);
     try {
       const result = await signInWithPopup(auth, provider);
       if (result.user) {
@@ -43,7 +45,7 @@ const LoginForm = () => {
     } catch (error) {
       console.error("Error signing in with Google:", error);
     } finally {
-      setLoading(false);
+      setLoadingG(false);
     }
   };
 
@@ -95,12 +97,12 @@ const LoginForm = () => {
       <button
         className="w-full p-3 bg-[#2A2A2A] text-white rounded-md flex items-center justify-center"
         onClick={handleGoogleSignIn}
-        disabled={loading}
+        disabled={loadingG}
       >
         <div className="scale-125 mr-4">
           <FcGoogle />
         </div>
-        {loading ? "Signing in..." : "Sign in with Google"}
+        {loadingG ? "Signing in..." : "Sign in with Google"}
       </button>
     </div>
   );
