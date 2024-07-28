@@ -3,13 +3,13 @@ import React from "react";
 import SidePanel from '@/components/SidePanel';
 import RedditComponent from '@/components/RedditComponent';
 import DashboardHeader from '@/components/DashboardHeader';
-import withAuth from '@/hoc/withAuth';
+
 
 const DashboardPage = () => {
     return (
         <div className="flex">
             <div className="flex h-full">
-                <div className="relative w-full -z-10 flex justify-center items-center top-0 mx-auto">
+                <div className="relative w-full z-10 flex justify-center items-center top-0 mx-auto">
                     <SidePanel />
                 </div>
             </div>
@@ -21,4 +21,4 @@ const DashboardPage = () => {
     );
 };
 
-export default withAuth(DashboardPage);
+export default DashboardPage;

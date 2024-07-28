@@ -43,21 +43,21 @@ const SidePanel = () => {
             </div>
             <div className="flex flex-col space-y-4 mt-8 items-left ml-5 z-10"> 
                 <Link href="/dashboard/reddit">
-                    <div className="text-white flex items-center space-x-2 hover:bg-gray-200 px-4 py-2 rounded-md w-full cursor-pointer">
+                    <div className="text-white flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full cursor-pointer">
                         <FaRedditAlien className='mr-5 scale-125' /> Reddit
                     </div>
                 </Link>
                 <Link href="/dashboard/twitter">
-                    <div className="text-white flex items-center space-x-2 hover:bg-gray-200 px-4 py-2 rounded-md w-full">
+                    <div className="text-white flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full">
                         <div ><FaXTwitter className='mr-5 scale-125'/></div>Twitter
                     </div>
                     
                 </Link>
                 
-                <Link href="/dashboard/notifications" className="text-white flex items-center space-x-2 hover:bg-gray-200 px-4 py-2 rounded-md w-full">
+                <Link href="/dashboard/notifications" className="text-white flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full">
                     <div ><IoNotifications className='mr-5 scale-125'/></div>Notifications
                 </Link>
-                <Link href="/dashboard/support" className="text-white flex items-center space-x-2 hover:bg-gray-200 px-4 py-2 rounded-md w-full">
+                <Link href="/dashboard/support" className="text-white flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full">
                     <div ><HiOutlineSupport className='mr-5 scale-125'/></div>Support
                 </Link>
             </div>

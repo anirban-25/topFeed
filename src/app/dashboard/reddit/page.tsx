@@ -3,7 +3,7 @@ import SidePanel from '@/components/SidePanel';
 import RedditComponent from '@/components/RedditComponent';
 import DashboardHeader from '@/components/DashboardHeader';
 import withAuth from '@/hoc/withAuth';
-const DashboardPage = () => {
+const page = () => {
     return (
         <div className="flex">
             <div className="flex h-full">
@@ -19,4 +19,4 @@ const DashboardPage = () => {
     );
 };
 
-export default withAuth(DashboardPage);
+export default page;

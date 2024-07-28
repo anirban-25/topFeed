@@ -21,4 +21,4 @@ const DashboardPage = () => {
     );
 };
 
-export default withAuth(DashboardPage);
+export default DashboardPage;
