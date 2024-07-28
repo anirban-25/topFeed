@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
 import SidePanel from '@/components/SidePanel';
-import RedditComponent from '@/components/RedditComponent';
-import DashboardHeader from '@/components/DashboardHeader';
+import TwitterComponent from '@/components/TwitterComponent';
+import TwitterHeader from '@/components/TwitterHeader';
 import withAuth from '@/hoc/withAuth';
 
 const DashboardPage = () => {
@@ -14,8 +14,8 @@ const DashboardPage = () => {
                 </div>
             </div>
             <div className="flex-grow bg-white">
-                <DashboardHeader />
-                <RedditComponent />
+                <TwitterHeader />
+                <TwitterComponent />
             </div>
         </div>
     );
