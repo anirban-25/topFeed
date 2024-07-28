@@ -5,7 +5,7 @@ import { FaRedditAlien } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { IoNotifications } from "react-icons/io5";
 import { HiOutlineSupport } from "react-icons/hi";
-import withAuth from "@/hoc/withAuth";
+
 const SidePanel = () => {
   return (
     <div className="h-screen w-64 flex bg-[#0B0B0B] flex-col ">
@@ -93,4 +93,4 @@ const SidePanel = () => {
   );
 };
 
-export default withAuth(SidePanel);
+export default SidePanel;

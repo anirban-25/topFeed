@@ -3,7 +3,7 @@ import React from "react";
 import SidePanel from '@/components/SidePanel';
 import TwitterComponent from '@/components/TwitterComponent';
 import TwitterHeader from '@/components/TwitterHeader';
-import withAuth from '@/hoc/withAuth';
+
 
 const DashboardPage = () => {
     return (

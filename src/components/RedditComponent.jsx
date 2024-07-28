@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import withAuth from '@/hoc/withAuth';
+
 
 const RedditComponent = () => {
     return (
