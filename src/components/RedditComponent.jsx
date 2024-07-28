@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import withAuth from '@/hoc/withAuth';
 
 const RedditComponent = () => {
     return (
@@ -16,4 +17,4 @@ const RedditComponent = () => {
     );
 };
 
-export default RedditComponent;
+export default withAuth(RedditComponent);
