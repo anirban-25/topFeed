@@ -5,28 +5,28 @@ import clsx from 'clsx';
 import { CiCircleMinus, CiCirclePlus } from "react-icons/ci";
 const questions = [
   {
+    question: 'How does TopFeed AI help me stay updated? ',
+    answer: 'TopFeed AI aggregates and summarizes the most relevant discussions from Reddit and the latest Tweets from Twitter based on your preferences. This helps you stay informed about the latest trends and conversations in your niche without having to manually search for updates.',
+  },
+  {
+    question: 'Can I customize the sources and topics I follow',
+    answer: 'Yes, you can personalize your feed by selecting specific subreddits and Twitter accounts to follow. Additionally, you can set preferences for the types of topics you are interested in, ensuring you only receive the most relevant updates.',
+  },
+  {
     question: 'Is there a free trial available?',
-    answer: 'Yes, you can try us for free for 30 days. If you want, we’ll provide you with a free, personalized 30-minute onboarding call to get you up and running as soon as possible. Yes, you can try us for free for 30 days. If you want, we’ll provide you with a free.',
+    answer: 'Yes, TopFeed AI offers a free plan that includes 2 instant Reddit feed refreshes per month and allows you to follow up to 3 Twitter accounts. This lets you experience the basic features of our platform without any cost.',
   },
   {
-    question: 'Can I change my plan later?',
-    answer: 'Yes, you can change your plan at any time. Just go to your account settings and select the plan you want to switch to.',
+    question: 'How often are the feeds refreshed?',
+    answer: 'The frequency of feed refreshes depends on the plan you choose. The free plan includes 2 instant Reddit feed refreshes per month, while the Basic, Pro, and Advanced plans offer daily automatic feed refreshes and a varying number of instant refreshes.',
   },
   {
-    question: 'What is your cancellation policy?',
-    answer: 'You can cancel your subscription at any time. If you cancel within the first 30 days, you will receive a full refund.',
+    question: 'What kind of notifications can I receive?',
+    answer: 'Depending on your plan, you can receive notifications via email, Slack, Telegram, and WhatsApp. These notifications keep you updated with the latest discussions and tweets in real-time, ensuring you never miss important updates.',
   },
   {
-    question: 'Can other info be added to an invoice?',
-    answer: 'Yes, you can add additional information to your invoice during the checkout process or by contacting our support team.',
-  },
-  {
-    question: 'How does billing work?',
-    answer: 'Billing is done on a monthly basis. You will be charged on the same day each month based on the date you subscribed.',
-  },
-  {
-    question: 'How do I change my account email?',
-    answer: 'To change your account email, go to your account settings and update your email address. A verification email will be sent to your new email address.',
+    question: 'How do I upgrade my plan?',
+    answer: 'Upgrading your plan is simple. Just log into your TopFeed AI account, navigate to the pricing page, and select the plan that best fits your needs. Follow the prompts to complete the upgrade process, and you’ll have immediate access to the additional features and benefits.',
   },
 ];
 

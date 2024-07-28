@@ -1,8 +1,95 @@
+"use client";
 import Navbar from "@/components/Navbar";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
+
+interface Section {
+  title: string;
+  content: string;
+}
+
+interface AccordionItemProps {
+  title: string;
+  content: string;
+  isOpen: boolean;
+  onClick: () => void;
+}
+
+const AccordionItem: React.FC<AccordionItemProps> = ({
+  title,
+  content,
+  isOpen,
+  onClick,
+}) => {
+  return (
+    <div className=" border-b border-gray-600 space-y-3 mb-10">
+      
+        <div className="flex items-center justify-between">
+          <span className="text-lg font-kumbh-sans-semibold text-white">{title}</span>
+          {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        </div>
+      <div className="px-6 pb-4">
+        <p className="text-gray-400 font-kumbh-sans-medium">{content}</p>
+      </div>
+    </div>
+  );
+};
 
 const Page = () => {
+  const [openSection, setOpenSection] = useState<number | null>(null);
+
+  const sections: Section[] = [
+    {
+      title: "Introduction",
+      content:
+        "TopFeed AI is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.",
+    },
+    {
+      title: "Information We Collect",
+      content:
+        "We collect personal information, usage data, device information, and use cookies and tracking technologies.",
+    },
+    {
+      title: "How We Use Your Information",
+      content:
+        "We use your information to provide and improve our services, process transactions, communicate with you, and prevent fraud.",
+    },
+    {
+      title: "Sharing Your Information",
+      content:
+        "We may share your information with service providers, for business transfers, and with your consent.",
+    },
+    {
+      title: "Security of Your Information",
+      content:
+        "We use administrative, technical, and physical security measures to protect your personal information.",
+    },
+    {
+      title: "Your Data Protection Rights",
+      content:
+        "Depending on your location, you may have rights to access, rectify, erase, restrict processing, object to processing, and request data portability.",
+    },
+    {
+      title: "Children's Privacy",
+      content:
+        "Our services are not intended for children under the age of 13. We do not knowingly collect personal information from children under 13.",
+    },
+    {
+      title: "Changes to This Privacy Policy",
+      content:
+        "We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.",
+    },
+    {
+      title: "Contact Information",
+      content:
+        "For questions about this Privacy Policy, contact us at support@topfeed.ai.",
+    },
+  ];
+  const toggleSection = (index: number) => {
+    setOpenSection(openSection === index ? null : index);
+  };
+
   return (
     <div>
       <div>
@@ -46,46 +133,26 @@ const Page = () => {
         <h2 className="text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-white via-[#55A3F8] to-[#7567D9]">
           Privacy Policy
         </h2>
-        <div className="max-w-3xl mx-auto text-white shadow-lg rounded-lg p-8">
-          <h3 className="text-xl font-semibold mb-4">
-            1. Information We Collect
-          </h3>
-          <p className="mb-4">
-            We collect information you provide directly to us, such as when you
-            create an account, submit a form, or communicate with us. This may
-            include your name, email address, and any other information you
-            choose to provide.
-          </p>
+        <p className="text-base  text-gray-400 mt-2 mb-6 text-center">
+          Effective from August 28, 2024
+        </p>
 
-          <h3 className="text-xl font-semibold mb-4">
-            2. How We Use Your Information
-          </h3>
-          <p className="mb-4">
-            We use the information we collect to provide, maintain, and improve
-            our services, to communicate with you, and to comply with legal
-            obligations.
-          </p>
-
-          <h3 className="text-xl font-semibold mb-4">3. Data Security</h3>
-          <p className="mb-4">
-            We implement appropriate technical and organizational measures to
-            protect the security of your personal information.
-          </p>
-
-          <h3 className="text-xl font-semibold mb-4">4. Your Rights</h3>
-          <p className="mb-4">
-            You have the right to access, correct, or delete your personal
-            information. Please contact us if you wish to exercise these rights.
-          </p>
-
-          <h3 className="text-xl font-semibold mb-4">
-            5. Changes to This Policy
-          </h3>
-          <p className="mb-4">
-            We may update this privacy policy from time to time. We will notify
-            you of any changes by posting the new privacy policy on this page.
-          </p>
+        <div className="space-y-10">
+          {sections.map((section, index) => (
+            <AccordionItem
+              key={index}
+              title={section.title}
+              content={section.content}
+              isOpen={openSection === index}
+              onClick={() => toggleSection(index)}
+            />
+          ))}
         </div>
+
+        <p className="mt-20 text-sm text-gray-600 text-center">
+          By using TopFeed AI, you acknowledge that you have read, understood,
+          and agree to be bound by this Privacy Policy.
+        </p>
       </section>
     </div>
   );

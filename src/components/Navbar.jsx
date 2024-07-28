@@ -20,17 +20,17 @@ const Navbar = () => {
             </div>
             <div className="mt-5">
               <a href="/">
-                <div className="p-2 bg-gray-400 mt-5 text-center rounded-lg font-bold text-sm shadow-md">
+                <div className="p-2  cursor-pointer bg-gray-400 mt-5 text-center rounded-lg font-bold text-sm shadow-md">
                   HOME
                 </div>
               </a>
               <a href="/">
-                <div className="p-2 bg-gray-400 mt-5 text-center rounded-lg font-bold text-sm shadow-md">
+                <div className="p-2 cursor-pointer bg-gray-400 mt-5 text-center rounded-lg font-bold text-sm shadow-md">
                   MY FEED
                 </div>
               </a>
               <a href="/">
-                <div className="p-2 bg-gray-400 mt-5 text-center rounded-lg font-bold text-sm shadow-md">
+                <div className="p-2 cursor-pointer bg-gray-400 mt-5 text-center rounded-lg font-bold text-sm shadow-md">
                   PRICING
                 </div>
               </a>
@@ -47,7 +47,7 @@ const Navbar = () => {
             <Image src="/images/logo.png" height={120} width={120} alt="logo" />
           </div>
         </Link>
-        <div className=" items-center  space-x-5 md:space-x-20 font-semibold text-sm hidden md:flex">
+        <div className=" items-center cursor-pointer  space-x-5 md:space-x-20 font-semibold text-sm hidden md:flex">
           <div>HOME</div>
           
           <a href="/pricing">

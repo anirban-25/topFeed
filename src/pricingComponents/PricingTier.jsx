@@ -5,7 +5,7 @@ const PricingTier = ({ name, price, yearlyPrice, popular, features }) => {
   return (
     <div
       className={`bg-[#292929] rounded-lg p-6 flex flex-col h-full ${
-        popular ? "border-2 border-blue-500" : ""
+        popular ? "border-2 border-blue-500 shadow-[0_5px_60px_-15px_rgba(0,0,0,0.3)] shadow-blue-900" : ""
       }`}
     >
       <div className=" items-center mb-4">

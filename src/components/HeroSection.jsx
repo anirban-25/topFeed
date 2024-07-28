@@ -5,6 +5,7 @@ const HeroSection = () => {
     <div>
       <h1 className="flex text-2xl md:text-6xl text-center justify-center font-kumbh-sans-bold mt-10 text-white ">
         <div className="">
+        <span>All The </span>
           <span
             className="bg-clip-text text-transparent"
             style={{
@@ -12,16 +13,14 @@ const HeroSection = () => {
                 "linear-gradient(90deg, #FFFFFF 0%, #55A3F8 18.22%, #7567D9 40.94%)",
             }}
           >
-            Take control&nbsp;
+          Trending Topics&nbsp;
           </span>
-          <span>of your news feed</span>
+          <span>in One Place</span>
         </div>
       </h1>
       <div className="flex justify-center items-center mt-3 text-sm text-center">
         <h3 className="text-xs md:max-w-[42rem] md:text-base text-[#E6E6E6]">
-          Stay ahead of the curve with our AI-driven platform, real-time updates
-          and deep insights on the latest SaaS trends, all tailored to your
-          business needs.
+        TopFeed AI allows you to summarize the latest Reddit discussion and provide the latest Tweets from X which is really ‘relevant’ to you.
         </h3>
       </div>
       <div className="flex justify-center mt-16 space-x-4">
