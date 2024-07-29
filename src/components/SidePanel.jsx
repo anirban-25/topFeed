@@ -35,7 +35,7 @@ const SidePanel = () => {
         height={100}
         width={800}
         alt="bg"
-        className="mx-auto absolute left-36 top-0"
+        className="mx-auto absolute left-20 top-0"
       />
 
       <div className="my-4 mt-6 items-left ml-6">
@@ -43,51 +43,67 @@ const SidePanel = () => {
           <Image src="/images/logo.svg" height={120} width={120} alt="logo" />
         </Link>
       </div>
-      <div className="flex flex-col space-y-4 mt-8 items-left ml-5 z-10">
+      <div className="font-KumbhSans-Bold text-[#8D8D8D] flex flex-col space-y-4 mt-8 items-left ml-5 mr-5 z-10">
+        <div className="group">
         <Link href="/dashboard/reddit">
-          <div className="text-white flex items-center space-x-2 hover:bg-gray-200 px-4 py-2 rounded-md w-full cursor-pointer">
-            <FaRedditAlien className="mr-5 scale-125" /> Reddit
+          <div className=" flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full cursor-pointer group-hover:text-white">
+            <FaRedditAlien className="mr-5 scale-125 icon-outline"/> Reddit
           </div>
         </Link>
+        </div>
+        <div className="group">
         <Link href="/dashboard/twitter">
-          <div className="text-white flex items-center space-x-2 hover:bg-gray-200 px-4 py-2 rounded-md w-full">
+          <div className=" flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full group group-hover:text-white">
             <div>
-              <FaXTwitter className="mr-5 scale-125" />
+              <FaXTwitter className="mr-5 scale-125 text-[#7A7A7A] group-hover:text-white" />
             </div>
             Twitter
           </div>
         </Link>
+        </div>
+        <div className="group">
 
         <Link
           href="/dashboard/notifications"
-          className="text-white flex items-center space-x-2 hover:bg-gray-200 px-4 py-2 rounded-md w-full"
+          className=" flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full  group-hover:text-white"
         >
           <div>
-            <IoNotifications className="mr-5 scale-125" />
+            <IoNotifications className="mr-5 scale-125 icon-outline" />
           </div>
           Notifications
         </Link>
+        </div>
+        <div className="group">
         <Link
           href="/dashboard/support"
-          className="text-white flex items-center space-x-2 hover:bg-gray-200 px-4 py-2 rounded-md w-full"
+          className=" flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full group group-hover:text-white"
         >
           <div>
-            <HiOutlineSupport className="mr-5 scale-125" />
+            <HiOutlineSupport className="mr-5 scale-125 text-[#7A7A7A] text-bold group-hover:text-white" />
           </div>
           Support
         </Link>
+        </div>
+        
       </div>
-      <div className="mt-auto mb-4 items-center">
-        <Link
-          href="/pricing"
-          className="text-white flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full"
+      <div className="mt-auto mb-9 items-center">
+        <div
+          className="font-kumbh-sans-Medium text-white space-x-2 bg-[#2A2A2A] px-3 py-5 rounded-md w-3/2 ml-3 mr-3 "
         >
-          <span>My Current Plan</span>
-          <span className="text-gray-400">FREE</span>
-        </Link>
-        <button className="text-white mt-2 bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-md w-full items-center">
+        <div className="font-kumbh-sans-Medium flex items-center space-x-10 ml-3 mb-5">
+          <span className="text-[#8D8D8D] text-sm">My Current Plan</span>
+          <span className="font-kumbh-sans-SemiBold text-white ">FREE</span>
+        
+        </div>
+        
+        <Link href="/pricing" className="flex items-center justify-center px-4 py-2 bg-[#146EF5] text-white rounded-lg hover:bg-blue-900 transition-all duration-200 mr-6">
           Upgrade Plan
-        </button>
+        </Link>
+        
+        
+        
+        </div>
+        
       </div>
     </div>
   );

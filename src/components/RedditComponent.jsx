@@ -17,4 +17,4 @@ const RedditComponent = () => {
     );
 };
 
-export default withAuth(RedditComponent);
+export default RedditComponent;
