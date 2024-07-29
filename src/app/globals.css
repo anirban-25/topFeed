@@ -225,3 +225,7 @@ body {
 .group:hover .icon-outline path {
   stroke: white;
 }
+
+.preserve-whitespace {
+  white-space: pre-line;
+}
