@@ -86,9 +86,9 @@ const SidePanel = () => {
         </div>
         
       </div>
-      <div className="mt-auto mb-9 items-center">
+      <div className="font-kumbh-sans-Medium mt-auto mb-9 items-center">
         <div
-          className="font-kumbh-sans-Medium text-white space-x-2 bg-[#2A2A2A] px-3 py-5 rounded-md w-3/2 ml-3 mr-3 "
+          className=" space-x-2 bg-[#2A2A2A] px-3 py-5 rounded-md w-3/2 ml-3 mr-3 "
         >
         <div className="font-kumbh-sans-Medium flex items-center space-x-10 ml-3 mb-5">
           <span className="text-[#8D8D8D] text-sm">My Current Plan</span>
