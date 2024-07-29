@@ -40,7 +40,7 @@ const SidePanel = () => {
 
       <div className="my-4 mt-6 items-left ml-6">
         <Link href="/">
-          <Image src="/images/logo.svg" height={120} width={120} alt="logo" />
+          <Image src="/images/logo.png" height={120} width={120} alt="logo" />
         </Link>
       </div>
       <div className="font-KumbhSans-Bold text-[#8D8D8D] flex flex-col space-y-4 mt-8 items-left ml-5 mr-5 z-10">
