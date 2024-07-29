@@ -8,7 +8,7 @@ import TwitterHeader from '@/components/TwitterHeader';
 const DashboardPage = () => {
     return (
         <div className="flex">
-            <div className="flex h-full">
+            <div className="flex fixed h-full">
                 <div className="relative w-full z-10 flex justify-center items-center top-0 mx-auto">
                     <SidePanel />
                 </div>

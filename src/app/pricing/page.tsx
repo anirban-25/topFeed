@@ -1,15 +1,60 @@
 "use client";
 import Navbar from "@/components/Navbar";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import PricingTier from "@/pricingComponents/PricingTier";
 import Footer from "@/components/Footer";
 
 import { Switch } from 'antd';
-const page = () => {
-  const onChange = (checked: boolean) => {
-    console.log(`switch to ${checked}`);
+const Page = () => {
+  const [clicked, setclicked] = useState(true)
+  const onChange = () => {
+    setclicked(!clicked)
   };
+  const tiersMonthly = [
+    {
+      name: "Starter",
+      price: 59,
+      yearlyPrice: 0,
+      popular: false,
+      features: [
+        "2 Instant Reddit Feed Refreshes/month",
+        "Follow 3 Twitter Accounts",
+        "Email Notifications",
+        "Basic Analytics"
+      ],
+    },
+    {
+      name: "Growth",
+      price: 99,
+      yearlyPrice: 0,
+      popular: true,
+      features: [
+        "15 Instant Reddit Feed Refreshes/month",
+        "Daily Automatic Feed Refresh for Reddit",
+        "Follow 10 Twitter Accounts",
+        "Email Notifications",
+        "Advanced Analytics",
+        "Priority Support"
+      ],
+    },
+    {
+      name: "Scale",
+      price: 149,
+      yearlyPrice: 0,
+      popular: false,
+      features: [
+        "30 Instant Reddit Feed Refreshes",
+        "Daily Automatic Feed Refresh for Reddit",
+        "Follow 20 Twitter Accounts",
+        "Email Notifications, Slack",
+        "Telegram, WhatsApp",
+        "Comprehensive Analytics",
+        "Dedicated Account Manager",
+        "API access",
+      ],
+    },
+  ];
   const tiers = [
     {
       name: "Starter",
@@ -111,18 +156,28 @@ const page = () => {
 
         </div>
         <div className="  flex items-center justify-center p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full">
+          {clicked? (
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full">
             {tiers.map((tier, index) => (
               <PricingTier key={index} {...tier} />
             ))}
           </div>
+          ): (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full">
+            {tiersMonthly.map((tier, index) => (
+              <PricingTier key={index} {...tier} />
+            ))}
+          </div>
+
+          )}
         </div>
       </div>
-      <div className="border-gradient-2 ">
+      <div className="border-gradient-2 mt-10">
         <Footer />
       </div>
     </div>
   );
 };
 
-export default page;
+export default Page;

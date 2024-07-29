@@ -8,18 +8,7 @@ import Testimonials from "./Testimonials";
 const FeaturesSection = () => {
   return (
     <div className="mt-20 text-white">
-      <hr className="relative border-0 border-t border-solid border-[#B3B3B380] w-1568 h-0 m-0 p-0"></hr>
-      <div className="flex justify-between items-center mb-10 mt-10">
-        <Image
-          src="/images/proofsection.svg"
-          width={1700}
-          height={1500}
-          alt="social proof section"
-          className="rounded-lg"
-        />
-      </div>
-
-      <hr className="relative border-0 border-t border-solid border-[#B3B3B380] w-1568 h-0 m-0 p-0 mb-10"></hr>
+      
 
       <div className="text-center mb-10 mt-32">
         <div className="text-[#8D8D8D] text-xs md:text-sm mb-5 tracking-widest">

@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 const RedditComponent = () => {
     return (
-        <div className="font-KumbhSans-Medium flex flex-col items-center justify-center min-h-screen p-8">
+        <div className="font-KumbhSans-Medium flex flex-col items-center justify-center  p-8">
             <Image src="/images/reddit.png" alt="Reddit Feed" width={457} height={270} />
             <div className="text-center mb-8 mt-8">
                 <h1 className="font-KumbhSans-Bold text-3xl font-bold mb-4">Create your Reddit TopFeed</h1>

@@ -5,7 +5,9 @@ const PricingTier = ({ name, price, yearlyPrice, popular, features }) => {
   return (
     <div
       className={`bg-[#292929] rounded-lg p-6 flex flex-col h-full ${
-        popular ? "border-2 border-blue-500 shadow-[0_5px_60px_-15px_rgba(0,0,0,0.3)] shadow-blue-900" : ""
+        popular
+          ? "border-2 border-blue-500 shadow-[0_5px_60px_-15px_rgba(0,0,0,0.3)] shadow-blue-900"
+          : ""
       }`}
     >
       <div className=" items-center mb-4">
@@ -31,10 +33,11 @@ const PricingTier = ({ name, price, yearlyPrice, popular, features }) => {
               ${price}
               <span className="text-sm font-normal">/mo</span>
             </div>
-            <div className="text-sm text-gray-400">
-              billed <span className="text-white">
-              ${yearlyPrice}</span> yearly
-            </div>
+            {yearlyPrice != 0 && (
+              <div className="text-sm text-gray-400">
+                billed <span className="text-white">${yearlyPrice}</span> yearly
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -48,7 +51,9 @@ const PricingTier = ({ name, price, yearlyPrice, popular, features }) => {
         Start a FREE trial
       </button>
       <div className="text-sm text-gray-300 flex-grow border-t border-gradient-3">
-        <p className="font-semibold mb-2 mt-5 text-[#8D8D8D] text-xs font-kumbh-sans-light">INCLUDES</p>
+        <p className="font-semibold mb-2 mt-5 text-[#8D8D8D] text-xs font-kumbh-sans-light">
+          INCLUDES
+        </p>
         <ul>
           {features.map((feature, index) => (
             <li key={index} className="flex items-start mb-2">

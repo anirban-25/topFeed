@@ -1,22 +1,35 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LiaHamburgerSolid } from "react-icons/lia";
 import { RxCrossCircled } from "react-icons/rx";
+import { usePathname, useSearchParams } from "next/navigation";
+import clsx from "clsx";
 const Navbar = () => {
   const [visibleIndex, setVisibleIndex] = useState(false);
-
+  const [url, setUrl] = useState(null);
   const toggleVisibility = () => {
     setVisibleIndex(!visibleIndex);
   };
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setUrl(pathname);
+    // console.log(url)
+    // You can now use the current URL
+    // ...
+  }, [pathname]);
   return (
     <div className=" w-full  items-center py-3 md:py-7 text-white">
       {visibleIndex && (
         <div className="transition-transform duration-300 ease-in-out transform text-black absolute z-10 min-w-1/2 w-1/2 left-0 top-0 h-full bg-gray-400 bg-opacity-90 border-r-white border-r">
           <div className="p-6">
             <div className=" flex justify-end">
-              <RxCrossCircled onClick={() => setVisibleIndex(!visibleIndex)} size={25} />
+              <RxCrossCircled
+                onClick={() => setVisibleIndex(!visibleIndex)}
+                size={25}
+              />
             </div>
             <div className="mt-5">
               <a href="/">
@@ -48,10 +61,25 @@ const Navbar = () => {
           </div>
         </Link>
         <div className=" items-center cursor-pointer  space-x-5 md:space-x-20 font-semibold text-sm hidden md:flex">
-          <div>HOME</div>
-          
-          <a href="/pricing">
-          <div className="text-[#8D8D8D] cursor-pointer">PRICING</div></a>
+          <Link href="/">
+            <div
+              className={` cursor-pointer ${
+                pathname == "/" ? "text-white" : "text-[#8D8D8D]"
+              }`}
+            >
+              HOME
+            </div>
+          </Link>
+
+          <Link href="/pricing">
+            <div
+              className={` cursor-pointer ${
+                pathname == "/pricing" ? "text-white" : "text-[#8D8D8D]"
+              }`}
+            >
+              PRICING
+            </div>
+          </Link>
         </div>
         <div>
           <Link href="/login">

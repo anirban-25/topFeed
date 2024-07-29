@@ -15,40 +15,77 @@ import axios from "axios";
 
 const DashboardHeader = () => {
   const timezones = [
-    { value: 'Pacific/Midway', label: '(GMT-11:00) Midway Island' },
-    { value: 'Pacific/Honolulu', label: '(GMT-10:00) Hawaii' },
-    { value: 'America/Anchorage', label: '(GMT-09:00) Alaska' },
-    { value: 'America/Los_Angeles', label: '(GMT-08:00) Pacific Time (US & Canada)' },
-    { value: 'America/Denver', label: '(GMT-07:00) Mountain Time (US & Canada)' },
-    { value: 'America/Chicago', label: '(GMT-06:00) Central Time (US & Canada)' },
-    { value: 'America/New_York', label: '(GMT-05:00) Eastern Time (US & Canada)' },
-    { value: 'America/Caracas', label: '(GMT-04:30) Caracas' },
-    { value: 'America/Halifax', label: '(GMT-04:00) Atlantic Time (Canada)' },
-    { value: 'America/Sao_Paulo', label: '(GMT-03:00) Brasilia' },
-    { value: 'Atlantic/South_Georgia', label: '(GMT-02:00) Mid-Atlantic' },
-    { value: 'Atlantic/Azores', label: '(GMT-01:00) Azores' },
-    { value: 'Europe/London', label: '(GMT+00:00) Greenwich Mean Time : Dublin, Edinburgh, Lisbon, London' },
-    { value: 'Europe/Berlin', label: '(GMT+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna' },
-    { value: 'Europe/Helsinki', label: '(GMT+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius' },
-    { value: 'Europe/Moscow', label: '(GMT+03:00) Moscow, St. Petersburg, Volgograd' },
-    { value: 'Asia/Dubai', label: '(GMT+04:00) Abu Dhabi, Muscat' },
-    { value: 'Asia/Karachi', label: '(GMT+05:00) Islamabad, Karachi, Tashkent' },
-    { value: 'Asia/Dhaka', label: '(GMT+06:00) Almaty, Novosibirsk' },
-    { value: 'Asia/Jakarta', label: '(GMT+07:00) Bangkok, Hanoi, Jakarta' },
-    { value: 'Asia/Shanghai', label: '(GMT+08:00) Beijing, Chongqing, Hong Kong, Urumqi' },
-    { value: 'Asia/Tokyo', label: '(GMT+09:00) Osaka, Sapporo, Tokyo' },
-    { value: 'Australia/Sydney', label: '(GMT+10:00) Canberra, Melbourne, Sydney' },
-    { value: 'Pacific/Noumea', label: '(GMT+11:00) Solomon Is., New Caledonia' },
-    { value: 'Pacific/Auckland', label: '(GMT+12:00) Auckland, Wellington' },
-    { value: 'Pacific/Chatham', label: '(GMT+13:00) Nuku alofa' }
+    { value: "Pacific/Midway", label: "(GMT-11:00) Midway Island" },
+    { value: "Pacific/Honolulu", label: "(GMT-10:00) Hawaii" },
+    { value: "America/Anchorage", label: "(GMT-09:00) Alaska" },
+    {
+      value: "America/Los_Angeles",
+      label: "(GMT-08:00) Pacific Time (US & Canada)",
+    },
+    {
+      value: "America/Denver",
+      label: "(GMT-07:00) Mountain Time (US & Canada)",
+    },
+    {
+      value: "America/Chicago",
+      label: "(GMT-06:00) Central Time (US & Canada)",
+    },
+    {
+      value: "America/New_York",
+      label: "(GMT-05:00) Eastern Time (US & Canada)",
+    },
+    { value: "America/Caracas", label: "(GMT-04:30) Caracas" },
+    { value: "America/Halifax", label: "(GMT-04:00) Atlantic Time (Canada)" },
+    { value: "America/Sao_Paulo", label: "(GMT-03:00) Brasilia" },
+    { value: "Atlantic/South_Georgia", label: "(GMT-02:00) Mid-Atlantic" },
+    { value: "Atlantic/Azores", label: "(GMT-01:00) Azores" },
+    {
+      value: "Europe/London",
+      label:
+        "(GMT+00:00) Greenwich Mean Time : Dublin, Edinburgh, Lisbon, London",
+    },
+    {
+      value: "Europe/Berlin",
+      label: "(GMT+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna",
+    },
+    {
+      value: "Europe/Helsinki",
+      label: "(GMT+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius",
+    },
+    {
+      value: "Europe/Moscow",
+      label: "(GMT+03:00) Moscow, St. Petersburg, Volgograd",
+    },
+    { value: "Asia/Dubai", label: "(GMT+04:00) Abu Dhabi, Muscat" },
+    {
+      value: "Asia/Karachi",
+      label: "(GMT+05:00) Islamabad, Karachi, Tashkent",
+    },
+    { value: "Asia/Dhaka", label: "(GMT+06:00) Almaty, Novosibirsk" },
+    { value: "Asia/Jakarta", label: "(GMT+07:00) Bangkok, Hanoi, Jakarta" },
+    {
+      value: "Asia/Shanghai",
+      label: "(GMT+08:00) Beijing, Chongqing, Hong Kong, Urumqi",
+    },
+    { value: "Asia/Tokyo", label: "(GMT+09:00) Osaka, Sapporo, Tokyo" },
+    {
+      value: "Australia/Sydney",
+      label: "(GMT+10:00) Canberra, Melbourne, Sydney",
+    },
+    {
+      value: "Pacific/Noumea",
+      label: "(GMT+11:00) Solomon Is., New Caledonia",
+    },
+    { value: "Pacific/Auckland", label: "(GMT+12:00) Auckland, Wellington" },
+    { value: "Pacific/Chatham", label: "(GMT+13:00) Nuku alofa" },
   ];
   const [topics, setTopics] = useState([
     "Cricket",
     "learnprogramming",
     "Python",
   ]);
-  const [selectedTimezone, setSelectedTimezone] = useState('');
-
+  const [selectedTimezone, setSelectedTimezone] = useState("");
+  const [open, setOpen] = useState(false);
   const handleChange = (event) => {
     setSelectedTimezone(event.target.value);
   };
@@ -149,20 +186,22 @@ const DashboardHeader = () => {
             </div>
             <div className="mt-4 relative">
               <div className="flex space-x-3">
-                <input
-                  type="text"
-                  value={newTopic}
-                  className="border w-[50%] rounded-lg p-2 shadow-md font-kumbh-sans-medium text-gray-800 border-[#CECECE]"
-                  onChange={(e) => setNewTopic(e.target.value)}
-                  placeholder="Type here"
-                />
                 <Button
                   color="white"
-                  onClick={handleAddTopic}
+                  onClick={() => setOpen(!open)}
                   className="border border-[#CECECE]"
                 >
                   + Add SubReddit
                 </Button>
+                {open && (
+                  <input
+                    type="text"
+                    value={newTopic}
+                    className=" border w-[50%] rounded-lg p-2 shadow-md font-kumbh-sans-medium text-gray-800 border-[#CECECE]"
+                    onChange={(e) => setNewTopic(e.target.value)}
+                    placeholder="Type here"
+                  />
+                )}
               </div>
               {suggestions.length > 0 && newTopic && (
                 <ul className="absolute z-10 w-full bg-white border border-gray-300 mt-1 max-h-48 overflow-y-auto">
@@ -185,16 +224,15 @@ const DashboardHeader = () => {
             </div>
             <div className="flex">
               <div className="flex items-center space-x-2 bg-[#FEF3F2] text-[#B42318] text-xs py-1 p-2 rounded-full border border-[#FECDCA] font-kumbh-sans-medium">
-              <div>
-              <IoIosInformationCircleOutline />
-              </div>
+                <div>
+                  <IoIosInformationCircleOutline />
+                </div>
                 <div>
                   Upgrade to our PRO plan to unlock refresh time feature
                 </div>
               </div>
             </div>
           </div>
-          
         </DialogBody>
         <DialogFooter>
           <Button color="blue" onClick={handleOpen}>

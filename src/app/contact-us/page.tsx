@@ -102,7 +102,7 @@ const page = () => {
               </p>
               <ul className="mt-4 text-sm text-gray-400">
                 <li className="mt-2">
-                  <strong>Email:</strong> support@favtutor.com
+                  <strong>Email:</strong> support@topfeed.com
                 </li>
                 <li className="mt-2">
                   <strong>Phone:</strong> +1(786) 231-3819
