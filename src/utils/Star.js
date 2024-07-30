@@ -7,7 +7,7 @@ const Star = ({ stars }) => {
     return (
       <span key={i}>
         {stars >= i + 1 ? (
-          <FaStar className="text-transparent bg-clip-text bg-gradient-to-r from-[#55A3F8]  to-[#7567D9] text-xs md:text-sm"/>
+          <FaStar className=" text-[#55A3F8] text-xs md:text-sm"/>
         ) : stars >= number ? (
           <FaStarHalfAlt className="text- bg-clip-text bg-gradient-to-r from-white via-[#55A3F8] to-[#7567D9] text-xs md:text-sm"/>
         ) : (

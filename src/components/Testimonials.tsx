@@ -8,39 +8,19 @@ type Props = {};
 const reviews = [
   {
     description:
-      "This platform has revolutionized how we stay updated on SaaS and AI trends. The real-time updates and in-depth insights are invaluable for our strategic planning.",
+      "TopFeed AI has revolutionized the way I stay updated with the latest trends in my industry. The ability to customize my feed with specific subreddits and Twitter accounts has saved me so much time. The real-time notifications ensure I never miss out on important discussions. Highly recommend the Growth plan for its advanced analytics and priority support!",
     stars: 5,
-    author: "John Doe",
-    position: "CEO of Tech Innovations",
+    author: " Alex M.",
+    position: "Digital Marketing Specialist",
   },
   {
     description:
-      "This platform has revolutionized how we stay updated on SaaS and AI trends. The real-time updates and in-depth insights are invaluable for our strategic planning.",
+      "As a content writer, TopFeed AI has become an essential tool for me. The daily automatic feed refreshes and instant Reddit summaries keep me informed and inspired for my next articles. The integration with Slack and WhatsApp is a game-changer, making it easy to stay connected on the go. Excellent value for money with the Scale plan.",
     stars: 5,
-    author: "John Doe",
-    position: "CEO of Tech Innovations",
+    author: "Maya S.",
+    position: "Content Head",
   },
-  {
-    description:
-      "This platform has revolutionized how we stay updated on SaaS and AI trends. The real-time updates and in-depth insights are invaluable for our strategic planning.",
-    stars: 5,
-    author: "John Doe",
-    position: "CEO of Tech Innovations",
-  },
-  {
-    description:
-      "This platform has revolutionized how we stay updated on SaaS and AI trends. The real-time updates and in-depth insights are invaluable for our strategic planning.",
-    stars: 5,
-    author: "John Doe",
-    position: "CEO of Tech Innovations",
-  },
-  {
-    description:
-      "This platform has revolutionized how we stay updated on SaaS and AI trends. The real-time updates and in-depth insights are invaluable for our strategic planning.",
-    stars: 5,
-    author: "John Doe",
-    position: "CEO of Tech Innovations",
-  },
+  
 ];
 
 const Testimonials = (props: Props) => {
@@ -81,6 +61,7 @@ const Testimonials = (props: Props) => {
                 height={60}
                 width={60}
                 alt="review icon"
+                className="pt-2"
               />
               <div className="text-sm">{review.description}</div>
               <div className="mt-4">

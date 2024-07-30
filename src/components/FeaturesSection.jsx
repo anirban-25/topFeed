@@ -87,20 +87,20 @@ const FeaturesSection = () => {
                 </h3>
               </div>
               <p className="mb-1 md:mb-4 text-base md:text-lg">
-              This tool allows you to summarize discussions happening in your favorite subreddits and break them down into different topics.
+              This tool is great for getting tweets from your favorite X (Twitter) account in one single feed with a “relevancy” score to filter the best ones out of them.
               </p>
               <ul className="text-sm md:text-lg list-none">
                 <li className="flex items-center mb-2">
                   <GiCheckMark className="text-blue-500 mr-2" size={20} />
-                  Find out what people are discussing
+                  Filter tweets with high to low relevancy
                 </li>
                 <li className="flex items-center mb-2">
                   <GiCheckMark className="text-blue-500 mr-2" size={20} />
-                  Get ideas for the next articles
+                  Saves time to find the latest news
                 </li>
                 <li className="flex items-center mb-2">
                   <GiCheckMark className="text-blue-500 mr-2" size={20} />
-                  Updated once per 24 hours
+                  Add up to 50 Twitter accounts
                 </li>
                 
               </ul>
