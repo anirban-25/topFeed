@@ -171,7 +171,7 @@ By using TopFeed AI, you acknowledge that you have read, understood, and agree t
           Privacy Policy
         </h2>
         <p className="text-base  text-gray-400 mt-2 mb-6 text-center">
-          Effective from August 28, 2024
+          Effective from July 28, 2024
         </p>
 
         <div className="space-y-10">
