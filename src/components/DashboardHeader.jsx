@@ -81,7 +81,6 @@ const DashboardHeader = () => {
   ];
   const [topics, setTopics] = useState([
     "Cricket",
-    "learnprogramming",
     "Python",
   ]);
   const [selectedTimezone, setSelectedTimezone] = useState("");
@@ -121,18 +120,28 @@ const DashboardHeader = () => {
       setNewTopic("");
     }
   };
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ topics }), // Send the topics array inside an object
+      });
 
-  const handleTwitterAccountChange = (index, value) => {
-    const updatedAccounts = [...twitterAccounts];
-    updatedAccounts[index] = value;
-    setTwitterAccounts(updatedAccounts);
-  };
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-  const handleAddTwitterAccount = () => {
-    if (twitterAccounts.length < 3) {
-      setTwitterAccounts([...twitterAccounts, ""]);
+      const data = await response.json();
+      console.log(data.result); // Handle the response data
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
+
+  
   const removeSubReddit = (topic) => {
     setTopics(topics.filter((t) => t !== topic));
   };
@@ -144,10 +153,10 @@ const DashboardHeader = () => {
       </h1>
       <div className="flex items-center">
         <button className="flex items-center px-4 py-2 bg-[#146EF5] text-white rounded-lg hover:bg-blue-800 transition-all duration-200 mr-6">
-          <span
-            className=""
-            onClick={() => handleOpen("lg")}
-            variant="gradient"
+            <span
+              className=""
+              onClick={() => handleOpen("lg")}
+              variant="gradient"
           >
             + Create New Feed
           </span>
@@ -240,7 +249,7 @@ const DashboardHeader = () => {
           </Button>
           <Button
             color="blue"
-            onClick={() => console.log({ topics, twitterAccounts })}
+            onClick={() => handleSubmit()}
           >
             Generate Feed
           </Button>
