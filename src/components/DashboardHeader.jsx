@@ -12,6 +12,7 @@ import {
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { RxAvatar, RxCross2 } from "react-icons/rx";
 import axios from "axios";
+import UserMenu from "../components/UserMenu";
 
 const DashboardHeader = () => {
   const timezones = [
@@ -161,9 +162,9 @@ const DashboardHeader = () => {
             + Create New Feed
           </span>
         </button>
-        <button className="mr-5">
-          <RxAvatar size={32} />
-        </button>
+        <div >
+        <UserMenu />
+        </div>
       </div>
       <Dialog open={size === "lg"} size={size || "md"} handler={handleOpen}>
         <DialogHeader className=" font-kumbh-sans-semibold text-xl text-[#0B0B0B]">
@@ -243,8 +244,8 @@ const DashboardHeader = () => {
             </div>
           </div>
         </DialogBody>
-        <DialogFooter>
-          <Button color="blue" onClick={handleOpen}>
+        <DialogFooter className="space-x-4">
+          <Button color="white" text="black" onClick={handleOpen} className="border border-[#CECECE]">
             Cancel
           </Button>
           <Button

@@ -1,5 +1,6 @@
 import React from "react";
 import { PiStarFourFill } from "react-icons/pi";
+import Link from "next/link";
 const HeroSection = () => {
   return (
     <div>
@@ -24,9 +25,11 @@ const HeroSection = () => {
         </h3>
       </div>
       <div className="flex justify-center mt-16 space-x-4">
+      <Link href="/login">
         <button className="bg-[#146EF5] text-white text-sm px-3 md:px-6 py-2 rounded-md">
           Get Started
         </button>
+       </Link> 
         <button className="bg-[#3D3D3D] text-white text-sm px-3 md:px-6 py-2 rounded-md">
           Learn More
         </button>
