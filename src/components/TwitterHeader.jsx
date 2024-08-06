@@ -1,6 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RxAvatar } from "react-icons/rx";
+import { auth } from '../firebase';
 import {
   Button,
   Dialog,
@@ -9,15 +10,53 @@ import {
   DialogFooter,
 } from "@material-tailwind/react";
 import { IoIosInformationCircleOutline } from "react-icons/io";
+import { X } from "lucide-react";
+import { storeDataInFirestore } from "../utils/storeData";
 const TwitterHeader = () => {
   const [newTopic, setNewTopic] = useState("");
-  // const handleAddTopic = (suggestion) => {
-  //   if (newTopic) {
-  //     setTopics([...topics, suggestion]);
-  //     setNewTopic("");
-  //   }
-  // };
-  const [twitterUrls, setTwitterUrls] = useState(["https://x.com/rustybrick"]); // State for storing URLs
+  const [twitterUrls, setTwitterUrls] = useState([""]);
+  const [errors, setErrors] = useState([]);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (isSaved) {
+      setErrors(Array(twitterUrls.length).fill(""));
+    }
+  }, [isSaved, twitterUrls.length]);
+  const validateUrl = (url) => {
+    const regex = /^https?:\/\/(www\.)?twitter\.com\/[a-zA-Z0-9_]{1,15}\/?$/;
+    return regex.test(url);
+  };
+
+  const handleInputChange = (index, value) => {
+    const newUrls = [...twitterUrls];
+    newUrls[index] = value;
+    setTwitterUrls(newUrls);
+    setIsSaved(false);
+  };
+
+  const addMore = () => {
+    setTwitterUrls([...twitterUrls, ""]);
+    setIsSaved(false);
+  };
+
+  const handleSave = () => {
+    const newErrors = twitterUrls.map((url) =>
+      url.trim() === "" ? "" : validateUrl(url) ? "" : "Invalid Twitter URL"
+    );
+    setErrors(newErrors);
+
+    if (newErrors.every((error) => error === "")) {
+      console.log("Saved Twitter URLs:", twitterUrls);
+      setIsSaved(true);
+    }
+  }; // State for storing URLs
+  const removeInput = (index) => {
+    const newUrls = twitterUrls.filter((_, i) => i !== index);
+    setTwitterUrls(newUrls);
+    setErrors(errors.filter((_, i) => i !== index));
+    setIsSaved(false);
+  };
   const [inputs, setInputs] = useState(["", ""]);
   const [size, setSize] = useState(null);
   const addUrl = (index) => {
@@ -31,7 +70,7 @@ const TwitterHeader = () => {
     console.log(twitterUrls);
     console.log(inputs);
     console.log(newTopic);
-    
+
     try {
       const response = await fetch("http://127.0.0.1:5000/process", {
         method: "POST",
@@ -46,7 +85,26 @@ const TwitterHeader = () => {
       }
 
       const data = await response.json();
-      console.log(data.result); // Handle the response data
+      console.log(data);
+      const tweetsArray = JSON.parse(data.result);
+      console.log("Parsed tweets array:", tweetsArray);
+  
+      // Check if the parsed result is an array
+      if (!Array.isArray(tweetsArray)) {
+        console.error("Parsed result is not an array:", tweetsArray);
+        return;
+      }
+  
+      // Get the authenticated user's ID
+      const userId = auth.currentUser?.uid;
+      if (!userId) {
+        console.error("User is not authenticated.");
+        return;
+      }
+  
+      // Store the parsed data in Firestore under the authenticated user's subcollection
+      await storeDataInFirestore(tweetsArray, userId);
+      console.log("Data stored in Firestore successfully for user:", userId); // Handle the response data
     } catch (error) {
       console.error("Error:", error);
     }
@@ -72,7 +130,12 @@ const TwitterHeader = () => {
           <RxAvatar size={32} />
         </button>
       </div>
-      <Dialog open={size === "lg"} size={size || "md"} handler={handleOpen}>
+      <Dialog
+        open={size === "lg"}
+        size={size || "md"}
+        handler={handleOpen}
+        className=" max-h-[80%] overflow-scroll"
+      >
         <DialogHeader className=" font-kumbh-sans-semibold text-xl text-[#0B0B0B]">
           Add New Reddit Feed
         </DialogHeader>
@@ -122,26 +185,54 @@ const TwitterHeader = () => {
               </div>
             </div>
           </div>
-          <div className=" border border-black mt-5 ">
-            {inputs.map((value, index) => (
-              <div key={index}>
-                <input
-                  type="text"
-                  value={value}
-                  onChange={(e) =>
-                    setInputs(
-                      inputs.map((val, i) =>
-                        i === index ? e.target.value : val
-                      )
-                    )
-                  }
-                  placeholder={`Enter Twitter URL ${index + 1}`}
-                />
-                <button onClick={() => addUrl(index)}>
-                  Add URL {index + 1}
-                </button>
+          <div className="max-w-lg  mt-5 ">
+            {twitterUrls.map((url, index) => (
+              <div key={index} className="mb-4">
+                <label className="block text-sm font-medium text-[#787878] font-kumbh-sans-medium mb-2">
+                  Account {index + 1}
+                </label>
+                <div className="flex relative items-center">
+                  <input
+                    type="text"
+                    value={url}
+                    onChange={(e) => handleInputChange(index, e.target.value)}
+                    placeholder="https://twitter.com/example"
+                    className={`w-full px-3 py-2 pr-10 border ${
+                      errors[index] ? "border-red-500" : "border-gray-300"
+                    } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  />
+                  {twitterUrls.length > 1 && (
+                    <button
+                      onClick={() => removeInput(index)}
+                      className="absolute top-3 right-2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                    >
+                      <X color="black" size={18} />
+                    </button>
+                  )}
+                </div>
+                {errors[index] && (
+                  <p className="mt-1 text-xs text-red-500">{errors[index]}</p>
+                )}
               </div>
             ))}
+            <div className="mt-4">
+              <button
+                onClick={addMore}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                + Add More
+              </button>
+              <button
+                onClick={handleSave}
+                className={`ml-4 px-4 py-2 text-sm font-medium text-white ${
+                  isSaved
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-blue-600 hover:bg-blue-700"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              >
+                {isSaved ? "Saved" : "Save"}
+              </button>
+            </div>
           </div>
         </DialogBody>
         <DialogFooter>

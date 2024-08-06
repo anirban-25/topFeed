@@ -56,7 +56,7 @@ const UserMenu = () => {
       {menuOpen && user && (
         <div
           ref={menuRef}
-          className="absolute right-0 mt-5 min-w-[200px] max-w-xs bg-white border border-gray-300 rounded-lg shadow-lg"
+          className="absolute right-0 mt-5 mr-2 min-w-[300px] bg-white border border-gray-300 rounded-lg shadow-lg"
         >
           <div className="flex items-center p-4">
             <img
@@ -66,7 +66,7 @@ const UserMenu = () => {
             />
             <div className="text-sm text-gray-700">
               <div className="font-medium break-words">{user.displayName || "User"}</div>
-              <div className="text-xs text-gray-500 break-words">{user.email}</div>
+              <div className="text-xs text-gray-500 break-words">{user.email} Loremasdsdf ipsum dolor sit, amet consectetur adipisicing elit. Cum fugit voluptatum architecto consectetur expedita necessitatibus. Cupiditate incidunt id vel laboriosam!</div>
             </div>
           </div>
           <div className="border-t border-gray-200 mt-2">
