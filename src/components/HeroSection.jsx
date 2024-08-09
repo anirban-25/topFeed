@@ -48,10 +48,10 @@ const HeroSection = () => {
       </div>
       
       <div className="">
-            <Image src="/images/globe.png" className="w-28 md:w-44 -z-10 absolute -bottom-20 -right-20" height={250} width={250} />
+            <Image src="/images/globe.png" className="w-28 md:w-44 -z-10 absolute -bottom-20 overflow-x-hidden -right-4 md:-right-20" height={250} width={250} />
       </div>
       <div className="">
-            <Image src="/images/globeL.png" className="w-28 md:w-44 absolute -z-10 -bottom-28 -left-20" height={250} width={250} />
+            <Image src="/images/globeL.png" className="w-28 md:w-44 absolute -z-10 -bottom-28 -left-4  md:-left-20" height={250} width={250} />
       </div>
     </div>
   );

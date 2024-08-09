@@ -25,7 +25,7 @@ const FeaturesSection = () => {
           <div className="relative md:w-1/2 mb-5 md:mb-0">
             <div className="relative rounded-lg">
               <Image
-                src="/images/followimage.png"
+                src="/images/followimage.svg"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
@@ -67,7 +67,7 @@ const FeaturesSection = () => {
           <div className="block md:hidden relative mb-5 md:mb-0">
             <div className="relative  rounded-lg">
               <Image
-                src="/images/followimage2.png"
+                src="/images/followimage2.svg"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
@@ -109,7 +109,7 @@ const FeaturesSection = () => {
           <div className="hidden md:block relative w-1/2">
             <div className="relative md:ml-10  rounded-lg">
               <Image
-                src="/images/followimage2.png"
+                src="/images/followimage2.svg"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
@@ -123,7 +123,7 @@ const FeaturesSection = () => {
           <div className="relative md:w-1/2 mb-5 md:mb-0">
             <div className="relative  rounded-lg">
               <Image
-                src="/images/followimage3.png"
+                src="/images/followimage3.svg"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"

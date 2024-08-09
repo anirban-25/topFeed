@@ -38,6 +38,7 @@ const page = () => {
           alt="bg"
           className="mx-auto absolute w-[234px] md:w-[800px] top-10 left-20 md:left-36 md:top-0 "
         />
+        
       </div>
       <div className="px-5 md:px-20">
         <div className="w-full flex justify-center items-center">
