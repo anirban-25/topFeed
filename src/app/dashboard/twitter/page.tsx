@@ -13,7 +13,7 @@ const DashboardPage = () => {
                     <SidePanel />
                 </div>
             </div>
-            <div className="flex-grow bg-white ml-64 w-[calc(100%-16rem)]">
+            <div className="flex-grow bg-white min-h-screen ml-64 w-[calc(100%-16rem)]">
                 <TwitterHeader />
                 <TwitterComponent />
             </div>

@@ -66,7 +66,7 @@ const UserMenu = () => {
             />
             <div className="text-sm text-gray-700">
               <div className="font-medium break-words">{user.displayName || "User"}</div>
-              <div className="text-xs text-gray-500 break-words">{user.email} Loremasdsdf ipsum dolor sit, amet consectetur adipisicing elit. Cum fugit voluptatum architecto consectetur expedita necessitatibus. Cupiditate incidunt id vel laboriosam!</div>
+              <div className="text-xs text-gray-500 break-words">{user.email}</div>
             </div>
           </div>
           <div className="border-t border-gray-200 mt-2">
