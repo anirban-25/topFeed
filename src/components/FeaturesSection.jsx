@@ -20,16 +20,17 @@ const FeaturesSection = () => {
         </h2>
         <h2 className="text-xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-[#55A3F8] to-[#7567D9]">Twitter & Reddit</h2>
       </div>
-      <div className="md:px-20">
+      <div className="md:px-20 mt-20">
         <div className="md:flex justify-between md:space-x-32 items-center mb-10 mt-10">
           <div className="relative md:w-1/2 mb-5 md:mb-0">
-            <div className="relative rounded-lg">
+            <div className="relative flex justify-center rounded-lg">
               <Image
                 src="/images/followimage.svg"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
-                className="rounded-lg "
+                className=" w-72 md:w-full rounded-lg "
+                
               />
             </div>
           </div>
@@ -65,17 +66,18 @@ const FeaturesSection = () => {
 
         <div className="md:flex md:justify-between items-center md:mb-10  mt-10">
           <div className="block md:hidden relative mb-5 md:mb-0">
-            <div className="relative  rounded-lg">
+            <div className="relative flex justify-center  rounded-lg">
               <Image
                 src="/images/followimage2.svg"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
-                className="rounded-lg "
+                className="rounded-lg w-72 md:w-full"
+                
               />
             </div>
           </div>
-          <div className=" w-1/2 max-w-1/2 flex space-x-32">
+          <div className=" md:w-1/2 md:max-w-1/2 flex space-x-32">
             <div className=" text-lg">
               <div className="flex items-center mb-4">
                 <FaClock
@@ -114,6 +116,8 @@ const FeaturesSection = () => {
                 height={450}
                 alt="Real-Time Updates"
                 className="rounded-lg "
+
+                
               />
             </div>
           </div>
@@ -121,13 +125,14 @@ const FeaturesSection = () => {
 
         <div className="md:flex justify-between md:space-x-32 items-center mb-10 mt-10">
           <div className="relative md:w-1/2 mb-5 md:mb-0">
-            <div className="relative  rounded-lg">
+            <div className="relative flex justify-center rounded-lg">
               <Image
                 src="/images/followimage3.svg"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
-                className="rounded-lg "
+                className="rounded-lg w-72 md:w-full"
+                
               />
             </div>
           </div>
