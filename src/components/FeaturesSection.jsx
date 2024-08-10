@@ -30,7 +30,7 @@ const FeaturesSection = () => {
                 height={450}
                 alt="Real-Time Updates"
                 className=" w-72 md:w-full rounded-lg "
-                
+                unoptimized={true}
               />
             </div>
           </div>
@@ -115,9 +115,7 @@ const FeaturesSection = () => {
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
-                className="rounded-lg "
-
-                
+                className="rounded-lg "                
               />
             </div>
           </div>
