@@ -23,9 +23,9 @@ const FeaturesSection = () => {
       <div className="md:px-20 mt-20">
         <div className="md:flex justify-between md:space-x-32 items-center mb-10 mt-10">
           <div className="relative md:w-1/2 mb-5 md:mb-0">
-            <div className="relative flex justify-center rounded-lg">
+            <div className="relative flex p-3 bg-gray-800 justify-center rounded-lg">
               <Image
-                src="/images/followimage.svg"
+                src="/images/followimage(6).png"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
@@ -41,13 +41,13 @@ const FeaturesSection = () => {
                 className="text-blue-500 mr-2 w-[19px] md:w-[24px]"
                 size={24}
               />
-              <h3 className="text-lg md:text-3xl font-bold ">
+              <h3 className="text-lg md:text-3xl font-kumbh-sans-bold ">
               Reddit TopSummarizer
               </h3>
             </div>
-            <p className="mb-1 md:mb-4 text-base md:text-lg">This tool allows you to summarize discussions happening in your favorite subreddits and break them down into different topics.
+            <p className="mb-1 md:mb-4 text-base md:text-lg font-kumbh-sans-medium text-[#B8B8B8]">This tool allows you to summarize discussions happening in your favorite subreddits and break them down into different topics.
             </p>
-            <ul className="text-sm md:text-lg list-none">
+            <ul className="text-sm text-[#E6E6E6] md:text-base font-kumbh-sans-regular space-y-5 list-none">
               <li className="flex items-center mb-2">
                 <GiCheckMark className="text-blue-500 mr-2" size={20} />
                 Find out what people are discussing
@@ -68,7 +68,7 @@ const FeaturesSection = () => {
           <div className="block md:hidden relative mb-5 md:mb-0">
             <div className="relative flex justify-center  rounded-lg">
               <Image
-                src="/images/followimage2.svg"
+                src="/images/followimage(5).png"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
@@ -84,14 +84,14 @@ const FeaturesSection = () => {
                   className="text-blue-500 mr-2 w-[19px] md:w-[24px]"
                   size={24}
                 />
-                <h3 className="text-lg md:text-3xl font-bold ">
+                <h3 className="text-lg md:text-3xl font-kumbh-sans-bold ">
                 X TopFeed
                 </h3>
               </div>
-              <p className="mb-1 md:mb-4 text-base md:text-lg">
+              <p className="mb-1 md:mb-4 text-[#B8B8B8] font-kumbh-sans-medium text-base md:text-lg">
               This tool is great for getting tweets from your favorite X (Twitter) account in one single feed with a “relevancy” score to filter the best ones out of them.
               </p>
-              <ul className="text-sm md:text-lg list-none">
+              <ul className="text-sm text-[#E6E6E6] md:text-base font-kumbh-sans-regular space-y-5 list-none">
                 <li className="flex items-center mb-2">
                   <GiCheckMark className="text-blue-500 mr-2" size={20} />
                   Filter tweets with high to low relevancy
@@ -109,9 +109,9 @@ const FeaturesSection = () => {
             </div>
           </div>
           <div className="hidden md:block relative w-1/2">
-            <div className="relative md:ml-10  rounded-lg">
+            <div className="relative md:ml-10 p-3 bg-gray-800 rounded-lg">
               <Image
-                src="/images/followimage2.svg"
+                src="/images/followimage(5).png"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
@@ -123,9 +123,9 @@ const FeaturesSection = () => {
 
         <div className="md:flex justify-between md:space-x-32 items-center mb-10 mt-10">
           <div className="relative md:w-1/2 mb-5 md:mb-0">
-            <div className="relative flex justify-center rounded-lg">
+            <div className="relative flex justify-center bg-gray-800 p-3 rounded-lg">
               <Image
-                src="/images/followimage3.svg"
+                src="/images/followimage(7).png"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
@@ -141,14 +141,14 @@ const FeaturesSection = () => {
                 className="text-blue-500 mr-2 w-[19px] md:w-[24px]"
                 size={24}
               />
-              <h3 className="text-lg md:text-3xl font-bold ">
+              <h3 className="text-lg md:text-3xl font-kumbh-sans-bold ">
               X TopNotifications
               </h3>
             </div>
-            <p className="mb-1 md:mb-4 text-base md:text-lg">
+            <p className="mb-1 md:mb-4 text-base font-kumbh-sans-medium text-[#B8B8B8] md:text-lg">
             This tool sends you instant notifications about the latest tweets from your favorite X accounts, so you don&apos;t miss out on any of it.
             </p>
-            <ul className="text-sm md:text-lg list-none">
+            <ul className="text-sm text-[#E6E6E6] md:text-base font-kumbh-sans-regular space-y-5 list-none">
               <li className="flex items-center mb-2">
                 <GiCheckMark className="text-blue-500 mr-2" size={20} />
                 Connects with WhatsApp & Telegram

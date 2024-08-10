@@ -44,7 +44,7 @@ const HeroSection = () => {
         &nbsp;FREE 14-day trial
       </div>
       <div className=" w-full h-full mx-auto flex justify-center mt-10">
-        <Image src="/images/mainSection.svg" height={1300} width={1300} />
+        <Image src="/images/mainSection(1).png" height={1300} width={1300} />
       </div>
 
       <div className="">
