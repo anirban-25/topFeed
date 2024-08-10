@@ -23,7 +23,7 @@ const FeaturesSection = () => {
       <div className="md:px-20 mt-20">
         <div className="md:flex justify-between md:space-x-32 items-center mb-10 mt-10">
           <div className="relative md:w-1/2 mb-5 md:mb-0">
-            <div className="relative flex p-3 bg-gray-800 justify-center rounded-lg">
+            <div className="relative flex border-[1rem] border-gray-800 justify-center rounded-lg">
               <Image
                 src="/images/followimage(6).png"
                 width={650}
@@ -66,7 +66,7 @@ const FeaturesSection = () => {
 
         <div className="md:flex md:justify-between items-center md:mb-10  mt-10">
           <div className="block md:hidden relative mb-5 md:mb-0">
-            <div className="relative flex justify-center  rounded-lg">
+            <div className="relative flex border-[1rem] border-gray-800 justify-center  rounded-lg">
               <Image
                 src="/images/followimage(5).png"
                 width={650}
@@ -109,7 +109,7 @@ const FeaturesSection = () => {
             </div>
           </div>
           <div className="hidden md:block relative w-1/2">
-            <div className="relative md:ml-10 p-3 bg-gray-800 rounded-lg">
+            <div className="relative md:ml-10 border-[1rem] border-gray-800 rounded-lg">
               <Image
                 src="/images/followimage(5).png"
                 width={650}
@@ -123,7 +123,7 @@ const FeaturesSection = () => {
 
         <div className="md:flex justify-between md:space-x-32 items-center mb-10 mt-10">
           <div className="relative md:w-1/2 mb-5 md:mb-0">
-            <div className="relative flex justify-center bg-gray-800 p-3 rounded-lg">
+            <div className="relative flex justify-center border-[1rem] border-gray-800  rounded-lg">
               <Image
                 src="/images/followimage(7).png"
                 width={650}
