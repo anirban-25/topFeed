@@ -1,14 +1,24 @@
 import React from "react";
 import SidePanel from '@/components/SidePanel';
 import RedditComponent from '@/components/RedditComponent';
-import DashboardHeader from '@/components/DashboardHeader';
+import NotificationHeader from '@/components/NotificationHeader';
+import BotsAndAlerts from '@/components/BotsAndAlerts';
 
-const DashboardPage = () => {
+const page = () => {
     return (
         <div className="flex">
-            hi
+            <div className="flex fixed h-full">
+                <div className="relative w-full z-10 flex justify-center items-center top-0 mx-auto">
+                    <SidePanel />
+                </div>
+            </div>
+            <div className="min h-screen flex-grow bg-white ml-64 w-[calc(100%-16rem)]">
+                <NotificationHeader />
+                <BotsAndAlerts />
+                
+            </div>
         </div>
     );
 };
 
-export default DashboardPage;
+export default page;
