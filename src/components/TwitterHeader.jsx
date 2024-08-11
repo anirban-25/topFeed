@@ -11,7 +11,7 @@ import {
 } from "@material-tailwind/react";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { X } from "lucide-react";
-import { storeDataInFirestore } from "../utils/storeData";
+import { storeDataInFirestore } from "../utils/storeTwitterData";
 const TwitterHeader = () => {
   const [newTopic, setNewTopic] = useState("");
   const [twitterUrls, setTwitterUrls] = useState([""]);

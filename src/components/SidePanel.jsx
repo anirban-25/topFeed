@@ -48,18 +48,18 @@ const SidePanel = () => {
         </Link>
       </div>
       <div className="font-kumbh-sans-Bold text-[#8D8D8D] flex flex-col space-y-4 mt-8 items-left ml-5 mr-5 z-10">
-        <div className="group">
+        <div className="">
         <Link href="/dashboard/reddit">
-          <div className={` flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full cursor-pointer group-hover:text-white  ${pathname=="/dashboard/reddit"? "bg-gray-700 text-white": ""}`}>
+          <div className={` flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full cursor-pointer group-hover:text-white  ${pathname=="/dashboard/reddit" ? "bg-gray-700 text-white": ""}`}>
             <FaRedditAlien className="mr-5 scale-125 icon-outline"/> Reddit
           </div>
         </Link>
         </div>
-        <div className="group">
+        <div className="">
         <Link href="/dashboard/twitter">
-          <div className=" flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full group group-hover:text-white">
+          <div className={` flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full cursor-pointer group-hover:text-white  ${pathname=="/dashboard/twitter"? "bg-gray-700 text-white": ""}`}>
             <div>
-              <FaXTwitter className="mr-5 scale-125 text-[#7A7A7A] group-hover:text-white" />
+              <FaXTwitter className="mr-5 scale-125 " />
             </div>
             Twitter
           </div>
@@ -69,10 +69,10 @@ const SidePanel = () => {
 
         <Link
           href="/dashboard/notifications"
-          className=" flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full  group-hover:text-white"
+          className={` flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full cursor-pointer group-hover:text-white  ${pathname=="/dashboard/notifications"? "bg-gray-700 text-white": ""}`}
         >
           <div>
-            <IoNotifications className="mr-5 scale-125 icon-outline" />
+            <IoNotifications className="mr-5 scale-125 " />
           </div>
           Notifications
         </Link>
@@ -80,10 +80,10 @@ const SidePanel = () => {
         <div className="group">
         <Link
           href="/dashboard/support"
-          className=" flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full group group-hover:text-white"
+          className={` flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full cursor-pointer group-hover:text-white  ${pathname=="/dashboard/support"? "bg-gray-700 text-white": ""}`}
         >
           <div>
-            <HiOutlineSupport className="mr-5 scale-125 text-[#7A7A7A] text-bold group-hover:text-white" />
+            <HiOutlineSupport className="mr-5 scale-125" />
           </div>
           Support
         </Link>

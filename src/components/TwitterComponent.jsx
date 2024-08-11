@@ -221,7 +221,7 @@ const TwitterComponent = () => {
       try {
         const userTweetsCollectionRef = collection(
           db,
-          "tweets",
+          "users",
           user.uid,
           "user_tweets"
         );

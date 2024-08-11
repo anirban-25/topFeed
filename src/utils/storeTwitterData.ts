@@ -18,7 +18,7 @@ export async function storeDataInFirestore(data: APIDataType[], userId: string) 
   }
 
   // Reference to the user's document within the tweets collection
-  const userDocRef = doc(db, 'tweets', userId);
+  const userDocRef = doc(db, 'users', userId);
 
   // Reference to the user's subcollection within the user's document
   const userTweetsCollectionRef = collection(userDocRef, 'user_tweets');

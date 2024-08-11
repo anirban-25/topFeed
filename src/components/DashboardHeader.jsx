@@ -13,6 +13,9 @@ import { IoIosInformationCircleOutline } from "react-icons/io";
 import { RxAvatar, RxCross2 } from "react-icons/rx";
 import axios from "axios";
 import UserMenu from "../components/UserMenu";
+import { auth, db } from "@/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { storeDataInFirestore } from "@/utils/storeRedditData";
 
 const DashboardHeader = () => {
   const timezones = [
@@ -80,10 +83,7 @@ const DashboardHeader = () => {
     { value: "Pacific/Auckland", label: "(GMT+12:00) Auckland, Wellington" },
     { value: "Pacific/Chatham", label: "(GMT+13:00) Nuku alofa" },
   ];
-  const [topics, setTopics] = useState([
-    "Cricket",
-    "Python",
-  ]);
+  const [topics, setTopics] = useState([]);
   const [selectedTimezone, setSelectedTimezone] = useState("");
   const [open, setOpen] = useState(false);
   const handleChange = (event) => {
@@ -121,28 +121,57 @@ const DashboardHeader = () => {
       setNewTopic("");
     }
   };
+  const cleanSubredditName = (name) => {
+    return name.startsWith("r/") ? name.slice(2) : name;
+  };
+
   const handleSubmit = async () => {
+    // setLoading(true);
+    // setError(null);
+
     try {
-      const response = await fetch('http://127.0.0.1:5000/process', {
-        method: 'POST',
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      const cleanedTopics = topics.map(cleanSubredditName);
+      const response = await fetch("http://localhost:5001/analyze", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-        body: JSON.stringify({ topics }), // Send the topics array inside an object
+        body: JSON.stringify({ subreddits: cleanedTopics }),
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error("Failed to fetch data from server");
       }
 
       const data = await response.json();
-      console.log(data.result); // Handle the response data
-    } catch (error) {
-      console.error('Error:', error);
+
+      // Prepare the data to be stored
+      const dataToStore = [
+        {
+          subreddits: cleanedTopics,
+          analysis: data,
+        },
+      ];
+
+      // Store the data in Firestore
+      await storeDataInFirestore(dataToStore, user.uid);
+
+      console.log("Data successfully stored in Firestore");
+      // Optionally, you can update your state or show a success message here
+    } catch (err) {
+      // setError(err.message);
+      console.error("Error:", err);
+    } finally {
+      // setLoading(false);
     }
   };
 
-  
   const removeSubReddit = (topic) => {
     setTopics(topics.filter((t) => t !== topic));
   };
@@ -154,16 +183,16 @@ const DashboardHeader = () => {
       </h1>
       <div className="flex items-center">
         <button className="flex items-center px-4 py-2 bg-[#146EF5] text-white rounded-lg hover:bg-blue-800 transition-all duration-200 mr-6">
-            <span
-              className=""
-              onClick={() => handleOpen("lg")}
-              variant="gradient"
+          <span
+            className=""
+            onClick={() => handleOpen("lg")}
+            variant="gradient"
           >
             + Create New Feed
           </span>
         </button>
-        <div >
-        <UserMenu />
+        <div>
+          <UserMenu />
         </div>
       </div>
       <Dialog open={size === "lg"} size={size || "md"} handler={handleOpen}>
@@ -245,13 +274,15 @@ const DashboardHeader = () => {
           </div>
         </DialogBody>
         <DialogFooter className="space-x-4">
-          <Button color="white" text="black" onClick={handleOpen} className="border border-[#CECECE]">
+          <Button
+            color="white"
+            text="black"
+            onClick={handleOpen}
+            className="border border-[#CECECE]"
+          >
             Cancel
           </Button>
-          <Button
-            color="blue"
-            onClick={() => handleSubmit()}
-          >
+          <Button color="blue" onClick={() => handleSubmit()}>
             Generate Feed
           </Button>
         </DialogFooter>
