@@ -1,8 +1,10 @@
+"use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { app } from "@/firebase";
-import { RxAvatar } from "react-icons/rx";
+import { Avatar } from "@material-tailwind/react";
+import { CiLogout } from "react-icons/ci";
 
 const UserMenu = () => {
   const [user, setUser] = useState(null);
@@ -51,7 +53,20 @@ const UserMenu = () => {
   return (
     <div className="relative">
       <button className="flex items-center" onClick={toggleMenu}>
-        <RxAvatar size={32} />
+        {user ? (
+          <Avatar
+            src={user.photoURL }
+            alt="avatar"
+            withBorder={true}
+            className="p-0.5"
+          />
+        ) : (
+          <Avatar
+            alt="avatar"
+            withBorder={true}
+            className="p-0.5"
+          />
+        )}
       </button>
       {menuOpen && user && (
         <div
@@ -65,6 +80,7 @@ const UserMenu = () => {
               className="w-12 h-12 rounded-full mr-4"
             />
             <div className="text-sm text-gray-700">
+              
               <div className="font-medium break-words">{user.displayName || "User"}</div>
               <div className="text-xs text-gray-500 break-words">{user.email}</div>
             </div>
@@ -72,9 +88,9 @@ const UserMenu = () => {
           <div className="border-t border-gray-200 mt-2">
             <button
               onClick={handleLogout}
-              className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+              className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
             >
-              Sign out
+              <CiLogout className="mr-2" />Sign out
             </button>
           </div>
         </div>

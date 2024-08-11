@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { RxAvatar } from "react-icons/rx";
+import UserMenu from "../components/UserMenu";
 import { auth } from "../firebase";
 import {
   Button,
@@ -130,9 +131,9 @@ const TwitterHeader = () => {
             + Create New Feed
           </span>
         </button>
-        <button className="mr-5">
-          <RxAvatar size={32} />
-        </button>
+        <div>
+          <UserMenu />
+        </div>
       </div>
       <Dialog
         open={size === "lg"}
