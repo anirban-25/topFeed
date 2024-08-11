@@ -8,18 +8,11 @@ import { usePathname, useSearchParams } from "next/navigation";
 import clsx from "clsx";
 const Navbar = () => {
   const [visibleIndex, setVisibleIndex] = useState(false);
-  const [url, setUrl] = useState(null);
   const toggleVisibility = () => {
     setVisibleIndex(!visibleIndex);
   };
   const pathname = usePathname();
 
-  useEffect(() => {
-    setUrl(pathname);
-    // console.log(url)
-    // You can now use the current URL
-    // ...
-  }, [pathname]);
   return (
     <div className=" w-full  items-center py-3 md:py-7 text-white">
       {visibleIndex && (

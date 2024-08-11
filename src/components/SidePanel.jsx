@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,8 +6,11 @@ import { FaRedditAlien } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { IoNotifications } from "react-icons/io5";
 import { HiOutlineSupport } from "react-icons/hi";
+import { usePathname } from "next/navigation";
 
 const SidePanel = () => {
+  
+  const pathname = usePathname();
   return (
     <div className="h-screen w-64 flex bg-[#0B0B0B] flex-col ">
       <Image
@@ -43,10 +47,10 @@ const SidePanel = () => {
           <Image src="/images/logo.png" height={120} width={120} alt="logo" />
         </Link>
       </div>
-      <div className="font-KumbhSans-Bold text-[#8D8D8D] flex flex-col space-y-4 mt-8 items-left ml-5 mr-5 z-10">
+      <div className="font-kumbh-sans-Bold text-[#8D8D8D] flex flex-col space-y-4 mt-8 items-left ml-5 mr-5 z-10">
         <div className="group">
         <Link href="/dashboard/reddit">
-          <div className=" flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full cursor-pointer group-hover:text-white">
+          <div className={` flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full cursor-pointer group-hover:text-white  ${pathname=="/dashboard/reddit"? "bg-gray-700 text-white": ""}`}>
             <FaRedditAlien className="mr-5 scale-125 icon-outline"/> Reddit
           </div>
         </Link>
@@ -88,7 +92,7 @@ const SidePanel = () => {
       </div>
       <div className="font-kumbh-sans-Medium mt-auto mb-9 items-center">
         <div
-          className=" space-x-2 bg-[#2A2A2A] px-3 py-5 rounded-md w-3/2 ml-3 mr-3 "
+          className=" space-x-2 bg-[#2A2A2A] p-3 rounded-md w-3/2 ml-3 mr-3 "
         >
         <div className="font-kumbh-sans-Medium flex items-center space-x-10 ml-3 mb-5">
           <span className="text-[#8D8D8D] text-sm">My Current Plan</span>

@@ -20,16 +20,17 @@ const FeaturesSection = () => {
         </h2>
         <h2 className="text-xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-[#55A3F8] to-[#7567D9]">Twitter & Reddit</h2>
       </div>
-      <div className="md:px-20">
+      <div className="md:px-20 mt-20">
         <div className="md:flex justify-between md:space-x-32 items-center mb-10 mt-10">
           <div className="relative md:w-1/2 mb-5 md:mb-0">
-            <div className="relative p-4 bg-gray-800 rounded-lg">
+            <div className="relative flex border-[1rem] border-gray-800 justify-center rounded-lg">
               <Image
-                src="/images/followimage.png"
+                src="/images/followimage(6).png"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
-                className="rounded-lg filter grayscale"
+                className=" w-72 md:w-full rounded-lg "
+                unoptimized={true}
               />
             </div>
           </div>
@@ -40,13 +41,13 @@ const FeaturesSection = () => {
                 className="text-blue-500 mr-2 w-[19px] md:w-[24px]"
                 size={24}
               />
-              <h3 className="text-lg md:text-3xl font-bold ">
+              <h3 className="text-lg md:text-3xl font-kumbh-sans-bold ">
               Reddit TopSummarizer
               </h3>
             </div>
-            <p className="mb-1 md:mb-4 text-base md:text-lg">This tool allows you to summarize discussions happening in your favorite subreddits and break them down into different topics.
+            <p className="mb-1 md:mb-4 text-base md:text-lg font-kumbh-sans-medium text-[#B8B8B8]">This tool allows you to summarize discussions happening in your favorite subreddits and break them down into different topics.
             </p>
-            <ul className="text-sm md:text-lg list-none">
+            <ul className="text-sm text-[#E6E6E6] md:text-base font-kumbh-sans-regular space-y-5 list-none">
               <li className="flex items-center mb-2">
                 <GiCheckMark className="text-blue-500 mr-2" size={20} />
                 Find out what people are discussing
@@ -65,31 +66,32 @@ const FeaturesSection = () => {
 
         <div className="md:flex md:justify-between items-center md:mb-10  mt-10">
           <div className="block md:hidden relative mb-5 md:mb-0">
-            <div className="relative p-4  bg-gray-800 rounded-lg">
+            <div className="relative flex border-[1rem] border-gray-800 justify-center  rounded-lg">
               <Image
-                src="/images/followimage.png"
+                src="/images/followimage(5).png"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
-                className="rounded-lg filter grayscale"
+                className="rounded-lg w-72 md:w-full"
+                
               />
             </div>
           </div>
-          <div className=" w-1/2 max-w-1/2 flex space-x-32">
+          <div className=" md:w-1/2 md:max-w-1/2 flex space-x-32">
             <div className=" text-lg">
               <div className="flex items-center mb-4">
                 <FaClock
                   className="text-blue-500 mr-2 w-[19px] md:w-[24px]"
                   size={24}
                 />
-                <h3 className="text-lg md:text-3xl font-bold ">
+                <h3 className="text-lg md:text-3xl font-kumbh-sans-bold ">
                 X TopFeed
                 </h3>
               </div>
-              <p className="mb-1 md:mb-4 text-base md:text-lg">
+              <p className="mb-1 md:mb-4 text-[#B8B8B8] font-kumbh-sans-medium text-base md:text-lg">
               This tool is great for getting tweets from your favorite X (Twitter) account in one single feed with a “relevancy” score to filter the best ones out of them.
               </p>
-              <ul className="text-sm md:text-lg list-none">
+              <ul className="text-sm text-[#E6E6E6] md:text-base font-kumbh-sans-regular space-y-5 list-none">
                 <li className="flex items-center mb-2">
                   <GiCheckMark className="text-blue-500 mr-2" size={20} />
                   Filter tweets with high to low relevancy
@@ -107,13 +109,13 @@ const FeaturesSection = () => {
             </div>
           </div>
           <div className="hidden md:block relative w-1/2">
-            <div className="relative md:ml-10 p-4 bg-gray-800 rounded-lg">
+            <div className="relative md:ml-10 border-[1rem] border-gray-800 rounded-lg">
               <Image
-                src="/images/followimage.png"
+                src="/images/followimage(5).png"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
-                className="rounded-lg filter grayscale"
+                className="rounded-lg "                
               />
             </div>
           </div>
@@ -121,13 +123,14 @@ const FeaturesSection = () => {
 
         <div className="md:flex justify-between md:space-x-32 items-center mb-10 mt-10">
           <div className="relative md:w-1/2 mb-5 md:mb-0">
-            <div className="relative p-4 bg-gray-800 rounded-lg">
+            <div className="relative flex justify-center border-[1rem] border-gray-800  rounded-lg">
               <Image
-                src="/images/followimage.png"
+                src="/images/followimage(7).png"
                 width={650}
                 height={450}
                 alt="Real-Time Updates"
-                className="rounded-lg filter grayscale"
+                className="rounded-lg w-72 md:w-full"
+                
               />
             </div>
           </div>
@@ -138,14 +141,14 @@ const FeaturesSection = () => {
                 className="text-blue-500 mr-2 w-[19px] md:w-[24px]"
                 size={24}
               />
-              <h3 className="text-lg md:text-3xl font-bold ">
+              <h3 className="text-lg md:text-3xl font-kumbh-sans-bold ">
               X TopNotifications
               </h3>
             </div>
-            <p className="mb-1 md:mb-4 text-base md:text-lg">
+            <p className="mb-1 md:mb-4 text-base font-kumbh-sans-medium text-[#B8B8B8] md:text-lg">
             This tool sends you instant notifications about the latest tweets from your favorite X accounts, so you don&apos;t miss out on any of it.
             </p>
-            <ul className="text-sm md:text-lg list-none">
+            <ul className="text-sm text-[#E6E6E6] md:text-base font-kumbh-sans-regular space-y-5 list-none">
               <li className="flex items-center mb-2">
                 <GiCheckMark className="text-blue-500 mr-2" size={20} />
                 Connects with WhatsApp & Telegram

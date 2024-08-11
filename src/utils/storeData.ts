@@ -6,6 +6,7 @@ import { collection, addDoc, doc } from 'firebase/firestore';
 type APIDataType = {
   content_html: string;
   relevancy: string;
+  authors: { name: string }[];
   // Add any other fields expected from the API response
 };
 
@@ -29,6 +30,7 @@ export async function storeDataInFirestore(data: APIDataType[], userId: string) 
       const docRef = await addDoc(userTweetsCollectionRef, {
         content_html: item.content_html,
         relevancy: item.relevancy,
+        authors: item.authors.map(author => ({ name: author.name })),
         // Add other fields to store if necessary
       });
       console.log("Document written with ID: ", docRef.id);
