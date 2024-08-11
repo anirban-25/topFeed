@@ -80,7 +80,7 @@ const UserMenu = () => {
               className="w-12 h-12 rounded-full mr-4"
             />
             <div className="text-sm text-gray-700">
-              <div className="font-medium break-words">{(user.displayName || "User").split(" ")[0]}</div>
+              
               <div className="font-medium break-words">{user.displayName || "User"}</div>
               <div className="text-xs text-gray-500 break-words">{user.email}</div>
             </div>

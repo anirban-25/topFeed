@@ -1,5 +1,7 @@
-import React from 'react';
+"use client";
+import React, { useEffect, useState } from "react";
 import { RxAvatar } from "react-icons/rx";
+import UserMenu from "../components/UserMenu";
 import { auth } from "../firebase";
 import {
   Button,
@@ -121,12 +123,17 @@ const TwitterHeader = () => {
       </h1>
       <div className="flex items-center">
         <button className="flex items-center px-4 py-2 bg-[#146EF5] text-white rounded-lg hover:bg-blue-900 mr-6">
-          <span className="font-kumbh-sans-Medium">+ Create New Feed</span>
+          <span
+            className="font-kumbh-sans-Medium"
+            onClick={() => handleOpen("lg")}
+            variant="gradient"
+          >
+            + Create New Feed
+          </span>
         </button>
-        <div >
-        <UserMenu />
+        <div>
+          <UserMenu />
         </div>
-
       </div>
       <Dialog
         open={size === "lg"}
