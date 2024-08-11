@@ -14,7 +14,7 @@ const TelegramLoginButton = ({ onAuth }) => {
 
       const script = document.createElement('script')
       script.src = "https://telegram.org/js/telegram-widget.js?22"
-      script.setAttribute('data-telegram-login', process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID)
+      script.setAttribute('data-telegram-login', process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME)
       script.setAttribute('data-size', 'large')
       script.setAttribute('data-onauth', 'TelegramLoginWidget.dataOnauth(user)')
       script.setAttribute('data-request-access', 'write')
