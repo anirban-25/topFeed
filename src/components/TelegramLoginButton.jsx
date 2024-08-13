@@ -4,12 +4,12 @@ import { useEffect, useRef } from 'react'
 
 const TelegramLoginButton = ({ onAuth }) => {
   const buttonRef = useRef(null)
+  const scriptRef = useRef(null) // Ref for the script element
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.TelegramLoginWidget = {
-        dataOnauth: (user) => onAuth(user),
-        dataOnerror: () => console.error('Telegram login failed')
+        dataOnauth: (user) => onAuth(user)
       }
 
       const script = document.createElement('script')
@@ -21,9 +21,12 @@ const TelegramLoginButton = ({ onAuth }) => {
       script.async = true
 
       buttonRef.current.appendChild(script)
+      scriptRef.current = script // Store a reference to the script element
 
       return () => {
-        buttonRef.current.removeChild(script)
+        if (buttonRef.current && scriptRef.current) {
+          buttonRef.current.removeChild(scriptRef.current) // Only remove if the script exists
+        }
       }
     }
   }, [onAuth])

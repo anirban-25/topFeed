@@ -71,7 +71,7 @@ const UserMenu = () => {
         >
           <div className="flex items-center p-4">
             <img
-              src={user.photoURL || "default-avatar-url"}
+              src={user.photoURL || null}
               alt="Profile"
               className="w-12 h-12 rounded-full mr-4 flex-shrink-0"
             />
