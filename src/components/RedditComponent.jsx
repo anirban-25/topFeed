@@ -18,8 +18,8 @@ const RedditComponent = () => {
                     id: doc.id,
                     ...doc.data()
                 }));
-                console.log(data[0].analysis[0].analysis);
-                setRedditData(data[0].analysis[0].analysis);
+                // console.log(data[0].analysis[0].analysis);
+                setRedditData(data[0]?.analysis[0]?.analysis);
                 setLoading(false);
             } else {
                 setLoading(false);
@@ -29,15 +29,8 @@ const RedditComponent = () => {
         fetchRedditData();
     }, []);
 
-    if (loading) {
-        return (
-            <div className="font-kumbh-sans-Medium flex flex-col items-center justify-center p-8">
-                <p>Loading...</p>
-            </div>
-        );
-    }
 
-    if (redditData.length === 0) {
+    if (!redditData) {
         return (
             <div className="font-kumbh-sans-Medium flex flex-col items-center justify-center p-8">
                 <Image src="/images/reddit.png" alt="Reddit Feed" width={457} height={270} />
