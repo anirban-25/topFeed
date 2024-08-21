@@ -2,34 +2,45 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { db, auth } from '../firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, limit, orderBy } from 'firebase/firestore';
 
 const RedditComponent = () => {
     const [redditData, setRedditData] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchRedditData = async () => {
+        const fetchLatestRedditData = async () => {
             const userId = auth.currentUser?.uid;
             if (userId) {
                 const userRedditsRef = collection(db, 'users', userId, 'user_reddits');
-                const querySnapshot = await getDocs(userRedditsRef);
-                const data = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                console.log(data[0].analysis[0].analysis);
-                setRedditData(data[0].analysis[0].analysis);
-                setLoading(false);
-            } else {
-                setLoading(false);
+                // Create a query to get the latest document
+                const q = query(userRedditsRef, orderBy('createdAt', 'desc'), limit(1));
+                const querySnapshot = await getDocs(q);
+                
+                if (!querySnapshot.empty) {
+                    const latestDoc = querySnapshot.docs[0];
+                    const data = {
+                        id: latestDoc.id,
+                        ...latestDoc.data()
+                    };
+                    console.log(data);
+                    setRedditData(data.analysis[0]?.analysis);
+                    
+                    setLoading(false);
+                } else {
+                    console.log("onirban hater");
+    
+                    setLoading(false);
+                }
             }
+           
+            
         };
 
-        fetchRedditData();
+        fetchLatestRedditData();
     }, []);
 
-    if (loading) {
+    if (!redditData) {
         return (
             <div className="font-kumbh-sans-Medium flex flex-col items-center justify-center p-8">
                 <p>Loading...</p>
@@ -51,6 +62,7 @@ const RedditComponent = () => {
             </div>
         );
     }
+    
 
     return (
         <div className="font-kumbh-sans-Medium p-8">

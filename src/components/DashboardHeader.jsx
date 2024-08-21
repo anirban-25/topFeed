@@ -136,7 +136,7 @@ const DashboardHeader = () => {
       }
 
       const cleanedTopics = topics.map(cleanSubredditName);
-      const response = await fetch("http://localhost:5001/analyze", {
+      const response = await fetch("https://mcdk0ymqo2.execute-api.us-east-2.amazonaws.com/reddit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -7,7 +7,9 @@ import ServiceBlock from './ServiceBlock'
 
 const BotsAndAlerts = () => {
   const [telegramConnected, setTelegramConnected] = useState(false)
-  const [telegramAccount, setTelegramAccount] = useState("")
+  const [telegramAccoWunt, setTelegramAccount] = useState("")
+  //const [emailConnected, setEmailConnected] = useState(false)
+  //const [emailAccount, setEmailAccount] = useState("")
 
   const handleTelegramAuth = (user) => {
     if (user) {
@@ -30,7 +32,7 @@ const BotsAndAlerts = () => {
   }
 
   return (
-    <div className="bg-[#F7F9FB] py-4"> {/* Reduced top padding */}
+    <div className="py-4"> 
       <div className="container px-6 space-y-4">
         <div className="flex flex-col items-center">
           <ServiceBlock
