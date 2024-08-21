@@ -1,7 +1,5 @@
-// utils/storeData.ts
-
 import { db } from '../firebase';
-import { collection, addDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDocs, deleteDoc } from 'firebase/firestore';
 
 type APIDataType = {
   content_html: string;
@@ -22,6 +20,16 @@ export async function storeDataInFirestore(data: APIDataType[], userId: string) 
 
   // Reference to the user's subcollection within the user's document
   const userTweetsCollectionRef = collection(userDocRef, 'user_tweets');
+
+  // Delete existing documents in the subcollection
+  try {
+    const querySnapshot = await getDocs(userTweetsCollectionRef);
+    const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+    console.log(`Deleted ${querySnapshot.size} existing documents for user ${userId}`);
+  } catch (e) {
+    console.error(`Error deleting existing documents for user ${userId}:`, e);
+  }
 
   // Store each item in the user's subcollection
   const promises = data.map(async (item, index) => {

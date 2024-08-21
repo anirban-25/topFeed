@@ -48,7 +48,7 @@ const RedditComponent = () => {
         );
     }
 
-    if (redditData.length === 0) {
+    if (!redditData) {
         return (
             <div className="font-kumbh-sans-Medium flex flex-col items-center justify-center p-8">
                 <Image src="/images/reddit.png" alt="Reddit Feed" width={457} height={270} />

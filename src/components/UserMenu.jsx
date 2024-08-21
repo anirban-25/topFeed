@@ -55,34 +55,33 @@ const UserMenu = () => {
       <button className="flex items-center" onClick={toggleMenu}>
         {user ? (
           <Avatar
-            src={user.photoURL }
+            src={user.photoURL}
             alt="avatar"
             withBorder={true}
             className="p-0.5"
           />
         ) : (
-          <Avatar
-            alt="avatar"
-            withBorder={true}
-            className="p-0.5"
-          />
+          <Avatar alt="avatar" withBorder={true} className="p-0.5" />
         )}
       </button>
       {menuOpen && user && (
         <div
           ref={menuRef}
-          className="absolute right-0 mt-5 mr-2 min-w-[300px] bg-white border border-gray-300 rounded-lg shadow-lg"
+          className="absolute right-0 mt-5 mr-2 min-w-[300px] max-w-[90vw] bg-white border border-gray-300 rounded-lg shadow-lg"
         >
           <div className="flex items-center p-4">
             <img
               src={user.photoURL || null}
               alt="Profile"
-              className="w-12 h-12 rounded-full mr-4"
+              className="w-12 h-12 rounded-full mr-4 flex-shrink-0"
             />
-            <div className="text-sm text-gray-700">
-              
-              <div className="font-medium break-words">{user.displayName || "User"}</div>
-              <div className="text-xs text-gray-500 break-words">{user.email}</div>
+            <div className="text-sm text-gray-700 overflow-hidden">
+              <div className="font-medium break-words">
+                {user.displayName || "User"}
+              </div>
+              <div className="text-xs text-gray-500 break-all">
+                {user.email}
+              </div>
             </div>
           </div>
           <div className="border-t border-gray-200 mt-2">
@@ -90,7 +89,8 @@ const UserMenu = () => {
               onClick={handleLogout}
               className="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
             >
-              <CiLogout className="mr-2" />Sign out
+              <CiLogout className="mr-2" />
+              Sign out
             </button>
           </div>
         </div>

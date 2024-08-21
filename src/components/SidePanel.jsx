@@ -48,14 +48,14 @@ const SidePanel = () => {
         </Link>
       </div>
       <div className="font-kumbh-sans-Bold text-[#8D8D8D] flex flex-col space-y-4 mt-8 items-left ml-5 mr-5 z-10">
-        <div className="">
+        <div className="group">
         <Link href="/dashboard/reddit">
           <div className={` flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full cursor-pointer group-hover:text-white  ${pathname=="/dashboard/reddit" ? "bg-gray-700 text-white": ""}`}>
             <FaRedditAlien className="mr-5 scale-125 icon-outline"/> Reddit
           </div>
         </Link>
         </div>
-        <div className="">
+        <div className="group">
         <Link href="/dashboard/twitter">
           <div className={` flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full cursor-pointer group-hover:text-white  ${pathname=="/dashboard/twitter"? "bg-gray-700 text-white": ""}`}>
             <div>
