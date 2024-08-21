@@ -90,7 +90,8 @@ const DashboardHeader = () => {
     setSelectedTimezone(event.target.value);
   };
   const [newTopic, setNewTopic] = useState("");
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [size, setSize] = useState(null);
   const [twitterAccounts, setTwitterAccounts] = useState([""]);
@@ -126,8 +127,8 @@ const DashboardHeader = () => {
   };
 
   const handleSubmit = async () => {
-    // setLoading(true);
-    // setError(null);
+    setLoading(true);
+    setError(null);
 
     try {
       const user = auth.currentUser;
