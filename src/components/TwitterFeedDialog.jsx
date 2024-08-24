@@ -116,7 +116,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
     setLoading(newLoading);
 
     try {
-      const response = await fetch("http://localhost:5000/checktwitterlinks", {
+      const response = await fetch("/api/checktwitterlinks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
