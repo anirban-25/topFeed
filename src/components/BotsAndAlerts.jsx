@@ -7,7 +7,7 @@ import ServiceBlock from './ServiceBlock'
 
 const BotsAndAlerts = () => {
   const [telegramConnected, setTelegramConnected] = useState(false)
-  const [telegramAccoWunt, setTelegramAccount] = useState("")
+  const [telegramAccount, setTelegramAccount] = useState("")
   //const [emailConnected, setEmailConnected] = useState(false)
   //const [emailAccount, setEmailAccount] = useState("")
 
