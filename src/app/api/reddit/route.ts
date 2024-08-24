@@ -1,11 +1,8 @@
 import { NextResponse } from 'next/server';
 import AWS from 'aws-sdk';
-import { storeDataInFirestore } from "@/utils/storeRedditData"; // Adjust the import based on your directory structure
-import { auth, db } from "@/firebase"; // Import your Firebase configuration
-import { getAuth} from "firebase/auth";
+import { storeDataInFirestore } from "@/utils/storeRedditData";
 
 // Initialize AWS SDK with Lambda
-
 const lambda = new AWS.Lambda({
   region: 'us-east-2',
   accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
@@ -14,37 +11,51 @@ const lambda = new AWS.Lambda({
 
 export async function POST(req: Request) {
   try {
-    const { subreddits } = await req.json();
+    const { subreddits, userId } = await req.json();
+    console.log("Subreddits:", subreddits);
+    console.log("User ID:", userId);
+    console.log("-------------------------------------------");
+
+    // Create a stringified JSON object for the body
+    const eventPayload = {
+      body: JSON.stringify({ subreddits })
+    };
 
     // Invoke the Lambda function
     const params = {
       FunctionName: "chatgpt", // Replace with your Lambda function name
-      Payload: JSON.stringify({ subreddits }),
+      Payload: JSON.stringify(eventPayload), // Pass the event payload as expected by Lambda
     };
 
     const lambdaResponse = await lambda.invoke(params).promise();
+    console.log("Lambda response:", lambdaResponse);
 
     if (lambdaResponse.StatusCode === 200 && lambdaResponse.Payload) {
       const parsedResponse = JSON.parse(lambdaResponse.Payload as string);
-      const analysisData = parsedResponse.data; // Assuming your Lambda returns data here
 
-      // Store data in Firestore (No need to re-authenticate the user)
-      const user = auth.currentUser;
-      if (!user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      if (parsedResponse.statusCode === 400) {
+        return NextResponse.json({ error: parsedResponse.body }, { status: 400 });
       }
 
-      const userId = user.uid;
+      // Parse the body again to extract the actual analysis data
+      const parsedBody = JSON.parse(parsedResponse.body);
+      const analysisData = parsedBody; // This should be the array of headings/sub-headings
 
-      // Call the storeDataInFirestore function to save data
+      console.log("Analysis data to store in Firestore:", analysisData);
+
+      if (!analysisData) {
+        throw new Error("No analysis data found in the Lambda response.");
+      }
+
+      // Store the processed data in Firestore under the user's document
       await storeDataInFirestore(analysisData, userId);
 
-      return NextResponse.json({ message: "Data stored successfully", analysisData }, { status: 200 });
+      return NextResponse.json({ message: "Data processed and stored successfully", analysisData }, { status: 200 });
     } else {
       return NextResponse.json({ error: "Failed to invoke Lambda function" }, { status: 500 });
     }
   } catch (error) {
-    console.error("Error in API:", error);
+    console.error("Error in API route:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

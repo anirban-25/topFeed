@@ -131,25 +131,17 @@ const DashboardHeader = () => {
   
     try {
       const cleanedTopics = topics.map(cleanSubredditName);
-      const user = auth.currentUser; // Get the current user from Firebase
   
+      const user = auth.currentUser;
       if (!user) {
         throw new Error("User is not authenticated.");
       }
   
-      let token;
-      try {
-        token = await user.getIdToken(); // Get the Firebase ID token
-      } catch (tokenError) {
-        throw new Error("Failed to retrieve authentication token.");
-      }
+      const userId = user.uid; // Get the user's ID
   
       const response = await axios.post("/api/reddit", {
         subreddits: cleanedTopics,
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Include the Firebase token
-        },
+        userId,  // Send the userId to the backend
       });
   
       if (response.status !== 200) {
@@ -159,7 +151,6 @@ const DashboardHeader = () => {
       }
   
       console.log("Received response from API:", response.data);
-      // No need to store in Firestore here, as the backend is handling it
   
     } catch (err) {
       console.error("Error during API call:", err);
@@ -168,7 +159,8 @@ const DashboardHeader = () => {
       setLoading(false);
     }
   };
-    
+  
+
 
   const removeSubReddit = (topic) => {
     setTopics(topics.filter((t) => t !== topic));
