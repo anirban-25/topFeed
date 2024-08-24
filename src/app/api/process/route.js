@@ -15,7 +15,7 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 const MODEL = "gpt-4o";
-const api_key = 'sk-proj-XuUwamNI9DqTzo38HYMCT3BlbkFJ63rP5LMSFkUKCnIxp7xX';
+const api_key = '';
 const client = new OpenAI({ apiKey: api_key });
 
 // Utility Functions
