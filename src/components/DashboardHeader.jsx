@@ -6,17 +6,14 @@ import {
   DialogHeader,
   DialogBody,
   DialogFooter,
-  Chip,
-  Input,
 } from "@material-tailwind/react";
 import { IoIosInformationCircleOutline } from "react-icons/io";
-import { RxAvatar, RxCross2 } from "react-icons/rx";
+import { RxCross2 } from "react-icons/rx";
 import axios from "axios";
 import UserMenu from "../components/UserMenu";
-import { auth, db } from "@/firebase";
+import { auth, db, app } from "@/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { storeDataInFirestore } from "@/utils/storeRedditData";
-
 const DashboardHeader = () => {
   const timezones = [
     { value: "Pacific/Midway", label: "(GMT-11:00) Midway Island" },
@@ -90,11 +87,11 @@ const DashboardHeader = () => {
     setSelectedTimezone(event.target.value);
   };
   const [newTopic, setNewTopic] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [size, setSize] = useState(null);
-  const [twitterAccounts, setTwitterAccounts] = useState([""]);
+
   useEffect(() => {
     if (newTopic) {
       const fetchSuggestions = async () => {
@@ -120,8 +117,10 @@ const DashboardHeader = () => {
     if (newTopic) {
       setTopics([...topics, suggestion]);
       setNewTopic("");
+      console.log("Added topic:", suggestion);
     }
   };
+
   const cleanSubredditName = (name) => {
     return name.startsWith("r/") ? name.slice(2) : name;
   };
@@ -129,75 +128,73 @@ const DashboardHeader = () => {
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
-
+  
     try {
-      const user = auth.currentUser;
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
-
       const cleanedTopics = topics.map(cleanSubredditName);
-      const response = await fetch("https://mcdk0ymqo2.execute-api.us-east-2.amazonaws.com/reddit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ subreddits: cleanedTopics }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch data from server");
+      const user = auth.currentUser; // Get the current user from Firebase
+  
+      if (!user) {
+        throw new Error("User is not authenticated.");
       }
-
-      const data = await response.json();
-
-      // Prepare the data to be stored
-      const dataToStore = [
-        {
-          subreddits: cleanedTopics,
-          analysis: data,
+  
+      let token;
+      try {
+        token = await user.getIdToken(); // Get the Firebase ID token
+      } catch (tokenError) {
+        throw new Error("Failed to retrieve authentication token.");
+      }
+  
+      const response = await axios.post("/api/reddit", {
+        subreddits: cleanedTopics,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the Firebase token
         },
-      ];
-
-      // Store the data in Firestore
-      await storeDataInFirestore(dataToStore, user.uid);
-
-      console.log("Data successfully stored in Firestore");
-      // Optionally, you can update your state or show a success message here
+      });
+  
+      if (response.status !== 200) {
+        console.error("Failed to fetch data from API:", response.status);
+        setError("Failed to fetch data from server");
+        return;
+      }
+  
+      console.log("Received response from API:", response.data);
+      // No need to store in Firestore here, as the backend is handling it
+  
     } catch (err) {
-      // setError(err.message);
-      console.error("Error:", err);
+      console.error("Error during API call:", err);
+      setError("An error occurred while processing your request.");
     } finally {
-      // setLoading(false);
+      setLoading(false);
     }
   };
+    
 
   const removeSubReddit = (topic) => {
     setTopics(topics.filter((t) => t !== topic));
+    console.log("Removed topic:", topic);
   };
+
   const handleOpen = (value) => setSize(value);
+  
   return (
     <header className="flex justify-between items-center p-4 bg-white shadow-md">
       <h1 className="text-xl text-[#8D8D8D] font-semibold ml-2">
         My Reddit Feed
       </h1>
       <div className="flex items-center">
-        <button className="flex items-center px-4 py-2 bg-[#146EF5] text-white rounded-lg hover:bg-blue-800 transition-all duration-200 mr-6">
-          <span
-            className=""
-            onClick={() => handleOpen("lg")}
-            variant="gradient"
-          >
-            + Create New Feed
-          </span>
+        <button
+          className="flex items-center px-4 py-2 bg-[#146EF5] text-white rounded-lg hover:bg-blue-800 transition-all duration-200 mr-6"
+          onClick={() => handleOpen("lg")}
+        >
+          + Create New Feed
         </button>
         <div>
           <UserMenu />
         </div>
       </div>
-      <Dialog open={size === "lg"} size={size || "md"} handler={handleOpen}>
-        <DialogHeader className=" font-kumbh-sans-semibold text-xl text-[#0B0B0B]">
+      <Dialog open={size === "lg"} size={size || "md"} handler={() => setSize(null)}>
+        <DialogHeader className="font-kumbh-sans-semibold text-xl text-[#0B0B0B]">
           Add New Reddit Feed
         </DialogHeader>
         <DialogBody>
@@ -213,9 +210,8 @@ const DashboardHeader = () => {
               {topics.map((topic, index) => (
                 <div
                   key={index}
-                  value={topic}
-                  className="mr-2 mt-3 flex bg-[#F5F9FF] border border-[#94BEFF] rounded-full  text-sm text-[#146EF5] font-kumbh-sans-medium px-3 items-center space-x-2 py-1
-                "
+                  value={topic} 
+                  className="mr-2 mt-3 flex bg-[#F5F9FF] border border-[#94BEFF] rounded-full text-sm text-[#146EF5] font-kumbh-sans-medium px-3 items-center space-x-2 py-1"
                 >
                   <div>{topic}</div>
                   <div className=" cursor-pointer">
@@ -237,7 +233,7 @@ const DashboardHeader = () => {
                   <input
                     type="text"
                     value={newTopic}
-                    className=" border w-[50%] rounded-lg p-2 shadow-md font-kumbh-sans-medium text-gray-800 border-[#CECECE]"
+                    className="border w-[50%] rounded-lg p-2 shadow-md font-kumbh-sans-medium text-gray-800 border-[#CECECE]"
                     onChange={(e) => setNewTopic(e.target.value)}
                     placeholder="Type here"
                   />
@@ -278,13 +274,13 @@ const DashboardHeader = () => {
           <Button
             color="white"
             text="black"
-            onClick={handleOpen}
+            onClick={() => setSize(null)}
             className="border border-[#CECECE]"
           >
             Cancel
           </Button>
-          <Button color="blue" onClick={() => handleSubmit()}>
-            Generate Feed
+          <Button color="blue" onClick={handleSubmit} disabled={loading}>
+            {loading ? "Generating Feed..." : "Generate Feed"}
           </Button>
         </DialogFooter>
       </Dialog>
