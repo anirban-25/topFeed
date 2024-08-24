@@ -73,7 +73,6 @@
     "react-transition-group": "^4.4.5",
     "sharp": "^0.33.2",
     "stripe": "^14.23.0",
-    "node-html-parser": "^6.1.13",
     "styled-components": "^6.1.11",
     "swr": "1.1.2",
     "tailwind-merge": "^2.2.1",
