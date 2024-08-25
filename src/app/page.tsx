@@ -24,7 +24,7 @@ const Page = () => {
 
       if (user && pathname === '/') {
         console.log("Redirecting to dashboard");
-        router.push('/dashboard');
+        router.push('/dashboard/reddit');
       }
     });
 

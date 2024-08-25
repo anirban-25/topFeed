@@ -132,7 +132,7 @@ const TwitterComponent = () => {
       />
       <div>
         {tweets.length === 0 ? (
-          <div className="font-kumbh-sans-Medium flex flex-col items-center justify-center h-full p-8">
+          <div className="font-kumbh-sans-medium flex flex-col items-center justify-center h-full p-8">
             <Image
               src="/images/twitter.png"
               alt="Twitter Feed"
@@ -140,16 +140,16 @@ const TwitterComponent = () => {
               height={270}
             />
             <div className="text-center mb-8 mt-8">
-              <h1 className="font-kumbh-sans-Bold text-3xl font-bold mb-4">
+              <h1 className="font-kumbh-sans-bold text-3xl font-bold mb-4">
                 Create your Twitter TopFeed
               </h1>
               <div className="max-w-lg mx-auto">
-                <p className="font-kumbh-sans-Regular text-gray-600 mb-8">
+                <p className="font-kumbh-sans-regular text-gray-600 mb-8">
                   Start collecting and analyzing tweets from your favorite accounts.
                 </p>
               </div>
               <button
-                className="font-kumbh-sans-Medium bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg"
+                className="font-kumbh-sans-medium bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg"
                 onClick={() => handleOpen("lg")}
               >
                 + Create New Feed

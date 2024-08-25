@@ -40,7 +40,7 @@ const LoginForm = () => {
     try {
       const result = await signInWithPopup(auth, provider);
       if (result.user) {
-        router.push("/dashboard");
+        router.push("/dashboard/reddit");
       }
     } catch (error) {
       console.error("Error signing in with Google:", error);

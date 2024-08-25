@@ -23,20 +23,20 @@ type TrendsAndQuestions = {
 type APIResponseType = (Heading | TrendsAndQuestions)[];
 
 // Function to store data under a specific user's subcollection
-export async function storeDataInFirestore(data: APIResponseType, userId: string) {
-  if (!userId) {
+export async function storeDataInFirestore(data: APIResponseType, user: string) {
+  if (!user) {
     console.error("No user ID provided.");
     return;
   }
 
   // Reference to the user's document within the users collection
-  const userDocRef = doc(db, 'users', userId);
+  const userDocRef = doc(db, 'users', user);
 
   // Reference to the user's subcollection within the user's document
   const userRedditsCollectionRef = collection(userDocRef, 'user_reddits');
 
   try {
-    console.log(`Storing data for user ${userId}`);
+    console.log(`Storing data for user ${user}`);
     const docRef = await addDoc(userRedditsCollectionRef, {
       analysis: data,
       timestamp: new Date() // Adding a timestamp for the stored document
@@ -44,7 +44,7 @@ export async function storeDataInFirestore(data: APIResponseType, userId: string
     console.log("Document written with ID: ", docRef.id);
     return docRef;
   } catch (e) {
-    console.error(`Error adding document for user ${userId}:`, e);
+    console.error(`Error adding document for user ${user}:`, e);
     throw e; // Re-throw the error to be caught by the caller if needed
   }
 }
