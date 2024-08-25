@@ -32,7 +32,8 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [existingFeedId, setExistingFeedId] = useState(null);
   const [isTopicSaved, setIsTopicSaved] = useState(false);
-
+  const user = auth.currentUser;
+      
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsAuthChecked(true);
@@ -69,6 +70,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
         setExistingFeedId(lastFeedId);
         setIsTopicSaved(true);
         setSaveStatus(Array(lastFeed.twitterUrls.length).fill("success"));
+        console.log(lastFeed.twitterUrls, lastFeed.topic)
       }
     } catch (error) {
       console.error("Error fetching last tweet feed:", error);
@@ -197,7 +199,6 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
     }
 
     try {
-      const user = auth.currentUser;
       if (!user) {
         console.error("No user is logged in.");
         return;
@@ -251,12 +252,15 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
       }
 
       const data = await response.json();
-      const tweetsArray = JSON.parse(data.result);
+      console.log("Received data:", data);
 
-      if (!Array.isArray(tweetsArray)) {
-        console.error("Parsed result is not an array:", tweetsArray);
+      if (!data.result || !Array.isArray(data.result)) {
+        console.error("Received data is not in the expected format:", data);
         return;
       }
+
+      const tweetsArray = data.result;
+      console.log("Tweets array:", tweetsArray);
 
       await storeDataInFirestore(tweetsArray, userId);
       console.log("Data stored in Firestore successfully for user:", userId);
@@ -266,7 +270,6 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
   };
 
   
-
 
   return (
     <Dialog
