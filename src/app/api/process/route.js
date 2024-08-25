@@ -7,15 +7,15 @@ import { parseISO, subHours } from 'date-fns';
 
 // Initialize Firebase Admin SDK (if not already initialized elsewhere)
 if (!admin.apps.length) {
-  const serviceAccount = require('./firebase_service_account.json');
+  const serviceAccount = require('./config/firebase_service_account.json');
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
   });
 }
 const db = admin.firestore();
 
-const MODEL = "gpt-4";
-const api_key = 'sk-proj-XuUwamNI9DqTzo38HYMCT3BlbkFJ63rP5LMSFkUKCnIxp7xX';
+const MODEL = "gpt-4o";
+const api_key = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 const client = new OpenAI({ apiKey: api_key });
 
 // Utility Functions

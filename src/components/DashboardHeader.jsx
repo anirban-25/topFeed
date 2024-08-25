@@ -131,6 +131,7 @@ const DashboardHeader = () => {
   
     try {
       const cleanedTopics = topics.map(cleanSubredditName);
+      console.log(cleanedTopics);
       const user = auth.currentUser; // Get the current user from Firebase
   
       if (!user) {
