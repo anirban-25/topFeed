@@ -7,7 +7,16 @@ import { parseISO, subHours } from 'date-fns';
 
 // Initialize Firebase Admin SDK (if not already initialized elsewhere)
 if (!admin.apps.length) {
-  const serviceAccount = require('./config/firebase_service_account.json');
+  let serviceAccount = require('./config/firebase_service_account.json');
+  serviceAccount = {
+    ...serviceAccount,
+    project_id: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    private_key_id: process.env.NEXT_PUBLIC_FIREBASE_PRIVATE_KEY_ID,
+    private_key: process.env.NEXT_PUBLIC_FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    client_email: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL,
+    client_id: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_ID,
+    client_x509_cert_url: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_X509_CERT_URL
+  };
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
   });
@@ -15,7 +24,7 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 const MODEL = "gpt-4o";
-const api_key = 'sk-proj-XuUwamNI9DqTzo38HYMCT3BlbkFJ63rP5LMSFkUKCnIxp7xX';
+const api_key = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 const client = new OpenAI({ apiKey: api_key });
 
 // Utility Functions

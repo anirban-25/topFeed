@@ -15,13 +15,10 @@ const AuthorSelectionDropdown = ({
   );
 
   return (
-    <div className="absolute z-10 mt-2 w-72 bg-white rounded-md shadow-lg">
+    <div className="absolute left-40 top-10 z-10 mt-2 w-72 bg-white rounded-md border-gray-300 border shadow-lg">
       <div className="p-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">Twitter Accounts</h2>
-          <button onClick={onClearFilters} className="text-red-500 text-sm">
-            Clear All Filters
-          </button>
         </div>
         <div className="relative mb-4">
           <Search
