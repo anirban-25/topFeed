@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
-import AWS from 'aws-sdk';
+import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import { storeDataInFirestore } from "@/utils/storeRedditData";
 
-// Initialize AWS SDK with Lambda
-const lambda = new AWS.Lambda({
+// Initialize AWS SDK Lambda client
+const lambdaClient = new LambdaClient({
   region: 'us-east-2',
-  accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+  credentials: {
+    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY!,
+  },
 });
 
 export async function POST(req: Request) {
@@ -18,20 +20,22 @@ export async function POST(req: Request) {
 
     // Create a stringified JSON object for the body
     const eventPayload = {
-      body: JSON.stringify({ subreddits })
+      body: JSON.stringify({ subreddits }),
     };
 
-    // Invoke the Lambda function
+    // Prepare the Lambda invocation parameters
     const params = {
       FunctionName: "chatgpt", // Replace with your Lambda function name
       Payload: JSON.stringify(eventPayload), // Pass the event payload as expected by Lambda
     };
 
-    const lambdaResponse = await lambda.invoke(params).promise();
+    // Invoke the Lambda function using the v3 SDK
+    const command = new InvokeCommand(params);
+    const lambdaResponse = await lambdaClient.send(command);
     console.log("Lambda response:", lambdaResponse);
 
     if (lambdaResponse.StatusCode === 200 && lambdaResponse.Payload) {
-      const parsedResponse = JSON.parse(lambdaResponse.Payload as string);
+      const parsedResponse = JSON.parse(Buffer.from(lambdaResponse.Payload).toString());
 
       if (parsedResponse.statusCode === 400) {
         return NextResponse.json({ error: parsedResponse.body }, { status: 400 });

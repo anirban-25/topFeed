@@ -11,7 +11,7 @@ const page = () => {
                     <SidePanel />
                 </div>
             </div>
-            <div className="min-h-screen flex-grow bg-[#F7F9FB] ml-64 w-[calc(100%-16rem)]">
+            <div className="min-h-screen flex-grow bg-white ml-64 w-[calc(100%-16rem)]">
                 <DashboardHeader />
                 <RedditComponent />
             </div>

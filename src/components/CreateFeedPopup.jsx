@@ -62,10 +62,11 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
   const handleGenerateFeed = async () => {
     setLoading(true);
     setError(null);
-
+  
     try {
       const cleanedTopics = topics.map(cleanSubredditName);
-      await handleSubmit(cleanedTopics); 
+      await handleSubmit(cleanedTopics);
+      handleOpen(null); 
     } catch (err) {
       console.error("Error during feed generation:", err);
       setError("An error occurred while processing your request.");

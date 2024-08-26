@@ -6,6 +6,7 @@ import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import CreateFeedPopup from "../components/CreateFeedPopup";
 import axios from "axios";
+import { Bars } from 'react-loader-spinner';
 
 const RedditComponent = () => {
   const [redditData, setRedditData] = useState(null);
@@ -38,7 +39,7 @@ const RedditComponent = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setLoading(false);
+      
     });
 
     return () => unsubscribe();
@@ -81,7 +82,17 @@ const RedditComponent = () => {
   }, [user]);
 
   if (loading) {
-    return <div className="font-kumbh-sans-medium flex flex-col items-center justify-center p-8">Loading...</div>;
+    return <div className="flex flex-col items-center justify-center min-h-screen">
+    <Bars
+      height="80"
+      width="80"
+      color="#3498db"  
+      ariaLabel="loading"
+    />
+    <div className="font-kumbh-sans-medium text-2xl mt-4">
+      Please wait while we are generating your feed!
+    </div>
+  </div>
   }
 
   if (error) {
@@ -90,7 +101,7 @@ const RedditComponent = () => {
 
   if (!redditData || redditData.length === 0) {
     return (
-      <div className="font-kumbh-sans-medium flex flex-col items-center justify-center p-8">
+      <div className="bg-white font-kumbh-sans-medium flex flex-col items-center justify-center p-8">
         <Image src="/images/reddit.png" alt="Reddit Feed" width={457} height={270} />
         <div className="text-center mb-8 mt-8">
           <h1 className="font-kumbh-sans-Bold text-3xl font-bold mb-4">Create your Reddit TopFeed</h1>
@@ -111,7 +122,7 @@ const RedditComponent = () => {
   }
 
   return (
-    <div className="font-kumbh-sans-Medium p-8">
+    <div className="bg-[#F7F9FB] font-kumbh-sans-Medium p-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {redditData.map((item, index) => (
           <div 
