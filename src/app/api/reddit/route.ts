@@ -13,23 +13,21 @@ const lambdaClient = new LambdaClient({
 
 export async function POST(req: Request) {
   try {
-    const { subreddits, userId } = await req.json();
+    const { subreddits, userId, isRefresh } = await req.json();  // Accept isRefresh flag
     console.log("Subreddits:", subreddits);
     console.log("User ID:", userId);
+    console.log("Is Refresh:", isRefresh);
     console.log("-------------------------------------------");
 
-    // Create a stringified JSON object for the body
     const eventPayload = {
       body: JSON.stringify({ subreddits }),
     };
 
-    // Prepare the Lambda invocation parameters
     const params = {
-      FunctionName: "chatgpt", // Replace with your Lambda function name
-      Payload: JSON.stringify(eventPayload), // Pass the event payload as expected by Lambda
+      FunctionName: "chatgpt",
+      Payload: JSON.stringify(eventPayload),
     };
 
-    // Invoke the Lambda function using the v3 SDK
     const command = new InvokeCommand(params);
     const lambdaResponse = await lambdaClient.send(command);
     console.log("Lambda response:", lambdaResponse);
@@ -41,9 +39,8 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: parsedResponse.body }, { status: 400 });
       }
 
-      // Parse the body again to extract the actual analysis data
       const parsedBody = JSON.parse(parsedResponse.body);
-      const analysisData = parsedBody; // This should be the array of headings/sub-headings
+      const analysisData = parsedBody;
 
       console.log("Analysis data to store in Firestore:", analysisData);
 
@@ -51,8 +48,8 @@ export async function POST(req: Request) {
         throw new Error("No analysis data found in the Lambda response.");
       }
 
-      // Store the processed data in Firestore under the user's document
-      await storeDataInFirestore(analysisData, userId);
+      // Store the processed data, subreddits, and increment the refresh count in Firestore
+      await storeDataInFirestore(analysisData, userId, subreddits, isRefresh);  // Pass isRefresh flag
 
       return NextResponse.json({ message: "Data processed and stored successfully", analysisData }, { status: 200 });
     } else {

@@ -1,12 +1,15 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CreateFeedPopup from "../components/CreateFeedPopup";
 import UserMenu from "../components/UserMenu";
-import { auth } from "@/firebase";
+import { db, auth } from "@/firebase";
+import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import axios from "axios";
+import { MdOutlineSettings } from "react-icons/md";
 
 const DashboardHeader = () => {
   const [open, setOpen] = useState(false);
+  const [redditDataExists, setRedditDataExists] = useState(false);
 
   const handleOpen = (value) => setOpen(value);
 
@@ -30,6 +33,21 @@ const DashboardHeader = () => {
     console.log("Received response from API:", response.data);
   };
 
+  useEffect(() => {
+    const checkRedditData = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
+      const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
+      const querySnapshot = await getDocs(q);
+
+      setRedditDataExists(!querySnapshot.empty);
+    };
+
+    checkRedditData();
+  }, []);
+
   return (
     <header className="flex justify-between items-center p-4 bg-white shadow-md">
       <h1 className="text-xl text-[#8D8D8D] font-semibold ml-2">
@@ -37,10 +55,18 @@ const DashboardHeader = () => {
       </h1>
       <div className="flex items-center">
         <button
-          className="flex items-center px-4 py-2 bg-[#146EF5] text-white rounded-lg hover:bg-blue-800 transition-all duration-200 mr-6"
+          className={`flex items-center px-4 py-2 text-md rounded-xl border transition-all duration-200 mr-6 ${
+            redditDataExists ? "bg-white text-black hover:bg-gray-200 border-gray-300" : "bg-[#146EF5] text-white hover:bg-blue-800 border-transparent"
+          }`}
           onClick={() => handleOpen(true)}
         >
-          + Create New Feed
+          {redditDataExists ? (
+            <>
+              <MdOutlineSettings className="mr-2 text-xl" /> Feed Settings
+            </>
+          ) : (
+            "+ Create New Feed"
+          )}
         </button>
         <div>
           <UserMenu />

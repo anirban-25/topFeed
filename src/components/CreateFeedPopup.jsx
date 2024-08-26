@@ -7,9 +7,11 @@ import {
   DialogBody,
   DialogFooter,
 } from "@material-tailwind/react";
+import { db, auth } from "@/firebase";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import axios from "axios";
+import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 
 const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
   const [topics, setTopics] = useState([]);
@@ -18,6 +20,28 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
   const [error, setError] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [isAddingTopic, setIsAddingTopic] = useState(false); // State to toggle input field
+
+  useEffect(() => {
+    const fetchLastUpdatedSubreddits = async () => {
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
+          const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty) {
+            const docData = querySnapshot.docs[0].data();
+            setTopics(docData.subreddits || []);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching last updated subreddits:", error);
+      }
+    };
+
+    fetchLastUpdatedSubreddits();
+  }, []);
 
   useEffect(() => {
     if (newTopic) {
@@ -62,11 +86,11 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
   const handleGenerateFeed = async () => {
     setLoading(true);
     setError(null);
-  
+
     try {
       const cleanedTopics = topics.map(cleanSubredditName);
       await handleSubmit(cleanedTopics);
-      handleOpen(null); 
+      handleOpen(null);
     } catch (err) {
       console.error("Error during feed generation:", err);
       setError("An error occurred while processing your request.");
