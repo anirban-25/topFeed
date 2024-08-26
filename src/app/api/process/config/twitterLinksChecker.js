@@ -5,9 +5,12 @@ let db;
 
 try {
   if (!admin.apps.length) {
-    const serviceAccount = require('./firebase_service_account.json');
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+      credential: admin.credential.cert({
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        clientEmail: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.NEXT_PUBLIC_FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      }),
     });
   }
   db = admin.firestore();
