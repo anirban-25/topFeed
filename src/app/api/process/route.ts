@@ -11,8 +11,8 @@ if (!admin.apps.length) {
     credential: admin.credential.cert({
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
       clientEmail: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.NEXT_PUBLIC_FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-    }),
+      privateKey: process.env.NEXT_PUBLIC_FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    } as admin.ServiceAccount),
   });
 }
 
@@ -23,17 +23,17 @@ const api_key = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 const client = new OpenAI({ apiKey: api_key });
 
 // Utility Functions
-function extractLinks(text) {
+function extractLinks(text: string): string[] {
   const urlPattern = /https?:\/\/\S+|www\.\S+/g;
   return text.match(urlPattern) || [];
 }
 
-function excludeLinks(text) {
+function excludeLinks(text: string): string {
   const urlPattern = /https?:\/\/\S+|www\.\S+|\b\w+\.com\b|\b\w+\.\S+/g;
   return text.replace(urlPattern, '');
 }
 
-async function fetchMetaTitle(url) {
+async function fetchMetaTitle(url: string): Promise<string> {
   try {
     const response = await axios.get(url, {
       headers: {
@@ -51,11 +51,21 @@ async function fetchMetaTitle(url) {
     }
     return 'Failed to fetch';
   } catch (error) {
-    console.error(`Error fetching meta title for ${url}: ${error.message}`);
+    console.error(`Error fetching meta title for ${url}: ${(error as Error).message}`);
     return url; // Return the URL itself if we can't fetch the title
   }
 }
-async function feedToGPT(filtered, newTopic) {
+
+interface FilteredData {
+  text: string;
+  meta_titles: string[];
+  url?: string;
+  content_html?: string;
+  authors?: string[];
+  relevancy?: string;
+}
+
+async function feedToGPT(filtered: FilteredData[], newTopic: string): Promise<FilteredData[]> {
   for (const row of filtered) {
     const title = String(row.text).trim();
     const contentText = String(row.meta_titles);
@@ -71,7 +81,7 @@ async function feedToGPT(filtered, newTopic) {
         max_tokens: 3000,
         temperature: 0,
       });
-      row.relevancy = response.choices[0].message.content;
+      row.relevancy = response.choices[0].message.content ?? undefined;
     } catch (error) {
       console.error(`Error in GPT-4 processing: ${error}`);
     }
@@ -79,8 +89,21 @@ async function feedToGPT(filtered, newTopic) {
   return filtered;
 }
 
-async function fetchRssFeeds(urls, newTopic) {
-  const twitterData = [];
+interface TwitterData {
+  title: string;
+  link: string;
+  date_published: string;
+  content_html: string;
+  content_text: string;
+  url: string;
+  authors: string[];
+  links?: string[];
+  text?: string;
+  meta_titles?: string[];
+}
+
+async function fetchRssFeeds(urls: string[], newTopic: string): Promise<FilteredData[]> {
+  const twitterData: TwitterData[] = [];
 
   for (const url of urls) {
     try {
@@ -109,7 +132,7 @@ async function fetchRssFeeds(urls, newTopic) {
   const twoDaysAgo = subHours(currentDate, 48);
   const filteredData = twitterData
     .filter(item => parseISO(item.date_published) > twoDaysAgo)
-    .sort((a, b) => parseISO(b.date_published) - parseISO(a.date_published))
+    .sort((a, b) => parseISO(b.date_published).getTime() - parseISO(a.date_published).getTime())
     .map(item => ({
       ...item,
       links: extractLinks(item.content_text),
@@ -118,17 +141,17 @@ async function fetchRssFeeds(urls, newTopic) {
 
   // Fetch meta titles
   for (const item of filteredData) {
-    item.meta_titles = await Promise.all(item.links.map(fetchMetaTitle));
+    item.meta_titles = await Promise.all((item.links ?? []).map(fetchMetaTitle));
   }
 
-  const filtered = filteredData.map(({ text, meta_titles, url, content_html, authors }) => 
-    ({ text, meta_titles, url, content_html, authors }));
+  const filtered: FilteredData[] = filteredData.map(({ text, meta_titles, url, content_html, authors }) => 
+    ({ text: text ?? '', meta_titles: meta_titles ?? [], url, content_html, authors }));
 
   return feedToGPT(filtered, newTopic);
 }
 
-async function fetchFeeds(twitterUrls, newTopic) {
-  const urls = [];
+async function fetchFeeds(twitterUrls: string[], newTopic: string): Promise<FilteredData[]> {
+  const urls: string[] = [];
   const apiUrl = "https://api.rss.app/v1/feeds";
   const headers = {
     'Authorization': 'Bearer c_nNbfzK4dAWoTxY:s_WIHFi2i4TLEx6YFbNvitWY',
@@ -145,7 +168,7 @@ async function fetchFeeds(twitterUrls, newTopic) {
       try {
         const response = await axios.post(apiUrl, { url: twitterUrl }, { headers });
         if (response.status === 200 && response.data.rss_feed_url) {
-          const feedId = response.data.rss_feed_url.split('/').pop().replace('.xml', '');
+          const feedId = response.data.rss_feed_url.split('/').pop()?.replace('.xml', '');
           const newFeedUrl = `http://rss.app/feeds/v1.1/${feedId}.json`;
           urls.push(newFeedUrl);
 
@@ -163,7 +186,7 @@ async function fetchFeeds(twitterUrls, newTopic) {
   return fetchRssFeeds(urls, newTopic);
 }
 
-export async function POST(request) {
+export async function POST(request: Request) {
   try {
     const { twitterUrls, newTopic } = await request.json();
 
