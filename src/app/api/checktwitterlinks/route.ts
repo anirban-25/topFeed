@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import twitterLinksChecker from '../process/config/twitterLinksChecker';
 
-export async function POST(request) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const result = await twitterLinksChecker(body);

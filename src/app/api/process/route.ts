@@ -5,14 +5,13 @@ import admin from 'firebase-admin';
 import { OpenAI } from 'openai';
 import { parseISO, subHours } from 'date-fns';
 
-
 // Initialize Firebase Admin SDK (if not already initialized elsewhere)
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.NEXT_PUBLIC_FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      projectId: "topfeed-123",
+      clientEmail: "firebase-adminsdk-6mx07@topfeed-123.iam.gserviceaccount.com",
+      privateKey: "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC1OnfEjnPLfrSo\nOCujizCA5Qb8yg7rcztlyRkXaPI/a5IJeBw/m6kJM9j/uaYKo1Dx10V2CjB4Xc4S\nWCWfv3NZTb7VLZ2zAkIyd3lPNoRQMzTHvkCpTBxvTcTTtrhSkJTtFNnz1QKkHkEQ\n82G1IsFDux87zvAe3nq1PD3UwXzrk1KFUvsDOcfoOIQLuTswsWpW+uV6ouXS13ca\nk6Lm4kgAZnitLbKTLnfYJxBoFzx/i/UPlA0PAPjBgtBpF95xofbOe6+z/HNxivsb\nXRaX1AaPZ0tEVhXXVLcrrz9chEKdSXaK1gpd/V4xWexSexV2j2F2MgV9hDsS4SzR\nA82gTNZXAgMBAAECggEAV/cNvEPS09LoGIDPOb4taFsChcAD9ugDTDgMrE69yufJ\nRjxdJcjGBxf5+8JeZGp6NzDg39c5SKtrg37yoDQa5p10g9/03Dc772gLY1YYah84\nvr1LgIFXifULFSJrHHRePSdyVUau1f9zYKlp4zR/74LLucmLxsgBcqfPcU4LdwJF\nN5qgXbKlsWyrQ/qbDzxnZqXwL6TipT4NVKQ9QpflY+DF+B1D4dTH07zitJJI1Caq\nzhgUAsTN/XCpcqbTI61UgLT+mvS3XlaHoVvdIZBRPJI/MeJx2Ro9qQ9FVHnsR+ky\nR2xYYhYuEyTi1sTvOOz4LPN6t02HcVTeRwjdTUYiSQKBgQDlY1WUq5YlzYD1XkZq\nUXa5ro8/5JOvv4MxTWhCT9wumsPyVvEgQ2EhrRNLKz35Xeegy2MJ9Ek4NMjO7ChF\n4tjT/6IwbA/2kAU2dEy1aUl07oPnp2vlTfcvVqAT4bGZ/81O7hRudDpI9X1Bfoe1\n3fGQuaDcaYPlCJoN9Zr04RM1mQKBgQDKQNNhEYo7Tpnz1uQVFMheM4Bb2lXNjjcf\nmw9leekAxurrLtZg3bu5GA0E2MKSmkCPBjSPb8ZjhVZt1MQPThERiZVb878pKi13\nK692Nf5rpwhi1dWyyZvtDaOMpjOlnmcQd1+5EPpPBoW9nCNSSVVbg9qcLnbMtkcj\nyHPAp7sBbwKBgCaRZBNCIlWqztLyje5UUhz4L5ezi+1RyvIgLLZxjPi9BtMZMSOW\nkJ9D5WmPFLV3x3kumTFURHdR0K2R4VeWw5QpeBCiKrDvGCFGvpsF39bsP3tUl/yO\n9k+cRf/xw5W7/74Uo5TKr/4SYIQBjTnT3kjSHSzSBN4eayCLugkQStWJAoGAZmJa\nnxDaARvRI3btDx7uL4GywMzOErijfwRnzt7f7NzFnzienXqhxRk/vexc0wnzFHP3\nt4TF0St2jTLf7T9/tHkJevrxEk2fpmwe7qB2othzjlThURhuLppw6IpaKsT9N4C2\nnGDT1Z1fppSb7NPiuekNiXKcARVk/eBDeItwR1ECgYEAw4sCxMM2Z8iP030erkAn\nX53u/wfSWScsMvnTr/kCp2lILFlIVUGdtpoxbFzPj6e3mH+gOlcs4pOKSZshC3q3\n/H0zAF3fRq1i3mvKRRWIfouePytf5TfmV9hpL9RmaIfkGjWuNGthncRLqeDuWqVI\n68L1U5jvaM2RZmOlyS1nCqU=\n-----END PRIVATE KEY-----\n",
     }),
   });
 }
@@ -24,17 +23,17 @@ const api_key = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 const client = new OpenAI({ apiKey: api_key });
 
 // Utility Functions
-function extractLinks(text) {
+function extractLinks(text: string): string[] {
   const urlPattern = /https?:\/\/\S+|www\.\S+/g;
   return text.match(urlPattern) || [];
 }
 
-function excludeLinks(text) {
+function excludeLinks(text: string): string {
   const urlPattern = /https?:\/\/\S+|www\.\S+|\b\w+\.com\b|\b\w+\.\S+/g;
   return text.replace(urlPattern, '');
 }
 
-async function fetchMetaTitle(url) {
+async function fetchMetaTitle(url: string): Promise<string> {
   try {
     const response = await axios.get(url, {
       headers: {
@@ -52,11 +51,21 @@ async function fetchMetaTitle(url) {
     }
     return 'Failed to fetch';
   } catch (error) {
-    console.error(`Error fetching meta title for ${url}: ${error.message}`);
+    console.error(`Error fetching meta title for ${url}: ${(error as Error).message}`);
     return url; // Return the URL itself if we can't fetch the title
   }
 }
-async function feedToGPT(filtered, newTopic) {
+
+interface FilteredData {
+  text: string;
+  meta_titles: string[];
+  url?: string;
+  content_html?: string;
+  authors?: string[];
+  relevancy?: string;
+}
+
+async function feedToGPT(filtered: FilteredData[], newTopic: string): Promise<FilteredData[]> {
   for (const row of filtered) {
     const title = String(row.text).trim();
     const contentText = String(row.meta_titles);
@@ -72,7 +81,7 @@ async function feedToGPT(filtered, newTopic) {
         max_tokens: 3000,
         temperature: 0,
       });
-      row.relevancy = response.choices[0].message.content;
+      row.relevancy = response.choices[0].message.content ?? undefined;
     } catch (error) {
       console.error(`Error in GPT-4 processing: ${error}`);
     }
@@ -80,8 +89,21 @@ async function feedToGPT(filtered, newTopic) {
   return filtered;
 }
 
-async function fetchRssFeeds(urls, newTopic) {
-  const twitterData = [];
+interface TwitterData {
+  title: string;
+  link: string;
+  date_published: string;
+  content_html: string;
+  content_text: string;
+  url: string;
+  authors: string[];
+  links?: string[];
+  text?: string;
+  meta_titles?: string[];
+}
+
+async function fetchRssFeeds(urls: string[], newTopic: string): Promise<FilteredData[]> {
+  const twitterData: TwitterData[] = [];
 
   for (const url of urls) {
     try {
@@ -110,7 +132,7 @@ async function fetchRssFeeds(urls, newTopic) {
   const twoDaysAgo = subHours(currentDate, 48);
   const filteredData = twitterData
     .filter(item => parseISO(item.date_published) > twoDaysAgo)
-    .sort((a, b) => parseISO(b.date_published) - parseISO(a.date_published))
+    .sort((a, b) => parseISO(b.date_published).getTime() - parseISO(a.date_published).getTime())
     .map(item => ({
       ...item,
       links: extractLinks(item.content_text),
@@ -119,17 +141,17 @@ async function fetchRssFeeds(urls, newTopic) {
 
   // Fetch meta titles
   for (const item of filteredData) {
-    item.meta_titles = await Promise.all(item.links.map(fetchMetaTitle));
+    item.meta_titles = await Promise.all((item.links ?? []).map(fetchMetaTitle));
   }
 
-  const filtered = filteredData.map(({ text, meta_titles, url, content_html, authors }) => 
-    ({ text, meta_titles, url, content_html, authors }));
+  const filtered: FilteredData[] = filteredData.map(({ text, meta_titles, url, content_html, authors }) => 
+    ({ text: text ?? '', meta_titles: meta_titles ?? [], url, content_html, authors }));
 
   return feedToGPT(filtered, newTopic);
 }
 
-async function fetchFeeds(twitterUrls, newTopic) {
-  const urls = [];
+async function fetchFeeds(twitterUrls: string[], newTopic: string): Promise<FilteredData[]> {
+  const urls: string[] = [];
   const apiUrl = "https://api.rss.app/v1/feeds";
   const headers = {
     'Authorization': 'Bearer c_nNbfzK4dAWoTxY:s_WIHFi2i4TLEx6YFbNvitWY',
@@ -146,7 +168,7 @@ async function fetchFeeds(twitterUrls, newTopic) {
       try {
         const response = await axios.post(apiUrl, { url: twitterUrl }, { headers });
         if (response.status === 200 && response.data.rss_feed_url) {
-          const feedId = response.data.rss_feed_url.split('/').pop().replace('.xml', '');
+          const feedId = response.data.rss_feed_url.split('/').pop()?.replace('.xml', '');
           const newFeedUrl = `http://rss.app/feeds/v1.1/${feedId}.json`;
           urls.push(newFeedUrl);
 
@@ -164,7 +186,7 @@ async function fetchFeeds(twitterUrls, newTopic) {
   return fetchRssFeeds(urls, newTopic);
 }
 
-export async function POST(request) {
+export async function POST(request: Request) {
   try {
     const { twitterUrls, newTopic } = await request.json();
 
