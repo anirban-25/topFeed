@@ -5,6 +5,7 @@ import admin from 'firebase-admin';
 import { OpenAI } from 'openai';
 import { parseISO, subHours } from 'date-fns';
 
+
 // Initialize Firebase Admin SDK (if not already initialized elsewhere)
 if (!admin.apps.length) {
   admin.initializeApp({
