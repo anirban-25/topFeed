@@ -13,7 +13,6 @@ try {
       }),
     });
   }
-  console.log(process.env.FIREBASE_PROJECT_ID,process.env.FIREBASE_CLIENT_EMAIL,process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"))
   db = admin.firestore();
 } catch (error) {
   console.error('Error initializing Firebase:', error);
