@@ -4,12 +4,36 @@ import Image from "next/image";
 import { db, auth } from "../firebase";
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import CreateFeedPopup from "../components/CreateFeedPopup";
+import axios from "axios";
 
 const RedditComponent = () => {
   const [redditData, setRedditData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
+  const [open, setOpen] = useState(false);
+  const handleOpen = (value) => setOpen(value);
+
+  const handleSubmit = async (cleanedTopics) => {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("User is not authenticated.");
+    }
+
+    const userId = user.uid;
+
+    const response = await axios.post("/api/reddit", {
+      subreddits: cleanedTopics,
+      userId,
+    });
+
+    if (response.status !== 200) {
+      throw new Error("Failed to fetch data from server");
+    }
+
+    console.log("Received response from API:", response.data);
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -75,11 +99,14 @@ const RedditComponent = () => {
               No Reddit data available. Click the button below to create a new feed.
             </p>
           </div>
-          <button className="bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg">
+          <button className="bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg"
+          onClick={() => handleOpen(true)}>
             + Create New Feed
           </button>
         </div>
+        <CreateFeedPopup open={open} handleOpen={handleOpen} handleSubmit={handleSubmit} />
       </div>
+      
     );
   }
 
@@ -87,20 +114,26 @@ const RedditComponent = () => {
     <div className="font-kumbh-sans-Medium p-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {redditData.map((item, index) => (
-          <div key={index} className="bg-white rounded-lg shadow-md p-6">
+          <div 
+            key={index} 
+            className="bg-white rounded-lg shadow-md p-6"
+            style={{ height: 'auto', minHeight: '150px' }} 
+          >
             {item.heading && <h2 className="font-kumbh-sans-bold text-xl font-bold mb-4">{item.heading}</h2>}
             
             {item.sub_headings && item.sub_headings.map((subHeading, subIndex) => (
-              <div key={subIndex} className="mb-4">
-                <h3 className="font-kumbh-sans-semibold text-lg font-semibold mb-2" style={{ color: "#146EF5" }}>
-                  {formatTitle(subHeading.title)}
-                </h3>
-                <ul className="list-disc pl-5">
-                  {subHeading.points && subHeading.points.map((point, pointIndex) => (
-                    <li key={pointIndex} className="font-kumbh-sans-medium text-sm text-gray-600">{point}</li>
-                  ))}
-                </ul>
-              </div>
+              subHeading.points && subHeading.points.length > 0 && ( 
+                <div key={subIndex} className="mb-4">
+                  <h3 className="font-kumbh-sans-semibold text-lg font-semibold mb-2" style={{ color: "#146EF5" }}>
+                    {formatTitle(subHeading.title)}
+                  </h3>
+                  <ul className="list-disc pl-5">
+                    {subHeading.points.map((point, pointIndex) => (
+                      <li key={pointIndex} className="font-kumbh-sans-medium text-sm text-gray-600">{point}</li>
+                    ))}
+                  </ul>
+                </div>
+              )
             ))}
 
             {item.title && (

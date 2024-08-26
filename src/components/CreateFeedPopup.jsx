@@ -45,7 +45,7 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
     if (suggestion) {
       setTopics([...topics, suggestion]);
       setNewTopic("");
-      setIsAddingTopic(false); // Hide input field after adding a topic
+      setIsAddingTopic(false);
       console.log("Added topic:", suggestion);
     }
   };
@@ -65,7 +65,7 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
 
     try {
       const cleanedTopics = topics.map(cleanSubredditName);
-      await handleSubmit(cleanedTopics); // Call the submit function passed from the parent
+      await handleSubmit(cleanedTopics); 
     } catch (err) {
       console.error("Error during feed generation:", err);
       setError("An error occurred while processing your request.");
