@@ -6,15 +6,16 @@ import { db, auth } from "@/firebase";
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import axios from "axios";
 import { MdOutlineSettings } from "react-icons/md";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 const DashboardHeader = () => {
   const [open, setOpen] = useState(false);
   const [redditDataExists, setRedditDataExists] = useState(false);
 
+  const [user] = useAuthState(auth);
   const handleOpen = (value) => setOpen(value);
 
   const handleSubmit = async (cleanedTopics) => {
-    const user = auth.currentUser;
     if (!user) {
       throw new Error("User is not authenticated.");
     }
@@ -33,20 +34,20 @@ const DashboardHeader = () => {
     console.log("Received response from API:", response.data);
   };
 
+  const checkRedditData = async () => {
+    if (!user) return;
+
+    const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
+    const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
+    const querySnapshot = await getDocs(q);
+
+    setRedditDataExists(!querySnapshot.empty);
+  };
   useEffect(() => {
-    const checkRedditData = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
-      const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
-      const querySnapshot = await getDocs(q);
-
-      setRedditDataExists(!querySnapshot.empty);
-    };
-
-    checkRedditData();
-  }, []);
+    if (user) {
+      checkRedditData();
+    }
+  }, [user]);
 
   return (
     <header className="flex justify-between items-center p-4 bg-white shadow-md">
@@ -56,7 +57,9 @@ const DashboardHeader = () => {
       <div className="flex items-center">
         <button
           className={`flex items-center px-4 py-2 text-md rounded-xl border transition-all duration-200 mr-6 ${
-            redditDataExists ? "bg-white text-black hover:bg-gray-200 border-gray-300" : "bg-[#146EF5] text-white hover:bg-blue-800 border-transparent"
+            redditDataExists
+              ? "bg-white text-black hover:bg-gray-200 border-gray-300"
+              : "bg-[#146EF5] text-white hover:bg-blue-800 border-transparent"
           }`}
           onClick={() => handleOpen(true)}
         >
@@ -72,7 +75,11 @@ const DashboardHeader = () => {
           <UserMenu />
         </div>
       </div>
-      <CreateFeedPopup open={open} handleOpen={handleOpen} handleSubmit={handleSubmit} />
+      <CreateFeedPopup
+        open={open}
+        handleOpen={handleOpen}
+        handleSubmit={handleSubmit}
+      />
     </header>
   );
 };

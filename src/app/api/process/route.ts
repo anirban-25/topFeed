@@ -129,7 +129,7 @@ async function fetchRssFeeds(urls: string[], newTopic: string): Promise<Filtered
 
   // Filter and process data
   const currentDate = new Date();
-  const twoDaysAgo = subHours(currentDate, 48);
+  const twoDaysAgo = subHours(currentDate, 24*14);
   const filteredData = twitterData
     .filter(item => parseISO(item.date_published) > twoDaysAgo)
     .sort((a, b) => parseISO(b.date_published).getTime() - parseISO(a.date_published).getTime())

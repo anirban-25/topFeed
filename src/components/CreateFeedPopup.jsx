@@ -12,6 +12,7 @@ import { IoIosInformationCircleOutline } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import axios from "axios";
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
   const [topics, setTopics] = useState([]);
@@ -21,28 +22,33 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [isAddingTopic, setIsAddingTopic] = useState(false); // State to toggle input field
 
-  useEffect(() => {
-    const fetchLastUpdatedSubreddits = async () => {
-      try {
-        const user = auth.currentUser;
-        if (user) {
-          const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
-          const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
-          const querySnapshot = await getDocs(q);
+  const [user] = useAuthState(auth);
+  const fetchLastUpdatedSubreddits = async () => {
+    try {
+      if (user) {
+        const userRedditsRef = collection(
+          db,
+          "users",
+          user.uid,
+          "user_reddits"
+        );
+        const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
+        const querySnapshot = await getDocs(q);
 
-          if (!querySnapshot.empty) {
-            const docData = querySnapshot.docs[0].data();
-            setTopics(docData.subreddits || []);
-          }
+        if (!querySnapshot.empty) {
+          const docData = querySnapshot.docs[0].data();
+          setTopics(docData.subreddits || []);
         }
-      } catch (error) {
-        console.error("Error fetching last updated subreddits:", error);
       }
-    };
-
-    fetchLastUpdatedSubreddits();
-  }, []);
-
+    } catch (error) {
+      console.error("Error fetching last updated subreddits:", error);
+    }
+  };
+  useEffect(() => {
+    if (user) {
+      fetchLastUpdatedSubreddits();
+    }
+  }, [user]);
   useEffect(() => {
     if (newTopic) {
       const fetchSuggestions = async () => {
@@ -162,7 +168,9 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
           </div>
         </div>
         <div className="mt-10 text-[#0B0B0B] text-base">
-          <div className="font-kumbh-sans-semibold">Daily feed auto refresh</div>
+          <div className="font-kumbh-sans-semibold">
+            Daily feed auto refresh
+          </div>
           <div className="flex">
             <div className="flex items-center space-x-2 bg-[#FEF3F2] text-[#B42318] text-xs py-1 p-2 rounded-full border border-[#FECDCA] font-kumbh-sans-medium">
               <div>
