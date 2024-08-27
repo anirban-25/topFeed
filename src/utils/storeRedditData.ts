@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { collection, addDoc, doc, updateDoc, increment } from 'firebase/firestore';
+import { collection, doc, setDoc, updateDoc, increment } from 'firebase/firestore';
 
 type SubHeading = {
   title: string;
@@ -26,14 +26,15 @@ export async function storeDataInFirestore(data: APIResponseType, user: string, 
 
   const userDocRef = doc(db, 'users', user);
   const userRedditsCollectionRef = collection(userDocRef, 'user_reddits');
+  const latestDocRef = doc(userRedditsCollectionRef, 'latest_analysis');
 
   try {
     console.log(`Storing data for user ${user}`);
-    const docRef = await addDoc(userRedditsCollectionRef, {
+    await setDoc(latestDocRef, {
       analysis: data,
       subreddits: subreddits,
       timestamp: new Date(),
-    });
+    }, { merge: true });  // This will overwrite existing fields
 
     if (isRefresh) {
       await updateDoc(userDocRef, {
@@ -41,10 +42,10 @@ export async function storeDataInFirestore(data: APIResponseType, user: string, 
       });
     }
 
-    console.log("Document written with ID: ", docRef.id);
-    return docRef;
+    console.log("Document updated with ID: ", latestDocRef.id);
+    return latestDocRef;
   } catch (e) {
-    console.error(`Error adding document for user ${user}:`, e);
+    console.error(`Error updating document for user ${user}:`, e);
     throw e;
   }
 }

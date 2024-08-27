@@ -7,32 +7,14 @@ import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import axios from "axios";
 import { MdOutlineSettings } from "react-icons/md";
 import { useAuthState } from "react-firebase-hooks/auth";
-
 const DashboardHeader = () => {
   const [open, setOpen] = useState(false);
   const [redditDataExists, setRedditDataExists] = useState(false);
-
+  
   const [user] = useAuthState(auth);
+  const [loading, setLoading] = useState(true);
+
   const handleOpen = (value) => setOpen(value);
-
-  const handleSubmit = async (cleanedTopics) => {
-    if (!user) {
-      throw new Error("User is not authenticated.");
-    }
-
-    const userId = user.uid;
-
-    const response = await axios.post("/api/reddit", {
-      subreddits: cleanedTopics,
-      userId,
-    });
-
-    if (response.status !== 200) {
-      throw new Error("Failed to fetch data from server");
-    }
-
-    console.log("Received response from API:", response.data);
-  };
 
   const checkRedditData = async () => {
     if (!user) return;
@@ -43,11 +25,46 @@ const DashboardHeader = () => {
 
     setRedditDataExists(!querySnapshot.empty);
   };
+
+  const handleSubmit = async (cleanedTopics) => {
+    try {
+      if (!user) {
+        throw new Error("User is not authenticated.");
+      }
+
+      const userId = user.uid;
+
+      // Send the POST request to the API
+      const response = await axios.post("/api/reddit", {
+        subreddits: cleanedTopics,
+        userId,
+      });
+
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data from server");
+      }
+
+      console.log("Received response from API:", response.data);
+
+      // Close the popup after the data is successfully generated
+      setOpen(false);
+
+      // Automatically check and fetch the updated document from Firestore
+      checkRedditData();
+
+    } catch (error) {
+      console.error("Error during feed generation:", error);
+    }
+  };
+  
+
   useEffect(() => {
     if (user) {
       checkRedditData();
     }
   }, [user]);
+
+
 
   return (
     <header className="flex justify-between items-center p-4 bg-white shadow-md">
@@ -80,6 +97,7 @@ const DashboardHeader = () => {
         handleOpen={handleOpen}
         handleSubmit={handleSubmit}
       />
+      
     </header>
   );
 };

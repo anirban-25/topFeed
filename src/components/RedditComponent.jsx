@@ -8,9 +8,11 @@ import CreateFeedPopup from "../components/CreateFeedPopup";
 import axios from "axios";
 import { Bars } from "react-loader-spinner";
 import { IoSearch } from "react-icons/io5";
+
+
 const RedditComponent = () => {
   const [redditData, setRedditData] = useState(null);
-  const [subreddits, setsubreddits] = useState(null);
+  const [subreddits, setSubreddits] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
@@ -20,12 +22,17 @@ const RedditComponent = () => {
   const handleOpen = (value) => setOpen(value);
 
   const handleSubmit = async (cleanedTopics) => {
-    await handleRefresh(cleanedTopics, true);
+    await handleRefresh(cleanedTopics); 
+    handleOpen(false);   
+
   };
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (cleanedTopics) => {
+    setLoading(true);
+    // console.log(cleanedTopics);
     const user = auth.currentUser;
     if (!user) {
+      setLoading(false);
       throw new Error("User is not authenticated.");
     }
     const userId = user.uid;
@@ -35,22 +42,43 @@ const RedditComponent = () => {
 
     if (!querySnapshot.empty) {
       const docData = querySnapshot.docs[0].data();
-      setsubreddits(docData.subreddits || []);
+      setSubreddits(docData.subreddits || []);
       const response = await axios.post("/api/reddit", {
         subreddits: docData.subreddits,
         userId,
       });
 
+
       if (response.status !== 200) {
+        setLoading(false);
         throw new Error("Failed to fetch data from server");
       }
 
       console.log("Received response from API:", response.data);
 
       await fetchLatestRedditData();
-
-        
     }
+    else{
+      const response = await axios.post("/api/reddit", {
+        subreddits: cleanedTopics,
+        userId,
+      });
+
+
+      if (response.status !== 200) {
+        setLoading(false);
+        throw new Error("Failed to fetch data from server");
+      }
+
+      console.log("Received response from API:", response.data);
+
+      await fetchLatestRedditData();
+      
+    
+
+    }
+
+    
     // setLoading(true);
   };
 
@@ -183,7 +211,7 @@ const RedditComponent = () => {
         </div>
         <button
           className="bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg ml-4"
-          onClick={() => handleRefresh()}
+          onClick={() => handleRefresh(null)}
         >
           Update Instant Refresh
         </button>
