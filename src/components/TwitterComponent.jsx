@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { db, auth } from "../firebase";
-import { collection, query, getDocs } from "firebase/firestore";
+import { collection, query, getDocs, doc, getDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Script from "next/script";
 import { RefreshCw, ChevronDown, AlertCircle, CheckCircle } from "lucide-react";
@@ -9,15 +9,22 @@ import { BsPeople } from "react-icons/bs";
 import AuthorSelectionDropdown from "./AuthorSelectionDropdown";
 import RelevanceSelector from "./RelevanceSelector";
 import TwitterFeedDialog from "./TwitterFeedDialog";
+import { useAppContext } from "@/contexts/AppContext";
 
 const TwitterComponent = () => {
+  const { twitterLoader, setTwitterLoader } = useAppContext();
+  const [loaderTwitter, setLoaderTwitter] = useState(false);
   const [user] = useAuthState(auth);
   const [tweets, setTweets] = useState([]);
   const [showAuthorDropdown, setShowAuthorDropdown] = useState(false);
   const authorDropdownRef = useRef(null);
   const [filteredTweets, setFilteredTweets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRelevance, setSelectedRelevance] = useState(["high", "medium", "low"]);
+  const [selectedRelevance, setSelectedRelevance] = useState([
+    "high",
+    "medium",
+    "low",
+  ]);
   const [size, setSize] = useState(null);
   const [authors, setAuthors] = useState([]);
   const [selectedAuthors, setSelectedAuthors] = useState({});
@@ -30,7 +37,12 @@ const TwitterComponent = () => {
     }
 
     try {
-      const userTweetsCollectionRef = collection(db, "users", user.uid, "user_tweets");
+      const userTweetsCollectionRef = collection(
+        db,
+        "users",
+        user.uid,
+        "user_tweets"
+      );
       const userTweetsQuery = query(userTweetsCollectionRef);
       const querySnapshot = await getDocs(userTweetsQuery);
 
@@ -42,7 +54,9 @@ const TwitterComponent = () => {
       setTweets(tweetsData);
       setFilteredTweets(tweetsData);
 
-      const uniqueAuthors = [...new Set(tweetsData.map((tweet) => tweet.authors[0].name))];
+      const uniqueAuthors = [
+        ...new Set(tweetsData.map((tweet) => tweet.authors[0].name)),
+      ];
       setAuthors(uniqueAuthors);
 
       const initialSelectedAuthors = Object.fromEntries(
@@ -75,7 +89,9 @@ const TwitterComponent = () => {
       )
     );
   }, [selectedRelevance, selectedAuthors, tweets]);
-
+  useEffect(()=>{
+    setLoaderTwitter(twitterLoader);
+  }, [twitterLoader])
   const handleOpen = (value) => setSize(value);
 
   const handleRelevanceChange = (newRelevance) => {
@@ -88,7 +104,7 @@ const TwitterComponent = () => {
       [author]: !prev[author],
     }));
   };
-
+  
   const clearAllFilters = () => {
     const resetAuthors = Object.fromEntries(
       Object.keys(selectedAuthors).map((author) => [author, true])
@@ -106,11 +122,9 @@ const TwitterComponent = () => {
         return "bg-yellow-500";
     }
   };
-
   const handleFeedCreated = () => {
     fetchUserTweets();
   };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -118,7 +132,13 @@ const TwitterComponent = () => {
       </div>
     );
   }
-
+  if (loaderTwitter) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        Loading..asdasdasdasdasdasdasdasd. {/* Loader content */}
+      </div>
+    );
+  }
   return (
     <>
       <Script
@@ -145,7 +165,8 @@ const TwitterComponent = () => {
               </h1>
               <div className="max-w-lg mx-auto">
                 <p className="font-kumbh-sans-regular text-gray-600 mb-8">
-                  Start collecting and analyzing tweets from your favorite accounts.
+                  Start collecting and analyzing tweets from your favorite
+                  accounts.
                 </p>
               </div>
               <button

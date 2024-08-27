@@ -21,8 +21,14 @@ import {
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { storeDataInFirestore } from "@/utils/storeTwitterData";
+import { useAppContext } from "@/contexts/AppContext";
 
-const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
+const TwitterFeedDialog = ({
+  size,
+  handleOpen,
+  onFeedCreated,
+}) => {
+  const { twitterLoader, setTwitterLoader } = useAppContext();
   const [newTopic, setNewTopic] = useState("");
   const [twitterUrls, setTwitterUrls] = useState([""]);
   const [errors, setErrors] = useState([]);
@@ -33,7 +39,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
   const [existingFeedId, setExistingFeedId] = useState(null);
   const [isTopicSaved, setIsTopicSaved] = useState(false);
   const user = auth.currentUser;
-      
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsAuthChecked(true);
@@ -70,7 +76,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
         setExistingFeedId(lastFeedId);
         setIsTopicSaved(true);
         setSaveStatus(Array(lastFeed.twitterUrls.length).fill("success"));
-        console.log(lastFeed.twitterUrls, lastFeed.topic)
+        console.log(lastFeed.twitterUrls, lastFeed.topic);
       }
     } catch (error) {
       console.error("Error fetching last tweet feed:", error);
@@ -228,9 +234,6 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
       }
 
       await processAndStoreTweets(user.uid, twitterUrls, newTopic);
-
-      onFeedCreated();
-      handleOpen(null);
     } catch (error) {
       console.error("Error:", error);
       alert("An error occurred while saving the feed. Please try again.");
@@ -238,6 +241,10 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
   };
 
   const processAndStoreTweets = async (userId, urls, topic) => {
+    localStorage.setItem("TwitterLoader", true);
+    setTwitterLoader(true);
+    onFeedCreated();
+    handleOpen(null);
     try {
       const response = await fetch("/api/process", {
         method: "POST",
@@ -266,10 +273,11 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
       console.log("Data stored in Firestore successfully for user:", userId);
     } catch (error) {
       console.error("Error processing and storing tweets:", error);
+    } finally {
+      setTwitterLoader(false);
+      localStorage.setItem("TwitterLoader", false);
     }
   };
-
-  
 
   return (
     <Dialog

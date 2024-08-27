@@ -11,8 +11,11 @@ import {
   orderBy,
   query,
 } from "firebase/firestore";
+import { useAppContext } from "@/contexts/AppContext";
 
 const TwitterHeader = () => {
+  const { twitterLoader, setTwitterLoader } = useAppContext();
+  const [loaderTwitter, setLoaderTwitter] = useState(false)
   const [feedCreated, setFeedCreated] = useState(false);
   const [user] = useAuthState(auth);
   const [size, setSize] = useState(null);
@@ -22,7 +25,7 @@ const TwitterHeader = () => {
       checkExistingFeed();
     }
   }, [user]);
-
+  
   const checkExistingFeed = async () => {
     try {
       const q = query(
