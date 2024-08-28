@@ -6,7 +6,7 @@ import { Switch } from '@headlessui/react' ;
 import { useAuthState } from "react-firebase-hooks/auth";
 import { db, auth } from "@/firebase";
 import ServiceBlock from './ServiceBlock';
-import { storeNotificationData } from "@/utils/Notifications ";
+import { storeNotificationData } from "@/utils/storeNotification";
 const BotsAndAlerts = () => {
   const [user] = useAuthState(auth);
   const [telegramConnected, setTelegramConnected] = useState(false);
