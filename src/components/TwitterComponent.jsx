@@ -10,8 +10,10 @@ import AuthorSelectionDropdown from "./AuthorSelectionDropdown";
 import RelevanceSelector from "./RelevanceSelector";
 import TwitterFeedDialog from "./TwitterFeedDialog";
 import { useAppContext } from "@/contexts/AppContext";
+import { useRouter } from "next/navigation";
 
 const TwitterComponent = () => {
+  const router = useRouter();
   const { twitterLoader, setTwitterLoader } = useAppContext();
   const [loaderTwitter, setLoaderTwitter] = useState(false);
   const [user] = useAuthState(auth);
@@ -32,7 +34,6 @@ const TwitterComponent = () => {
   const fetchUserTweets = async () => {
     if (!user) {
       console.error("No user is logged in.");
-      setLoading(false);
       return;
     }
 
@@ -67,8 +68,18 @@ const TwitterComponent = () => {
       console.error("Error fetching user tweets:", error);
     } finally {
       setLoading(false);
+
+      setLoaderTwitter(twitterLoader);
     }
   };
+  useEffect(() => {
+    import("ldrs").then(({ cardio }) => {
+      cardio.register();
+    });
+    import("ldrs").then(({ lineSpinner }) => {
+      lineSpinner.register();
+    });
+  }, []);
 
   useEffect(() => {
     fetchUserTweets();
@@ -89,22 +100,27 @@ const TwitterComponent = () => {
       )
     );
   }, [selectedRelevance, selectedAuthors, tweets]);
-  useEffect(()=>{
-    setLoaderTwitter(twitterLoader);
-  }, [twitterLoader])
+  useEffect(() => {
+    if (twitterLoader) {
+      setLoaderTwitter(twitterLoader);
+    }
+    fetchUserTweets();
+  }, [twitterLoader]);
   const handleOpen = (value) => setSize(value);
 
   const handleRelevanceChange = (newRelevance) => {
     setSelectedRelevance(newRelevance);
   };
-
+  const handleRefresh = () => {
+    router.refresh();
+  };
   const toggleAuthor = (author) => {
     setSelectedAuthors((prev) => ({
       ...prev,
       [author]: !prev[author],
     }));
   };
-  
+
   const clearAllFilters = () => {
     const resetAuthors = Object.fromEntries(
       Object.keys(selectedAuthors).map((author) => [author, true])
@@ -127,15 +143,26 @@ const TwitterComponent = () => {
   };
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading...
+      <div className="flex items-center justify-center min-h-[90%]">
+        <l-line-spinner
+          size="40"
+          stroke="3"
+          speed="1"
+          color="black"
+        ></l-line-spinner>
       </div>
     );
   }
   if (loaderTwitter) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading..asdasdasdasdasdasdasdasd. {/* Loader content */}
+      <div className="flex items-center justify-center min-h-[90%]">
+        <div className=" text-center">
+          <div>
+            <l-cardio size="80" stroke="4" speed="2" color="black"></l-cardio>{" "}
+          </div>
+          <div>Give us 2 minutes to prepare your feed</div>
+        </div>
+        {/* Loader content */}
       </div>
     );
   }
@@ -186,10 +213,10 @@ const TwitterComponent = () => {
                 </h2>
                 <button
                   className="flex mt-2 items-center px-3 py-1 text-sm text-blue-600 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors"
-                  onClick={() => handleOpen("lg")}
+                  onClick={handleRefresh}
                 >
                   <RefreshCw size={16} className="mr-1" />
-                  Create New Feed
+                  Refresh
                 </button>
               </div>
               <div className="flex space-x-2 relative" ref={authorDropdownRef}>

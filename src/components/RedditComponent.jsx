@@ -8,10 +8,12 @@ import CreateFeedPopup from "../components/CreateFeedPopup";
 import axios from "axios";
 import { Bars } from "react-loader-spinner";
 import { IoSearch } from "react-icons/io5";
-
+import { useAppContext } from "@/contexts/AppContext";
 
 const RedditComponent = () => {
+  const { redditDataFetch, setRedditDataFetch } = useAppContext();
   const [redditData, setRedditData] = useState(null);
+  const [loaderInitial, setLoaderInitial] = useState(true)
   const [subreddits, setSubreddits] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,14 +24,13 @@ const RedditComponent = () => {
   const handleOpen = (value) => setOpen(value);
 
   const handleSubmit = async (cleanedTopics) => {
-    await handleRefresh(cleanedTopics); 
-    handleOpen(false);   
-
+    await handleRefresh(cleanedTopics);
+    handleOpen(false);
   };
 
   const handleRefresh = async (cleanedTopics) => {
     setLoading(true);
-    // console.log(cleanedTopics);
+
     const user = auth.currentUser;
     if (!user) {
       setLoading(false);
@@ -48,7 +49,6 @@ const RedditComponent = () => {
         userId,
       });
 
-
       if (response.status !== 200) {
         setLoading(false);
         throw new Error("Failed to fetch data from server");
@@ -57,14 +57,12 @@ const RedditComponent = () => {
       console.log("Received response from API:", response.data);
 
       await fetchLatestRedditData();
-    }
-    else{
+    } else {
       const response = await axios.post("/api/reddit", {
         subreddits: cleanedTopics,
         userId,
       });
 
-
       if (response.status !== 200) {
         setLoading(false);
         throw new Error("Failed to fetch data from server");
@@ -73,13 +71,7 @@ const RedditComponent = () => {
       console.log("Received response from API:", response.data);
 
       await fetchLatestRedditData();
-      
-    
-
     }
-
-    
-    // setLoading(true);
   };
 
   useEffect(() => {
@@ -91,8 +83,8 @@ const RedditComponent = () => {
   }, []);
 
   const fetchLatestRedditData = async () => {
+    setLoading(true);
     if (!user) return;
-
     try {
       console.log("Fetching data for user:", user.uid);
       const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
@@ -116,6 +108,7 @@ const RedditComponent = () => {
       console.error("Error fetching Reddit data:", err);
       setError(err.message);
     } finally {
+      setLoaderInitial(false)
       setLoading(false);
     }
   };
@@ -125,7 +118,14 @@ const RedditComponent = () => {
       fetchLatestRedditData();
     }
   }, [user]);
-
+useEffect(() => {
+    import("ldrs").then(({ cardio }) => {
+      cardio.register();
+    });
+    import("ldrs").then(({ lineSpinner }) => {
+      lineSpinner.register();
+    });
+  }, []);
   const filteredData = redditData?.filter(
     (item) =>
       item.heading?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -142,13 +142,37 @@ const RedditComponent = () => {
       )
   );
 
+  useEffect(() => {
+    if(redditDataFetch){
+      setLoading(redditDataFetch);
+    }else{
+      fetchLatestRedditData();
+
+    }
+  }, [redditDataFetch]);
+  
+  if (loaderInitial) {
+    return (
+      <div className="flex items-center justify-center min-h-[90%]">
+        <l-line-spinner
+          size="40"
+          stroke="3"
+          speed="1"
+          color="black"
+        ></l-line-spinner>
+      </div>
+    );
+  }
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <Bars height="80" width="80" color="#3498db" ariaLabel="loading" />
-        <div className="font-kumbh-sans-medium text-2xl mt-4">
-          Please wait while we are generating your feed!
+      <div className="flex items-center justify-center min-h-[90%]">
+        <div className=" text-center">
+          <div>
+            <l-cardio size="80" stroke="4" speed="2" color="black"></l-cardio>{" "}
+          </div>
+          <div>Give us 2 minutes to prepare your feed</div>
         </div>
+        {/* Loader content */}
       </div>
     );
   }

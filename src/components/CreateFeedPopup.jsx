@@ -13,8 +13,10 @@ import { RxCross2 } from "react-icons/rx";
 import axios from "axios";
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useAppContext } from "@/contexts/AppContext";
 
 const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
+  const { setRedditDataFetch } = useAppContext();
   const [topics, setTopics] = useState([]);
   const [newTopic, setNewTopic] = useState("");
   const [loading, setLoading] = useState(false);
@@ -90,18 +92,21 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
   };
 
   const handleGenerateFeed = async () => {
+    setRedditDataFetch(true);
     setLoading(true);
     setError(null);
-  
+    handleOpen(null);
+
     try {
       const cleanedTopics = topics.map(cleanSubredditName);
-      await handleSubmit(cleanedTopics); 
-      handleOpen(null);
+      await handleSubmit(cleanedTopics);
     } catch (err) {
       console.error("Error during feed generation:", err);
       setError("An error occurred while processing your request.");
     } finally {
+      setRedditDataFetch(false);
       setLoading(false);
+      fetchLastUpdatedSubreddits();
     }
   };
 

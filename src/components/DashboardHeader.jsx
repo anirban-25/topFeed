@@ -7,7 +7,10 @@ import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import axios from "axios";
 import { MdOutlineSettings } from "react-icons/md";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useAppContext } from "@/contexts/AppContext";
+
 const DashboardHeader = () => {
+  const { redditDataFetch,setRedditDataFetch } = useAppContext();
   const [open, setOpen] = useState(false);
   const [redditDataExists, setRedditDataExists] = useState(false);
   
@@ -15,7 +18,10 @@ const DashboardHeader = () => {
   const [loading, setLoading] = useState(true);
 
   const handleOpen = (value) => setOpen(value);
-
+  useEffect(() => {
+    checkRedditData();
+  }, [redditDataFetch])
+  
   const checkRedditData = async () => {
     if (!user) return;
 
@@ -24,6 +30,7 @@ const DashboardHeader = () => {
     const querySnapshot = await getDocs(q);
 
     setRedditDataExists(!querySnapshot.empty);
+    // setRedditDataFetch(!querySnapshot.empty);
   };
 
   const handleSubmit = async (cleanedTopics) => {

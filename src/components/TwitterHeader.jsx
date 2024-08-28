@@ -12,6 +12,7 @@ import {
   query,
 } from "firebase/firestore";
 import { useAppContext } from "@/contexts/AppContext";
+import { MdOutlineSettings } from "react-icons/md";
 
 const TwitterHeader = () => {
   const { twitterLoader, setTwitterLoader } = useAppContext();
@@ -25,6 +26,9 @@ const TwitterHeader = () => {
       checkExistingFeed();
     }
   }, [user]);
+  useEffect(() => {
+    checkExistingFeed();
+  }, [twitterLoader]);
   
   const checkExistingFeed = async () => {
     try {
@@ -53,14 +57,22 @@ const TwitterHeader = () => {
         My Twitter Feed
       </h1>
       <div className="flex items-center">
-        <button
-          className="flex items-center px-4 py-2 bg-[#146EF5] text-white rounded-lg hover:bg-blue-900 mr-6"
-          onClick={() => handleOpen("lg")}
-        >
-          <span className="font-kumbh-sans-medium">
-            {feedCreated ? "+ Feed Settings" : "+ Create New Feed"}
-          </span>
-        </button>
+      <button
+      className={`flex items-center px-4 py-2 text-md rounded-xl border transition-all duration-200 mr-6 ${
+        feedCreated
+          ? "bg-white text-black hover:bg-gray-200 border-gray-300"
+          : "bg-[#146EF5] text-white hover:bg-blue-800 border-transparent"
+      }`}
+      onClick={() => handleOpen(true)}
+    >
+      {feedCreated ? (
+        <>
+          <MdOutlineSettings className="mr-2 text-xl" /> Feed Settings
+        </>
+      ) : (
+        "+ Create New Feed"
+      )}
+    </button>
         <div>
           <UserMenu />
         </div>

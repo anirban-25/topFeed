@@ -8,10 +8,11 @@ export const useAppContext = () => useContext(AppContext);
 export const AppProvider = ({ children }) => {
   
 const [twitterLoader, setTwitterLoader] = useState(false)
+const [redditDataFetch, setRedditDataFetch] = useState(false)
   return (
     <AppContext.Provider
       value={{
-        twitterLoader, setTwitterLoader
+        twitterLoader, setTwitterLoader,redditDataFetch, setRedditDataFetch
       }}
     >
       {children}
