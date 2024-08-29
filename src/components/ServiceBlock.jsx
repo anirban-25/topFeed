@@ -1,6 +1,5 @@
-import { useState } from 'react'
-import { Switch } from '@headlessui/react'
-import TelegramLoginButton from './TelegramLoginButton'
+import { useState } from 'react';
+import TelegramLoginButton from './TelegramLoginButton';
 
 const ServiceBlock = ({
   icon,
@@ -8,36 +7,33 @@ const ServiceBlock = ({
   connected,
   accountName,
   onConnect,
-  onAddBot,
   onDisconnect,
-  onDeactivate,
+  twitterConnected,
+  redditConnected,
+  setTwitterConnected,
+  setRedditConnected
 }) => {
   const [showTelegramLogin, setShowTelegramLogin] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [twitterConnected, setTwitterConnected] = useState(false);
-  const [redditConnected, setRedditConnected] = useState(false);
 
-  const handleTelegramConnect = () => {
-    setShowTelegramLogin(true)
-  }
+  const handleTelegramConnect = () => setShowTelegramLogin(true);
+
   const toggleTwitterConnection = () => {
-    setTwitterConnected(!twitterConnected);
-    // Store twitter connection status in Firestore
+    const newStatus = !twitterConnected;
+    setTwitterConnected(newStatus);
   };
 
   const toggleRedditConnection = () => {
-    setRedditConnected(!redditConnected);
-    // Store reddit connection status in Firestore
+    const newStatus = !redditConnected;
+    setRedditConnected(newStatus);
   };
 
-  const handleSettingsClick = () => {
-    setShowSettings(prev => !prev)
-  }
+  const handleSettingsClick = () => setShowSettings(prev => !prev);
 
   const handleDisconnect = () => {
-    onDisconnect()
-    setShowSettings(false)
-  }
+    onDisconnect();
+    setShowSettings(false);
+  };
 
   return (
     <div className="p-4 bg-white border rounded-lg shadow-sm flex items-center justify-between w-full mb-4">
@@ -52,20 +48,9 @@ const ServiceBlock = ({
           )}
         </div>
       </div>
-      <div className="flex items-center space-x-4">
+      <div className="relative flex items-center space-x-4">
         {connected ? (
           <>
-            <Switch
-              checked={connected}
-              onChange={onDeactivate}
-              className={`${connected ? 'bg-blue-600' : 'bg-gray-200'}
-                relative inline-flex h-6 w-11 items-center rounded-full`}
-            >
-              <span
-                className={`${connected ? 'translate-x-6' : 'translate-x-1'}
-                  inline-block h-4 w-4 transform rounded-full bg-white`}
-              />
-            </Switch>
             <button
               onClick={handleSettingsClick}
               className="text-gray-600 hover:text-gray-900"
@@ -73,7 +58,7 @@ const ServiceBlock = ({
               <img src="/images/settings.svg" alt="settings" className="h-7 w-7" />
             </button>
             {showSettings && (
-              <div className="absolute bg-white border rounded-lg shadow-lg p-4 mt-2 w-48">
+              <div className="settings-popup">
                 <button
                   onClick={handleDisconnect}
                   className="w-full text-red-600 hover:text-red-800"
@@ -108,7 +93,7 @@ const ServiceBlock = ({
             ) : (
               <button
                 onClick={handleTelegramConnect}
-                className="px-4 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                className="px-4 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
               >
                 + Connect
               </button>
@@ -117,7 +102,7 @@ const ServiceBlock = ({
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ServiceBlock
+export default ServiceBlock;

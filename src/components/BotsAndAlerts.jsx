@@ -1,12 +1,11 @@
 "use client";
-import { useState } from "react";
-import { FaEnvelope } from "react-icons/fa";
-import TelegramLoginButton from './TelegramLoginButton';
-import { Switch } from '@headlessui/react' ;
+import { useState, useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { db, auth } from "@/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import ServiceBlock from './ServiceBlock';
 import { storeNotificationData } from "@/utils/storeNotification";
+
 const BotsAndAlerts = () => {
   const [user] = useAuthState(auth);
   const [telegramConnected, setTelegramConnected] = useState(false);
@@ -20,42 +19,64 @@ const BotsAndAlerts = () => {
     twitter: false,
     reddit: false,
   });
-  //const [emailConnected, setEmailConnected] = useState(false)
-  //const [emailAccount, setEmailAccount] = useState("")
-  
-  const handleTelegramAuth = (user) => {
+
+  useEffect(() => {
     if (user) {
-      setTelegramConnected(true)
-      setTelegramAccount(`@${user.username}`);
-      setNotificationData(prevState => ({
-        ...prevState,
+      // Fetch stored notification data from Firebase
+      const notificationDocRef = doc(db, 'notifications', user.uid);
+      getDoc(notificationDocRef).then(docSnap => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setTelegramConnected(data.istelegram);
+          setTelegramAccount(data.telegramAccount ? `@${data.telegramAccount}` : "");
+          setTwitterConnected(data.twitter);
+          setRedditConnected(data.reddit);
+          setNotificationData(data);
+        }
+      }).catch(error => {
+        console.error("Error fetching notification data:", error);
+      });
+    }
+  }, [user]);
+
+  const handleTelegramAuth = (authUser) => {
+    if (authUser) {
+      const updatedNotificationData = {
         istelegram: true,
-        telegramAccount: user.username,
+        telegramAccount: authUser.username,
         isActive: true,
-      }));
+        twitter: notificationData.twitter,
+        reddit: notificationData.reddit,
+      };
+
+      setTelegramConnected(true);
+      setTelegramAccount(`@${authUser.username}`);
+      setNotificationData(updatedNotificationData);
+
+      // Store the notification data immediately after login
       if (user) {
-        storeNotificationData(user.uid, notificationData);
-      console.log("Telegram connected:", user);
+        storeNotificationData(user.uid, updatedNotificationData);
+        console.log("Telegram connected:", authUser);
       }
     } else {
-      console.error("Telegram login failed")
+      console.error("Telegram login failed");
     }
   };
 
-  const handleAddTelegramBot = () => {
-    console.log("Telegram bot added for", telegramAccount)
-  }
-
   const handleDisconnectTelegram = () => {
+    const updatedNotificationData = {
+      ...notificationData,
+      istelegram: false,
+      telegramAccount: "",
+      isActive: false,
+    };
+
     setTelegramConnected(false);
     setTelegramAccount("");
-    setNotificationData(prevState => ({
-      ...prevState,
-      istelegram: false,
-      isActive: false,
-    }));
+    setNotificationData(updatedNotificationData);
+
     if (user) {
-      storeNotificationData(user.uid, notificationData);
+      storeNotificationData(user.uid, updatedNotificationData);
     }
   };
 
@@ -69,13 +90,16 @@ const BotsAndAlerts = () => {
             connected={telegramConnected}
             accountName={telegramAccount}
             onConnect={handleTelegramAuth}
-            onAddBot={handleAddTelegramBot}
             onDisconnect={handleDisconnectTelegram}
+            twitterConnected={twitterConnected}
+            redditConnected={redditConnected}
+            setTwitterConnected={setTwitterConnected}
+            setRedditConnected={setRedditConnected}
           />
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BotsAndAlerts
+export default BotsAndAlerts;

@@ -1,37 +1,36 @@
-'use client'
-
-import { useEffect, useRef } from 'react'
+'use client';
+import { useEffect, useRef } from 'react';
 
 const TelegramLoginButton = ({ onAuth }) => {
-  const buttonRef = useRef(null)
-  const scriptRef = useRef(null) // Ref for the script element
+  const buttonRef = useRef(null);
+  const scriptRef = useRef(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.TelegramLoginWidget = {
         dataOnauth: (user) => onAuth(user)
-      }
+      };
 
-      const script = document.createElement('script')
-      script.src = "https://telegram.org/js/telegram-widget.js?22"
-      script.setAttribute('data-telegram-login', process.env.NEXT_PUBLIC_TEL_BOT_ID)
-      script.setAttribute('data-size', 'large')
-      script.setAttribute('data-onauth', 'TelegramLoginWidget.dataOnauth(user)')
-      script.setAttribute('data-request-access', 'write')
-      script.async = true
+      const script = document.createElement('script');
+      script.src = "https://telegram.org/js/telegram-widget.js?22";
+      script.setAttribute('data-telegram-login', process.env.NEXT_PUBLIC_TEL_BOT_ID);
+      script.setAttribute('data-size', 'large');
+      script.setAttribute('data-onauth', 'TelegramLoginWidget.dataOnauth(user)');
+      script.setAttribute('data-request-access', 'write');
+      script.async = true;
 
-      buttonRef.current.appendChild(script)
-      scriptRef.current = script // Store a reference to the script element
+      buttonRef.current.appendChild(script);
+      scriptRef.current = script;
 
       return () => {
         if (buttonRef.current && scriptRef.current) {
-          buttonRef.current.removeChild(scriptRef.current) // Only remove if the script exists
+          buttonRef.current.removeChild(scriptRef.current);
         }
-      }
+      };
     }
-  }, [onAuth])
+  }, [onAuth]);
 
-  return <div ref={buttonRef}></div>
-}
+  return <div ref={buttonRef}></div>;
+};
 
-export default TelegramLoginButton
+export default TelegramLoginButton;

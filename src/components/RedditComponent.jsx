@@ -171,7 +171,7 @@ useEffect(() => {
           <div>
             <l-cardio size="80" stroke="4" speed="2" color="black"></l-cardio>{" "}
           </div>
-          <div>Give us 2 minutes to prepare your feed</div>
+          <div>We are generating your feed!</div>
         </div>
         {/* Loader content */}
       </div>
