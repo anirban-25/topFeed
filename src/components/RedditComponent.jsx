@@ -8,6 +8,7 @@ import CreateFeedPopup from "../components/CreateFeedPopup";
 import axios from "axios";
 import { Bars } from "react-loader-spinner";
 import { IoSearch } from "react-icons/io5";
+import RedditMasonryLayout from "./MasonryLayoutReddit";
 import { useAppContext } from "@/contexts/AppContext";
 
 const RedditComponent = () => {
@@ -241,69 +242,7 @@ useEffect(() => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredData.map((item, index) => (
-          <div
-            key={index}
-            className="bg-[#F7F9FB] rounded-lg shadow-md p-6"
-            style={{ height: "auto", minHeight: "150px" }}
-          >
-            {item.heading && (
-              <h2 className="font-kumbh-sans-bold text-xl font-bold mb-4">
-                {item.heading}
-              </h2>
-            )}
-
-            {item.sub_headings &&
-              item.sub_headings.map(
-                (subHeading, subIndex) =>
-                  subHeading.points &&
-                  subHeading.points.length > 0 && (
-                    <div key={subIndex} className="mb-4">
-                      <h3
-                        className="font-kumbh-sans-semibold text-lg font-semibold mb-2"
-                        style={{ color: "#146EF5" }}
-                      >
-                        {formatTitle(subHeading.title)}
-                      </h3>
-                      <ul className="list-disc pl-5">
-                        {subHeading.points.map((point, pointIndex) => (
-                          <li
-                            key={pointIndex}
-                            className="font-kumbh-sans-medium text-sm text-gray-600"
-                          >
-                            {point}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )
-              )}
-
-            {item.title && (
-              <div className="mb-4">
-                <h3
-                  className="font-kumbh-sans-semibold text-lg font-semibold mb-2"
-                  style={{ color: "#146EF5" }}
-                >
-                  {formatTitle(item.title)}
-                </h3>
-                <ul className="list-disc pl-5">
-                  {item.points &&
-                    item.points.map((point, pointIndex) => (
-                      <li
-                        key={pointIndex}
-                        className="font-kumbh-sans-medium text-sm text-gray-600"
-                      >
-                        {point}
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+      <RedditMasonryLayout filteredRedditData={filteredData} />
     </div>
   );
 };

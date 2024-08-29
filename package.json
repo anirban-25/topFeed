@@ -67,6 +67,7 @@
     "react-icons": "^5.2.1",
     "react-lineto": "^3.3.0",
     "react-loader-spinner": "^6.1.6",
+    "react-masonry-css": "^1.0.16",
     "react-monaco-editor": "^0.55.0",
     "react-phone-input-2": "^2.15.1",
     "react-resizable": "^3.0.5",
