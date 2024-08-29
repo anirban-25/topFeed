@@ -45,6 +45,7 @@ const TwitterComponent = () => {
 
   useEffect(() => {
     console.log("FILTERED CHanged........");
+    loadTwitterWidgets();
   }, [filteredTweets]);
 
   useEffect(() => {
@@ -172,6 +173,7 @@ const TwitterComponent = () => {
 
   const handleRelevanceChange = (newRelevance) => {
     setSelectedRelevance(newRelevance);
+    loadTwitterWidgets();
   };
 
   // const toggleAuthor = (author) => {
