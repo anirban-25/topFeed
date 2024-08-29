@@ -199,7 +199,9 @@ const TwitterComponent = () => {
     setSelectedRelevance(newRelevance);
     loadTwitterWidgets();
   };
-
+  const handleRefresh = () => {
+    router.refresh();
+  };
   // const toggleAuthor = (author) => {
   //   const newSelectedAuthors = {
   //     ...selectedAuthors,
