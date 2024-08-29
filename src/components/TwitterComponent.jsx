@@ -1,15 +1,16 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { db, auth } from "../firebase";
-import { collection, query, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, query, getDocs } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Script from "next/script";
-import { RefreshCw, ChevronDown, AlertCircle, CheckCircle } from "lucide-react";
+import { RefreshCw, ChevronDown } from "lucide-react";
 import { BsPeople } from "react-icons/bs";
 import AuthorSelectionDropdown from "./AuthorSelectionDropdown";
 import RelevanceSelector from "./RelevanceSelector";
 import TwitterFeedDialog from "./TwitterFeedDialog";
 import { useAppContext } from "@/contexts/AppContext";
+import MasonryLayout from "./MasonryLayout";
 
 const TwitterComponent = () => {
   const { twitterLoader, setTwitterLoader } = useAppContext();
@@ -20,6 +21,8 @@ const TwitterComponent = () => {
   const authorDropdownRef = useRef(null);
   const [filteredTweets, setFilteredTweets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [selectedRelevance, setSelectedRelevance] = useState([
     "high",
     "medium",
@@ -28,6 +31,88 @@ const TwitterComponent = () => {
   const [size, setSize] = useState(null);
   const [authors, setAuthors] = useState([]);
   const [selectedAuthors, setSelectedAuthors] = useState({});
+  const prevSelectedAuthorsRef = useRef({});
+
+  const loadTwitterWidgets = useCallback(() => {
+    if (window.twttr && window.twttr.widgets) {
+      window.twttr.widgets.load();
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUserTweets();
+  }, [user]);
+
+  useEffect(() => {
+    console.log("FILTERED CHanged........");
+  }, [filteredTweets]);
+
+  useEffect(() => {
+    console.log("Tweets Changed........");
+  }, [tweets]);
+
+  useEffect(() => {
+    if (scriptLoaded) {
+      loadTwitterWidgets();
+    }
+  }, [tweets, scriptLoaded, loadTwitterWidgets]);
+
+  const deepEqual = (obj1, obj2) => {
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+
+    for (let key of keys1) {
+      if (obj1[key] !== obj2[key]) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  // Existing useEffect hook that filters tweets
+  useEffect(() => {
+    // Filter only if there's an actual change in selectedAuthors or selectedRelevance
+    if (
+      !deepEqual(selectedAuthors, prevSelectedAuthorsRef.current) ||
+      selectedRelevance !== prevSelectedAuthorsRef.currentRelevance
+    ) {
+      prevSelectedAuthorsRef.current = { ...selectedAuthors };
+      prevSelectedAuthorsRef.currentRelevance = selectedRelevance;
+
+      const filtered = tweets.filter(
+        (tweet) =>
+          selectedRelevance.includes(tweet.relevancy.toLowerCase()) &&
+          selectedAuthors[tweet.authors[0].name]
+      );
+
+      setFilteredTweets(filtered);
+      loadTwitterWidgets();
+    }
+  }, [selectedAuthors, selectedRelevance, tweets, loadTwitterWidgets]);
+
+  const handleAuthorDropdownToggle = () => {
+    setShowAuthorDropdown(!showAuthorDropdown);
+    // No state change related to authors here
+    loadTwitterWidgets();
+  };
+
+  // Toggle author selection state only when there's an actual change
+  const toggleAuthor = (author) => {
+    const newSelectedAuthors = {
+      ...selectedAuthors,
+      [author]: !selectedAuthors[author],
+    };
+
+    // Update state only if there's a real change
+    if (!deepEqual(newSelectedAuthors, selectedAuthors)) {
+      setSelectedAuthors(newSelectedAuthors);
+    }
+  };
 
   const fetchUserTweets = async () => {
     if (!user) {
@@ -62,7 +147,10 @@ const TwitterComponent = () => {
       const initialSelectedAuthors = Object.fromEntries(
         uniqueAuthors.map((author) => [author, true])
       );
-      setSelectedAuthors(initialSelectedAuthors);
+      setSelectedAuthors((prev) => {
+        prevSelectedAuthorsRef.current = initialSelectedAuthors; // Initialize previous authors on first load
+        return initialSelectedAuthors;
+      });
     } catch (error) {
       console.error("Error fetching user tweets:", error);
     } finally {
@@ -71,40 +159,31 @@ const TwitterComponent = () => {
   };
 
   useEffect(() => {
-    fetchUserTweets();
-  }, [user]);
-
-  useEffect(() => {
     if (tweets.length > 0 && window.twttr) {
       window.twttr.widgets.load();
     }
   }, [tweets]);
 
   useEffect(() => {
-    setFilteredTweets(
-      tweets.filter(
-        (tweet) =>
-          selectedRelevance.includes(tweet.relevancy.toLowerCase()) &&
-          selectedAuthors[tweet.authors[0].name]
-      )
-    );
-  }, [selectedRelevance, selectedAuthors, tweets]);
-  useEffect(()=>{
     setLoaderTwitter(twitterLoader);
-  }, [twitterLoader])
+  }, [twitterLoader]);
+
   const handleOpen = (value) => setSize(value);
 
   const handleRelevanceChange = (newRelevance) => {
     setSelectedRelevance(newRelevance);
   };
 
-  const toggleAuthor = (author) => {
-    setSelectedAuthors((prev) => ({
-      ...prev,
-      [author]: !prev[author],
-    }));
-  };
-  
+  // const toggleAuthor = (author) => {
+  //   const newSelectedAuthors = {
+  //     ...selectedAuthors,
+  //     [author]: !selectedAuthors[author],
+  //   };
+  //   if (!deepEqual(newSelectedAuthors, selectedAuthors)) {
+  //     setSelectedAuthors(newSelectedAuthors);
+  //   }
+  // };
+
   const clearAllFilters = () => {
     const resetAuthors = Object.fromEntries(
       Object.keys(selectedAuthors).map((author) => [author, true])
@@ -122,9 +201,20 @@ const TwitterComponent = () => {
         return "bg-yellow-500";
     }
   };
+
   const handleFeedCreated = () => {
     fetchUserTweets();
   };
+
+  const handleImageError = (e) => {
+    e.target.src = "/images/fallback.png"; // Fallback image
+    setImageError(true);
+  };
+
+  const handleImageLoad = () => {
+    setImageError(false);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -132,22 +222,23 @@ const TwitterComponent = () => {
       </div>
     );
   }
+
   if (loaderTwitter) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        Loading..asdasdasdasdasdasdasdasd. {/* Loader content */}
+        Loading... {/* Loader content */}
       </div>
     );
   }
+
   return (
     <>
       <Script
         src="https://platform.twitter.com/widgets.js"
         strategy="lazyOnload"
         onLoad={() => {
-          if (tweets.length > 0 && window.twttr) {
-            window.twttr.widgets.load();
-          }
+          setScriptLoaded(true);
+          loadTwitterWidgets();
         }}
       />
       <div>
@@ -199,7 +290,7 @@ const TwitterComponent = () => {
                 />
                 <button
                   className="px-4 py-2 text-sm font-medium text-black bg-white border border-[#CECECE] rounded-md hover:bg-gray-50 focus:outline-none"
-                  onClick={() => setShowAuthorDropdown(!showAuthorDropdown)}
+                  onClick={handleAuthorDropdownToggle}
                 >
                   <span className="flex items-center">
                     <BsPeople color="black" size={17} className="mr-2" />
@@ -213,41 +304,18 @@ const TwitterComponent = () => {
                     selectedAuthors={selectedAuthors}
                     onToggleAuthor={toggleAuthor}
                     onClose={() => setShowAuthorDropdown(false)}
-                    onClearFilters={clearAllFilters}
                   />
                 )}
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredTweets.map((tweet) => (
-                <div
-                  key={tweet.id}
-                  className="border border-gray-500 border-dotted rounded-lg overflow-hidden flex flex-col"
-                >
-                  <div
-                    className={`${getRelevancyColor(
-                      tweet.relevancy
-                    )} text-white font-kumbh-sans-bold py-2 px-4 flex items-center justify-between`}
-                  >
-                    <span>Relevancy: {tweet.relevancy}</span>
-                    {tweet.relevancy.toLowerCase() === "high" ? (
-                      <CheckCircle size={20} />
-                    ) : (
-                      <AlertCircle size={20} />
-                    )}
-                  </div>
-                  <div className="p-4 flex-grow">
-                    <div
-                      className="tweet-content"
-                      dangerouslySetInnerHTML={{ __html: tweet.content_html }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <MasonryLayout
+              filteredTweets={filteredTweets}
+              getRelevancyColor={getRelevancyColor}
+              handleImageLoad={handleImageLoad}
+              handleImageError={handleImageError}
+            />
           </div>
         )}
-
         <TwitterFeedDialog
           size={size}
           handleOpen={handleOpen}

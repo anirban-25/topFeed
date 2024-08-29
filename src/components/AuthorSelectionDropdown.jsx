@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Search } from "lucide-react";
-
 const AuthorSelectionDropdown = ({
   authors,
   selectedAuthors,
@@ -19,6 +18,12 @@ const AuthorSelectionDropdown = ({
       <div className="p-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">Twitter Accounts</h2>
+          <button
+            className="text-sm text-blue-500 hover:underline"
+            onClick={onClearFilters}
+          >
+            Clear All
+          </button>
         </div>
         <div className="relative mb-4">
           <Search
@@ -49,6 +54,14 @@ const AuthorSelectionDropdown = ({
             </div>
           ))}
         </div>
+      </div>
+      <div className="p-4">
+        <button
+          className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors"
+          onClick={onClose}
+        >
+          Close
+        </button>
       </div>
     </div>
   );
