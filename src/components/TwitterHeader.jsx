@@ -67,7 +67,7 @@ const TwitterHeader = () => {
     >
       {feedCreated ? (
         <>
-          <MdOutlineSettings className="mr-2 text-xl" onClick={() => handleOpen("lg")}/> Feed Settings
+          <MdOutlineSettings className="mr-2 text-xl" onClick={() => handleOpen("lg")} /> Feed Settings
         </>
       ) : (
         "+ Create New Feed"

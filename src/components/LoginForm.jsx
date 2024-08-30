@@ -1,23 +1,42 @@
 "use client";
 import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
-import { getAuth, GoogleAuthProvider, sendSignInLinkToEmail, signInWithPopup } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  sendSignInLinkToEmail,
+  signInWithPopup,
+} from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { app } from "@/firebase";
+import { app, db } from "@/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingG, setLoadingG] = useState(false);
-  
+
   const [error, setError] = useState("");
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
   const router = useRouter();
-
+  const updateUserPlan = async (userId) => {
+    try {
+      await setDoc(
+        doc(db, "users", userId),
+        {
+          plan: "free",
+        },
+        { merge: true }
+      );
+      console.log("User plan updated successfully");
+    } catch (error) {
+      console.error("Error updating user plan:", error);
+    }
+  };
   const handleSendSignInLink = async (event) => {
-    event.preventDefault(); 
+    event.preventDefault();
     setLoading(true);
     setError("");
     try {
@@ -40,6 +59,8 @@ const LoginForm = () => {
     try {
       const result = await signInWithPopup(auth, provider);
       if (result.user) {
+        
+        await updateUserPlan(result.user.uid);
         router.push("/dashboard/reddit");
       }
     } catch (error) {
@@ -58,7 +79,8 @@ const LoginForm = () => {
       </div>
 
       <p className="text-sm text-center text-[#E6E6E6] mb-4 mt-5">
-        Please enter your email ID to receive a login link. Click the link in your email to be signed in instantly.
+        Please enter your email ID to receive a login link. Click the link in
+        your email to be signed in instantly.
       </p>
 
       {!isEmailSent ? (
@@ -85,7 +107,9 @@ const LoginForm = () => {
           {error && <p className="text-red-500 text-center mt-2">{error}</p>}
         </form>
       ) : (
-        <p className="text-center text-white">Please check your email for the sign-up link.</p>
+        <p className="text-center text-white">
+          Please check your email for the sign-up link.
+        </p>
       )}
 
       <div className="flex items-center mb-10 mt-10">

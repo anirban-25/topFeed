@@ -1,36 +1,47 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getAuth, isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { auth } from "@/firebase";
+import { auth, db } from "@/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 const HandleEmailLink = () => {
   const router = useRouter();
-  const auth = getAuth();
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const handleEmailLink = async () => {
       if (isSignInWithEmailLink(auth, window.location.href)) {
-        try {
-          let email = window.localStorage.getItem("emailForSignIn");
-          if (!email) {
-            email = window.prompt("Please provide your email for confirmation.");
-          }
-          if (email) {
-            await signInWithEmailLink(auth, email, window.location.href);
-            window.localStorage.removeItem("emailForSignIn");
-            router.push("/dashboard/reddit"); 
-          }
-        } catch (error) {
-          console.error("Error signing in with email link:", error);
+        let email = window.localStorage.getItem("emailForSignIn");
+        if (!email) {
+          email = window.prompt("Please provide your email for confirmation.");
         }
+        if (email) {
+          try {
+            const result = await signInWithEmailLink(auth, email, window.location.href);
+            window.localStorage.removeItem("emailForSignIn");
+            
+            // Update user's plan in Firestore
+            await setDoc(doc(db, "users", result.user.uid), {
+              plan: "free"
+            }, { merge: true });
+
+            router.push("/dashboard/reddit");
+          } catch (error) {
+            console.error("Error signing in with email link:", error);
+            setError("Failed to sign in. Please try again or contact support.");
+          }
+        }
+      } else {
+        setError("Invalid sign-in link. Please request a new one.");
       }
     };
 
     handleEmailLink();
-  }, [auth, router]);
+  }, [router]);
 
-  return null;
+
+  return <div className="text-center mt-4">Processing your sign-in...</div>;
 };
 
 export default HandleEmailLink;
