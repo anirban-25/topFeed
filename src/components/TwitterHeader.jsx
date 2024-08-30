@@ -4,19 +4,13 @@ import UserMenu from "../components/UserMenu";
 import { auth, db } from "../firebase";
 import TwitterFeedDialog from "./TwitterFeedDialog";
 import { useAuthState } from "react-firebase-hooks/auth";
-import {
-  collection,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-} from "firebase/firestore";
+import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import { useAppContext } from "@/contexts/AppContext";
 import { MdOutlineSettings } from "react-icons/md";
 
 const TwitterHeader = () => {
   const { twitterLoader, setTwitterLoader } = useAppContext();
-  const [loaderTwitter, setLoaderTwitter] = useState(false)
+  const [loaderTwitter, setLoaderTwitter] = useState(false);
   const [feedCreated, setFeedCreated] = useState(false);
   const [user] = useAuthState(auth);
   const [size, setSize] = useState(null);
@@ -29,7 +23,7 @@ const TwitterHeader = () => {
   useEffect(() => {
     checkExistingFeed();
   }, [twitterLoader]);
-  
+
   const checkExistingFeed = async () => {
     try {
       const q = query(
@@ -48,7 +42,8 @@ const TwitterHeader = () => {
 
   const handleFeedCreated = () => {
     setFeedCreated(true);
-    handleOpen(null); // Close the dialog
+    checkExistingFeed();
+    // handleOpen(null); // Close the dialog
   };
 
   return (
@@ -57,22 +52,22 @@ const TwitterHeader = () => {
         My Twitter Feed
       </h1>
       <div className="flex items-center">
-      <button
-      className={`flex items-center px-4 py-2 text-md rounded-xl border transition-all duration-200 mr-6 ${
-        feedCreated
-          ? "bg-white text-black hover:bg-gray-200 border-gray-300"
-          : "bg-[#146EF5] text-white hover:bg-blue-800 border-transparent"
-      }`}
-      onClick={() => handleOpen(true)}
-    >
-      {feedCreated ? (
-        <>
-          <MdOutlineSettings className="mr-2 text-xl" /> Feed Settings
-        </>
-      ) : (
-        "+ Create New Feed"
-      )}
-    </button>
+        <button
+          className={`flex items-center px-4 py-2 text-md rounded-xl border transition-all duration-200 mr-6 ${
+            feedCreated
+              ? "bg-white text-black hover:bg-gray-200 border-gray-300"
+              : "bg-[#146EF5] text-white hover:bg-blue-800 border-transparent"
+          }`}
+          onClick={() => handleOpen(true)}
+        >
+          {feedCreated ? (
+            <>
+              <MdOutlineSettings className="mr-2 text-xl" /> Feed Settings
+            </>
+          ) : (
+            "+ Create New Feed"
+          )}
+        </button>
         <div>
           <UserMenu />
         </div>
