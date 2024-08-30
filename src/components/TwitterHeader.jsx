@@ -63,11 +63,11 @@ const TwitterHeader = () => {
           ? "bg-white text-black hover:bg-gray-200 border-gray-300"
           : "bg-[#146EF5] text-white hover:bg-blue-800 border-transparent"
       }`}
-      onClick={() => handleOpen(true)}
+      onClick={() => handleOpen("lg")}
     >
       {feedCreated ? (
         <>
-          <MdOutlineSettings className="mr-2 text-xl" /> Feed Settings
+          <MdOutlineSettings className="mr-2 text-xl" onClick={() => handleOpen("lg")}/> Feed Settings
         </>
       ) : (
         "+ Create New Feed"
