@@ -24,7 +24,8 @@ export async function getUserNotificationSettings(userId) {
 // Function to send a message to the user's Telegram account
 export async function sendTelegramMessage(telegramAccount, message) {
   try {
-    const telegramToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN; // Your bot token
+    console.log("Sending message to Telegram account:", telegramAccount);
+    const telegramToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN; // Your bot token     
     const telegramChatId = telegramAccount; // Assuming this is the chat ID or username
     
     const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;

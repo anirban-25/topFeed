@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import { storeDataInFirestore } from "@/utils/storeRedditData";
-import { getUserNotificationSettings, sendTelegramMessage } from "@/utils/notificationUtils"; // Import new utilities
+import { getUserNotificationSettings, sendTelegramMessage } from "@/utils/notificationUtils"; 
 
 // Initialize AWS SDK Lambda client
 const lambdaClient = new LambdaClient({
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     // Log the incoming request data
     console.log("Subreddits:", subreddits);
     console.log("User ID:", userId);
-    console.log("Is Refresh:", isRefresh);
+    //console.log("Is Refresh:", isRefresh);
     console.log("-------------------------------------------");
 
     const eventPayload = {
@@ -61,9 +61,9 @@ export async function POST(req: Request) {
       console.log("Fetched User Settings:", userSettings);
 
       // Check if userSettings exist and match the criteria to send a Telegram notification
-      if (userSettings && userSettings.istelegram && userSettings.isactive && userSettings.reddit) {
+      if (userSettings && userSettings.istelegram == true && userSettings.isActive == true && userSettings.reddit == true) {
+        console.log("conditions matched lessgo");
         const message = `New Reddit analysis data available: ${JSON.stringify(analysisData)}`;
-
         // Send the message to the user's Telegram account
         await sendTelegramMessage(userSettings.telegramUserId, message);
         console.log("Telegram message sent successfully.");
