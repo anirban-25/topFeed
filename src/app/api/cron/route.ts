@@ -233,12 +233,9 @@ async function fetchFeeds(
 export async function GET() {
   try {
     console.log("Starting GET function");
-    console.log("Fetching users collection");
     const usersSnapshot = await db.collection("users").get();
-    console.log("Users collection fetched:", usersSnapshot);
     console.log(`Number of users: ${usersSnapshot.size}`);
-    const testDoc = await db.collection("users").doc("OEo6JrtqmJaeFCB8aatX962N2ki1").get();
-    console.log("Test document data:", testDoc.data());
+
     const allResults = await Promise.all(
       usersSnapshot.docs.map(async (userDoc) => {
         console.log(`Processing user: ${userDoc.id}`);
@@ -259,6 +256,23 @@ export async function GET() {
                 tweetFeedData.topic
               );
               console.log(`User ${userDoc.id} - fetchFeeds result:`, result);
+
+              // Update user_tweets subcollection
+              const userTweetsRef = userDoc.ref.collection("user_tweets");
+              const batch = db.batch();
+
+              for (const tweet of result) {
+                const newTweetRef = userTweetsRef.doc();
+                batch.set(newTweetRef, {
+                  content_html: tweet.content_html,
+                  authors: tweet.authors,
+                  relevancy: tweet.relevancy
+                });
+              }
+
+              await batch.commit();
+              console.log(`Updated user_tweets for user ${userDoc.id}`);
+
               return {
                 userId: userDoc.id,
                 tweetFeedId: tweetFeedDoc.id,
