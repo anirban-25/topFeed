@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import { storeDataInFirestore } from "@/utils/storeRedditData";
+import { getUserNotificationSettings, sendTelegramMessage } from "@/utils/notificationUtils"; // Import new utilities
 
 // Initialize AWS SDK Lambda client
 const lambdaClient = new LambdaClient({
@@ -13,7 +14,9 @@ const lambdaClient = new LambdaClient({
 
 export async function POST(req: Request) {
   try {
-    const { subreddits, userId, isRefresh } = await req.json();  // Accept isRefresh flag
+    const { subreddits, userId, isRefresh } = await req.json();
+
+    // Log the incoming request data
     console.log("Subreddits:", subreddits);
     console.log("User ID:", userId);
     console.log("Is Refresh:", isRefresh);
@@ -47,11 +50,26 @@ export async function POST(req: Request) {
       if (!analysisData) {
         throw new Error("No analysis data found in the Lambda response.");
       }
+      // await sendTelegramMessage('Atishab', 'Test message from bot');
 
       // Store the processed data, subreddits, and increment the refresh count in Firestore
-      await storeDataInFirestore(analysisData, userId, subreddits, isRefresh);  // Pass isRefresh flag
+      await storeDataInFirestore(analysisData, userId, subreddits, isRefresh);
+      console.log("Fetching user notification settings for:", userId);
 
-      return NextResponse.json({ message: "Data processed and stored successfully", analysisData }, { status: 200 });
+      // Fetch user notification settings from Firestore
+      const userSettings = await getUserNotificationSettings(userId);
+      console.log("Fetched User Settings:", userSettings);
+
+      // Check if userSettings exist and match the criteria to send a Telegram notification
+      if (userSettings && userSettings.istelegram && userSettings.isactive && userSettings.reddit) {
+        const message = `New Reddit analysis data available: ${JSON.stringify(analysisData)}`;
+
+        // Send the message to the user's Telegram account
+        await sendTelegramMessage(userSettings.telegramUserId, message);
+        console.log("Telegram message sent successfully.");
+      }
+
+      return NextResponse.json({ message: "Data processed, stored, and notification sent if applicable", analysisData }, { status: 200 });
     } else {
       return NextResponse.json({ error: "Failed to invoke Lambda function" }, { status: 500 });
     }

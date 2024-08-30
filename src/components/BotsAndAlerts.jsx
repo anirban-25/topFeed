@@ -10,12 +10,15 @@ const BotsAndAlerts = () => {
   const [user] = useAuthState(auth);
   const [telegramConnected, setTelegramConnected] = useState(false);
   const [telegramAccount, setTelegramAccount] = useState("");
+  const [telegramid, setTelegramid] = useState("");
   const [twitterConnected, setTwitterConnected] = useState(false);
   const [redditConnected, setRedditConnected] = useState(false);
+  const [isActive, setIsActive] = useState(true); // Switch state is on by default
   const [notificationData, setNotificationData] = useState({
     istelegram: false,
     telegramAccount: "",
-    isActive: false,
+    telegramUserId:"",
+    isActive: true, 
     twitter: false,
     reddit: false,
   });
@@ -29,8 +32,10 @@ const BotsAndAlerts = () => {
           const data = docSnap.data();
           setTelegramConnected(data.istelegram);
           setTelegramAccount(data.telegramAccount ? `@${data.telegramAccount}` : "");
+          setTelegramid(data.telegramUserId);
           setTwitterConnected(data.twitter);
           setRedditConnected(data.reddit);
+          setIsActive(data.isActive);
           setNotificationData(data);
         }
       }).catch(error => {
@@ -44,13 +49,16 @@ const BotsAndAlerts = () => {
       const updatedNotificationData = {
         istelegram: true,
         telegramAccount: authUser.username,
-        isActive: true,
+        telegramUserId: authUser.id,
+        isActive: true, 
         twitter: notificationData.twitter,
         reddit: notificationData.reddit,
       };
 
       setTelegramConnected(true);
       setTelegramAccount(`@${authUser.username}`);
+      setTelegramid(authUser.id);
+      setIsActive(true);
       setNotificationData(updatedNotificationData);
 
       // Store the notification data immediately after login
@@ -68,15 +76,65 @@ const BotsAndAlerts = () => {
       ...notificationData,
       istelegram: false,
       telegramAccount: "",
+      telegramid: "",
+
       isActive: false,
     };
 
     setTelegramConnected(false);
     setTelegramAccount("");
+    telegramid(""),
+    setIsActive(false);
     setNotificationData(updatedNotificationData);
 
     if (user) {
       storeNotificationData(user.uid, updatedNotificationData);
+    }
+  };
+
+  const handleToggleSwitch = () => {
+    const newIsActive = !isActive;
+    setIsActive(newIsActive);
+
+    const updatedNotificationData = {
+      ...notificationData,
+      isActive: newIsActive,
+    };
+
+    setNotificationData(updatedNotificationData);
+
+    if (user) {
+      storeNotificationData(user.uid, updatedNotificationData);
+    }
+  };
+  const handleToggleTwitter = () => {
+    const newTwitterConnected = !twitterConnected;
+    setTwitterConnected(newTwitterConnected);
+    setNotificationData(prevState => ({
+      ...prevState,
+      twitter: newTwitterConnected,  // Update state
+    }));
+    if (user) {
+      storeNotificationData(user.uid, {
+        ...notificationData,
+        twitter: newTwitterConnected,  // Store in Firestore
+      });
+    }
+  };
+
+  // Handle Reddit Toggle
+  const handleToggleReddit = () => {
+    const newRedditConnected = !redditConnected;
+    setRedditConnected(newRedditConnected);
+    setNotificationData(prevState => ({
+      ...prevState,
+      reddit: newRedditConnected,  // Update state
+    }));
+    if (user) {
+      storeNotificationData(user.uid, {
+        ...notificationData,
+        reddit: newRedditConnected,  // Store in Firestore
+      });
     }
   };
 
@@ -91,10 +149,10 @@ const BotsAndAlerts = () => {
             accountName={telegramAccount}
             onConnect={handleTelegramAuth}
             onDisconnect={handleDisconnectTelegram}
-            twitterConnected={twitterConnected}
-            redditConnected={redditConnected}
-            setTwitterConnected={setTwitterConnected}
-            setRedditConnected={setRedditConnected}
+            isActive={isActive}
+            onToggleSwitch={handleToggleSwitch}
+            handleToggleTwitter={handleToggleTwitter}
+            handleToggleReddit={handleToggleReddit}
           />
         </div>
       </div>

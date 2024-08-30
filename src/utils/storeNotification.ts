@@ -3,6 +3,7 @@ import { doc, setDoc } from 'firebase/firestore';
 
 type NotificationData = {
   istelegram: boolean;
+  telegramUserId: string,
   telegramAccount: string;
   isActive: boolean;
   twitter: boolean;
