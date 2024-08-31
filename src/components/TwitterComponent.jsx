@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { db, auth } from "../firebase";
-import { collection, query, getDocs } from "firebase/firestore";
+import { collection, query, getDocs, orderBy, limit } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Script from "next/script";
 import { RefreshCw, ChevronDown } from "lucide-react";
@@ -130,7 +130,8 @@ const TwitterComponent = () => {
         user.uid,
         "user_tweets"
       );
-      const userTweetsQuery = query(userTweetsCollectionRef);
+      const userTweetsQuery = query(userTweetsCollectionRef,orderBy("timestamp", "desc"), // Order by timestamp in descending order
+      limit(150));
       const querySnapshot = await getDocs(userTweetsQuery);
 
       const tweetsData = querySnapshot.docs.map((doc) => ({

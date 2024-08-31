@@ -4,7 +4,7 @@ import admin from "firebase-admin"; // Assume fetchFeeds is exported from a util
 import axios from "axios";
 import { parse } from "node-html-parser";
 import { OpenAI } from "openai";
-import { parseISO, subHours } from "date-fns";
+import { parseISO, subHours, subMinutes } from "date-fns";
 // Initialize Firebase Admin SDK (if not already initialized elsewhere)
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -149,9 +149,9 @@ async function fetchRssFeeds(
 
   // Filter and process data
   const currentDate = new Date();
-  const twoWeeksAgo = subHours(currentDate, 6);
+  const fifteenMinutesAgo = subMinutes(currentDate, 15);
   const filteredData = twitterData
-    .filter((item) => parseISO(item.date_published) > twoWeeksAgo)
+    .filter((item) => parseISO(item.date_published) > fifteenMinutesAgo)
     .sort(
       (a, b) =>
         parseISO(b.date_published).getTime() -

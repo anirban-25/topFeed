@@ -1,11 +1,11 @@
 import { useState, useEffect, createElement } from "react";
-import Image from "next/image";
 import {
   Dialog,
   DialogHeader,
   DialogBody,
   DialogFooter,
   Button,
+  Switch,
 } from "@material-tailwind/react";
 import {
   Tabs,
@@ -14,68 +14,44 @@ import {
   Tab,
   TabPanel,
 } from "@material-tailwind/react";
-import {
-  collection,
-  getDocs,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { FaXTwitter, FaRedditAlien } from "react-icons/fa6";
+import Image from "next/image";
 
 const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
-  const [twitterAccounts, setTwitterAccounts] = useState([]);
-  const [selectedTwitterAccounts, setSelectedTwitterAccounts] = useState([]);
+  const [selectedNotificationLevels, setSelectedNotificationLevels] = useState(
+    []
+  );
+
+  const [redditNotifications, setRedditNotifications] = useState(false);
   const [redditAccounts, setRedditAccounts] = useState([]);
-  const [
-    previouslySelectedTwitterAccounts,
-    setPreviouslySelectedTwitterAccounts,
-  ] = useState([]);
   const [user] = useAuthState(auth);
 
   useEffect(() => {
-    const fetchTwitterAccounts = async () => {
+    const fetchNotificationLevels = async () => {
       if (user) {
-        // Fetch user's tweet feed data
-        const tweetFeedRef = collection(db, "users", user.uid, "tweet_feed");
-        const tweetQuerySnapshot = await getDocs(tweetFeedRef);
-
-        const accounts = [];
-        tweetQuerySnapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.twitterUrls) {
-            accounts.push(
-              ...data.twitterUrls.map((url) => {
-                const handle = url.replace("https://x.com/", "");
-                return {
-                  url,
-                  handle,
-                  profileImageUrl: `https://unavatar.io/twitter/${handle}`,
-                };
-              })
-            );
-          }
-        });
-        setTwitterAccounts(accounts);
-
-        // Fetch selected twitter accounts from notifications collection
         const notificationsRef = doc(db, "notifications", user.uid);
         const notificationsSnap = await getDoc(notificationsRef);
 
         if (notificationsSnap.exists()) {
-          const existingTwitterAccounts =
-            notificationsSnap.data().twitterAccounts || [];
-          setSelectedTwitterAccounts(existingTwitterAccounts);
-          setPreviouslySelectedTwitterAccounts(existingTwitterAccounts);
+          const levels = notificationsSnap.data().notificationLevels || [];
+          setSelectedNotificationLevels(levels);
         }
       }
     };
-    const fetchRedditAccounts = async () => {
+    const fetchData = async () => {
       if (user) {
+        const notificationsRef = doc(db, "notifications", user.uid);
+        const notificationsSnap = await getDoc(notificationsRef);
+
+        if (notificationsSnap.exists()) {
+          const data = notificationsSnap.data();
+          setSelectedNotificationLevels(data.notificationLevels || []);
+          setRedditNotifications(data.redditNotifications || false);
+        }
+
         const latestAnalysisRef = doc(
           db,
           "users",
@@ -99,8 +75,8 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       }
     };
 
-    fetchTwitterAccounts();
-    fetchRedditAccounts();
+    fetchData();
+    fetchNotificationLevels();
   }, [user]);
 
   const handleConfirm = async () => {
@@ -108,46 +84,31 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       try {
         const notificationsRef = doc(db, "notifications", user.uid);
 
-        // Calculate accounts to add and remove
-        const accountsToAdd = selectedTwitterAccounts.filter(
-          (handle) => !previouslySelectedTwitterAccounts.includes(handle)
-        );
-        if (selectedTwitterAccounts.length === 0) {
-        }
-
-        console.log("Accounts to Add:", accountsToAdd);
-
-        // Update Firestore
         await updateDoc(notificationsRef, {
-          twitterAccounts: accountsToAdd,
+          notificationLevels: selectedNotificationLevels,
+          redditNotifications: redditNotifications,
         });
 
-        console.log("Firestore updated successfully");
+        console.log("Notification settings updated successfully");
       } catch (error) {
-        console.error("Error updating Firestore:", error);
+        console.error("Error updating notification settings:", error);
       }
     }
     handleOpen(null); // Close the dialog
   };
 
-  const handleSelectAll = () => {
-    setSelectedTwitterAccounts(
-      twitterAccounts.map((account) => account.handle)
-    );
+  const handleNotificationLevelChange = (level) => {
+    setSelectedNotificationLevels((prevLevels) => {
+      if (prevLevels.includes(level)) {
+        return prevLevels.filter((l) => l !== level);
+      } else {
+        return [...prevLevels, level];
+      }
+    });
   };
-
-  const handleUnselectAll = () => {
-    setSelectedTwitterAccounts([]);
+  const handleRedditNotificationChange = () => {
+    setRedditNotifications(!redditNotifications);
   };
-
-  const handleAccountToggle = (handle) => {
-    setSelectedTwitterAccounts((prevSelected) =>
-      prevSelected.includes(handle)
-        ? prevSelected.filter((item) => item !== handle)
-        : [...prevSelected, handle]
-    );
-  };
-
   const data = [
     {
       label: "Twitter",
@@ -155,45 +116,30 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       icon: FaXTwitter,
       content: (
         <div>
-          <div className="flex justify-between mt-5">
-            <h3 className="text-lg font-kumbh-sans-regular mb-2">
-              Twitter Accounts:
-            </h3>
-            <div className="flex space-x-2 mb-2">
-              <Button variant="text" color="gray" onClick={handleSelectAll}>
-                Select All
-              </Button>
-              <Button variant="text" color="gray" className="" onClick={handleUnselectAll}>
-                Unselect All
-              </Button>
-            </div>
-          </div>
-          <ul className="space-y-2">
-            {twitterAccounts.map((account, index) => (
-              <li key={index} className="flex items-center space-x-2">
+          <h3 className="text-lg font-kumbh-sans-regular mb-4  text-black">
+            Select Notification Levels:
+          </h3>
+          <div className="space-y-4">
+            {["high", "medium", "low"].map((level) => (
+              <div key={level} className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  checked={selectedTwitterAccounts.includes(account.handle)}
-                  onChange={() => handleAccountToggle(account.handle)}
+                  id={level}
+                  name="notificationLevels"
+                  value={level}
+                  checked={selectedNotificationLevels.includes(level)}
+                  onChange={() => handleNotificationLevelChange(level)}
+                  className="form-checkbox"
                 />
-                <Image
-                  src={account.profileImageUrl}
-                  alt={`${account.handle} profile`}
-                  width={30}
-                  height={30}
-                  className="rounded-full"
-                />
-                <a
-                  href={account.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 hover:underline font-kumbh-sans-medium"
+                <label
+                  htmlFor={level}
+                  className="capitalize font-kumbh-sans-bold text-black"
                 >
-                  @{account.handle}
-                </a>
-              </li>
+                  {level}
+                </label>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       ),
     },
@@ -203,7 +149,22 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       icon: FaRedditAlien,
       content: (
         <div>
-          <h3 className="text-lg font-kumbh-sans-regular mb-2">Subreddits:</h3>
+          <div className="flex justify-between ">
+            <h3 className="text-lg font-kumbh-sans-regular text-black mb-3">
+              Subreddits:
+            </h3>
+
+            <div className="flex items-center justify-between mb-4 space-x-4">
+              <h3 className="text-sm font-kumbh-sans-medium text-black">
+                Reddit Notifications: 
+              </h3>
+              <Switch
+                checked={redditNotifications}
+                onChange={handleRedditNotificationChange}
+                color="blue"
+              />
+            </div>
+          </div>
           <ul className="space-y-2">
             {redditAccounts.map((subreddit, index) => (
               <li key={index} className="flex items-center space-x-2">
@@ -281,7 +242,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         >
           <span>Cancel</span>
         </Button>
-        <Button variant="gradient" color="green" onClick={handleConfirm}>
+        <Button onClick={handleConfirm} variant="text" color="blue">
           <span>Confirm</span>
         </Button>
       </DialogFooter>
