@@ -76,14 +76,14 @@ const BotsAndAlerts = () => {
       ...notificationData,
       istelegram: false,
       telegramAccount: "",
-      telegramid: "",
+      telegramUserId: "",
 
       isActive: false,
     };
 
     setTelegramConnected(false);
     setTelegramAccount("");
-    telegramid(""),
+    setTelegramid(""),
     setIsActive(false);
     setNotificationData(updatedNotificationData);
 

@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef} from 'react';
-import { Switch } from '@headlessui/react';
-import TelegramLoginButton from './TelegramLoginButton';
-
+import { useEffect, useState, useRef } from "react";
+import { Switch } from "@headlessui/react";
+import TelegramLoginButton from "./TelegramLoginButton";
+import NotificationDialog from "@/components/NotificationDialog"
 const ServiceBlock = ({
   icon,
   title,
@@ -13,22 +13,26 @@ const ServiceBlock = ({
   onToggleSwitch,
   twitterConnected,
   redditConnected,
-  handleToggleTwitter,  
-  handleToggleReddit, 
+  handleToggleTwitter,
+  handleToggleReddit,
 }) => {
   const [showTelegramLogin, setShowTelegramLogin] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const settingsRef = useRef(null);
 
+  const settingsRef = useRef(null);
+  const [size, setSize] = useState(null);
+
+  const handleOpen = (value) => setSize(value);
   const handleTelegramConnect = () => setShowTelegramLogin(true);
 
-  
-
-  const handleSettingsClick = () => setShowSettings(prev => !prev);
-
   const handleDisconnect = () => {
+    
     onDisconnect();
+    handleOpen(null)
     setShowSettings(false);
+
+
+    
   };
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -60,55 +64,26 @@ const ServiceBlock = ({
               checked={isActive}
               onChange={onToggleSwitch}
               className={`${
-                isActive ? 'bg-blue-500' : 'bg-gray-300'
+                isActive ? "bg-blue-500" : "bg-gray-300"
               } relative inline-flex h-6 w-11 items-center rounded-full`}
             >
               <span
                 className={`${
-                  isActive ? 'translate-x-6' : 'translate-x-1'
+                  isActive ? "translate-x-6" : "translate-x-1"
                 } inline-block h-4 w-4 transform bg-white rounded-full transition-transform`}
               />
             </Switch>
             <button
-              onClick={handleSettingsClick}
+              onClick={() => handleOpen("md")}
               className="text-gray-600 hover:text-gray-900"
             >
-              <img src="/images/settings.svg" alt="settings" className="h-7 w-7 hover:bg-gray-200" />
+              <img
+                src="/images/settings.svg"
+                alt="settings"
+                className="h-7 w-7 hover:rotate-90 duration-200 hover:scale-105 "
+              />
             </button>
-            {showSettings && (
-              <div
-              ref={settingsRef}
-              className="absolute left-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-10"
-              style={{ width: '200px' }}
-            >
-              
-              <div className="mt-2">
-                <label className="inline-flex items-center mt-2">
-                  <input
-                    type="checkbox"
-                    checked={twitterConnected}
-                    onChange={handleToggleTwitter}
-                  />
-                  <span className="ml-2">Twitter</span>
-                </label>
-                <label className="inline-flex items-center mt-2">
-                  <input
-                    type="checkbox"
-                    checked={redditConnected}
-                    onChange={handleToggleReddit}
-                  />
-                  <span className="ml-2">Reddit</span>
-                </label>
-              </div>
-              <button
-                onClick={handleDisconnect}
-                className="w-full text-red-300 hover:text-red-800"
-              >
-                Disconnect
-              </button>
-            </div>
             
-            )}
           </>
         ) : (
           <>
@@ -125,6 +100,7 @@ const ServiceBlock = ({
           </>
         )}
       </div>
+      <NotificationDialog size={size} handleOpen={handleOpen} handleDisconnect={handleDisconnect}/>
     </div>
   );
 };

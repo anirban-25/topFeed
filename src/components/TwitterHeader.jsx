@@ -4,6 +4,7 @@ import UserMenu from "../components/UserMenu";
 import { auth, db } from "../firebase";
 import TwitterFeedDialog from "./TwitterFeedDialog";
 import { useAuthState } from "react-firebase-hooks/auth";
+
 import {
   collection,
   getDocs,
@@ -82,6 +83,7 @@ const TwitterHeader = () => {
         handleOpen={handleOpen}
         onFeedCreated={handleFeedCreated}
       />
+      
     </header>
   );
 };
