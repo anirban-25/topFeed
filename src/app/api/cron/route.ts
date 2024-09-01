@@ -5,7 +5,10 @@ import axios from "axios";
 import { parse } from "node-html-parser";
 import { OpenAI } from "openai";
 import { parseISO, subHours, subMinutes } from "date-fns";
-import { getUserNotificationSettings, sendTelegramMessage } from "@/utils/notificationUtils";
+import {
+  getUserNotificationSettings,
+  sendTelegramMessage,
+} from "@/utils/notificationUtils";
 // Initialize Firebase Admin SDK (if not already initialized elsewhere)
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -71,7 +74,7 @@ interface FilteredData {
   text: string;
   meta_titles: string[];
   url?: string;
-  content_html?: string;
+  content_html: string;
   authors?: string[];
   relevancy?: string;
 }
@@ -81,14 +84,19 @@ function shouldSendNotification(
   notificationLevels: string[]
 ): boolean {
   const lowercasedRelevancy = relevancy.toLowerCase();
-  const lowercasedNotificationLevels = notificationLevels.map(level => level.toLowerCase());
+  const lowercasedNotificationLevels = notificationLevels.map((level) =>
+    level.toLowerCase()
+  );
 
   return lowercasedNotificationLevels.includes(lowercasedRelevancy);
 }
 
 async function feedToGPT(
   filtered: FilteredData[],
-  newTopic: string, id: string, notificationLevels: string[], telegramUserId: string
+  newTopic: string,
+  id: string,
+  notificationLevels: string[],
+  telegramUserId: string
 ): Promise<FilteredData[]> {
   for (const row of filtered) {
     const title = String(row.text).trim();
@@ -115,9 +123,7 @@ async function feedToGPT(
           const message = `${row.url}`;
           await sendTelegramMessage(telegramUserId, message);
         }
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     } catch (error) {
       console.error(`Error in GPT-4 processing: ${error}`);
     }
@@ -142,7 +148,8 @@ async function fetchRssFeeds(
   urls: string[],
   newTopic: string,
   id: string,
-  notificationLevels: string[], telegramUserId: string
+  notificationLevels: string[],
+  telegramUserId: string
 ): Promise<FilteredData[]> {
   const twitterData: TwitterData[] = [];
 
@@ -200,15 +207,29 @@ async function fetchRssFeeds(
       authors,
     })
   );
+  const existingContentHtmlSet = new Set<string>();
+  const userTweetsSnapshot = await db
+    .collection("users")
+    .doc(id)
+    .collection("user_tweets")
+    .get();
+  userTweetsSnapshot.forEach((doc) => {
+    existingContentHtmlSet.add(doc.data().content_html);
+  });
 
-  return feedToGPT(filtered, newTopic, id, notificationLevels, telegramUserId);
+  // Filter out items that have already been stored in Firestore
+  const finalFilteredData = filtered.filter(
+    (item) => !existingContentHtmlSet.has(item.content_html)
+  );
+  return feedToGPT(finalFilteredData, newTopic, id, notificationLevels, telegramUserId);
 }
 
 async function fetchFeeds(
   twitterUrls: string[],
   newTopic: string,
   id: string,
-  notificationLevels: string[], telegramUserId: string
+  notificationLevels: string[],
+  telegramUserId: string
 ): Promise<FilteredData[]> {
   const urls: string[] = [];
   const apiUrl = "https://api.rss.app/v1/feeds";
@@ -259,7 +280,7 @@ export async function GET(request: NextRequest) {
   try {
     console.log("Starting GET function");
     const { searchParams } = new URL(request.url);
-    const forceRefresh = searchParams.get('refresh') === 'true';
+    const forceRefresh = searchParams.get("refresh") === "true";
 
     if (forceRefresh) {
       console.log("Force refresh requested. Bypassing cache.");
@@ -283,7 +304,7 @@ export async function GET(request: NextRequest) {
           const tweetFeedData = tweetFeedDoc.data();
           console.log(`User ${userDoc.id} - Tweet feed data:`, tweetFeedData);
           var notificationLevels: string[] = [];
-          var telegramUserId = ""
+          var telegramUserId = "";
           const userSettings = await getUserNotificationSettings(userDoc.id);
           if (userSettings) {
             notificationLevels = userSettings.notificationLevels || [];
@@ -297,7 +318,8 @@ export async function GET(request: NextRequest) {
                 tweetFeedData.twitterUrls,
                 tweetFeedData.topic,
                 userDoc.id,
-                notificationLevels, telegramUserId
+                notificationLevels,
+                telegramUserId
               );
               console.log(`User ${userDoc.id} - fetchFeeds result:`, result);
 
