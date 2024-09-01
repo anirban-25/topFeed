@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { NextRequest  } from 'next/server';
+import { NextRequest } from "next/server";
 import admin from "firebase-admin"; // Assume fetchFeeds is exported from a utils file
 import axios from "axios";
 import { parse } from "node-html-parser";
 import { OpenAI } from "openai";
 import { parseISO, subHours, subMinutes } from "date-fns";
+import { getUserNotificationSettings, sendTelegramMessage } from "@/utils/notificationUtils";
 // Initialize Firebase Admin SDK (if not already initialized elsewhere)
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -75,9 +76,16 @@ interface FilteredData {
   relevancy?: string;
 }
 
+function shouldSendNotification(
+  relevancy: string,
+  notificationLevels: string[]
+): boolean {
+  return notificationLevels.includes(relevancy);
+}
+
 async function feedToGPT(
   filtered: FilteredData[],
-  newTopic: string
+  newTopic: string, id: string, notificationLevels: string[], telegramUserId: string
 ): Promise<FilteredData[]> {
   for (const row of filtered) {
     const title = String(row.text).trim();
@@ -98,7 +106,11 @@ async function feedToGPT(
       //   temperature: 0,
       // });
       // row.relevancy = response.choices[0].message.content ?? undefined;
-      row.relevancy = "High";
+      row.relevancy = "high";
+      if (shouldSendNotification(row.relevancy, notificationLevels)) {
+        const message = `${row.url}`;
+        await sendTelegramMessage(telegramUserId, message);
+      }
     } catch (error) {
       console.error(`Error in GPT-4 processing: ${error}`);
     }
@@ -121,7 +133,9 @@ interface TwitterData {
 
 async function fetchRssFeeds(
   urls: string[],
-  newTopic: string
+  newTopic: string,
+  id: string,
+  notificationLevels: string[], telegramUserId: string
 ): Promise<FilteredData[]> {
   const twitterData: TwitterData[] = [];
 
@@ -180,12 +194,14 @@ async function fetchRssFeeds(
     })
   );
 
-  return feedToGPT(filtered, newTopic);
+  return feedToGPT(filtered, newTopic, id, notificationLevels, telegramUserId);
 }
 
 async function fetchFeeds(
   twitterUrls: string[],
-  newTopic: string
+  newTopic: string,
+  id: string,
+  notificationLevels: string[], telegramUserId: string
 ): Promise<FilteredData[]> {
   const urls: string[] = [];
   const apiUrl = "https://api.rss.app/v1/feeds";
@@ -230,19 +246,19 @@ async function fetchFeeds(
     }
   }
 
-  return fetchRssFeeds(urls, newTopic);
+  return fetchRssFeeds(urls, newTopic, id, notificationLevels, telegramUserId);
 }
 export async function GET(request: NextRequest) {
   try {
     console.log("Starting GET function");
-    const { searchParams } = new URL(request.url);
-    const forceRefresh = searchParams.get('refresh') === 'true';
-    
-    if (forceRefresh) {
-      console.log("Force refresh requested. Bypassing cache.");
-      // You might want to add logic here to clear any local caches
-      // or set flags to ensure fresh data is fetched
-    }
+    // const { searchParams } = new URL(request.url);
+    // const forceRefresh = searchParams.get('refresh') === 'true';
+
+    // if (forceRefresh) {
+    //   console.log("Force refresh requested. Bypassing cache.");
+    //   // You might want to add logic here to clear any local caches
+    //   // or set flags to ensure fresh data is fetched
+    // }
 
     const usersSnapshot = await db.collection("users").get();
     console.log(`Number of users: ${usersSnapshot.size}`);
@@ -260,11 +276,23 @@ export async function GET(request: NextRequest) {
           const tweetFeedData = tweetFeedDoc.data();
           console.log(`User ${userDoc.id} - Tweet feed data:`, tweetFeedData);
 
+          const userSettings = await getUserNotificationSettings(userDoc.id);
+          if (!userSettings) {
+            return NextResponse.json(
+              { error: "User notification settings not found." },
+              { status: 404 }
+            );
+          }
+
+          const notificationLevels = userSettings.notificationLevels || [];
+          const telegramUserId = userSettings.telegramUserId || "";
           if (tweetFeedData.twitterUrls && tweetFeedData.topic) {
             try {
               const result = await fetchFeeds(
                 tweetFeedData.twitterUrls,
-                tweetFeedData.topic
+                tweetFeedData.topic,
+                userDoc.id,
+                notificationLevels, telegramUserId
               );
               console.log(`User ${userDoc.id} - fetchFeeds result:`, result);
 
@@ -308,17 +336,20 @@ export async function GET(request: NextRequest) {
 
     const filteredResults = allResults.filter((result) => result !== null);
     console.log(`Total results: ${filteredResults.length}`);
-    const response =  NextResponse.json({
+    const response = NextResponse.json({
       results: filteredResults,
       timestamp: new Date().toISOString(),
     });
 
-    response.headers.set('Cache-Control', 'no-store, max-age=0');
+    response.headers.set("Cache-Control", "no-store, max-age=0");
     return response;
   } catch (error) {
     console.error(`Error processing data:`, error);
-    const errorResponse = NextResponse.json({ error: String(error) }, { status: 500 });
-    errorResponse.headers.set('Cache-Control', 'no-store, max-age=0');
+    const errorResponse = NextResponse.json(
+      { error: String(error) },
+      { status: 500 }
+    );
+    errorResponse.headers.set("Cache-Control", "no-store, max-age=0");
     return errorResponse;
   }
 }
