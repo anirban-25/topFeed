@@ -12,11 +12,11 @@ export async function getUserNotificationSettings(userId) {
         console.log("Document found:", docSnap.data());
       return docSnap.data();
     } else {
-      console.error("No notification settings found for user:", userId);
+      console.log("No notification settings found for user:", userId);
       return null;
     }
   } catch (error) {
-    console.error("Error fetching user notification settings:", error);
+    console.log("Error fetching user notification settings:", error);
     return null;
   }
 }

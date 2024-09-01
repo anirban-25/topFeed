@@ -22,7 +22,6 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 import { storeDataInFirestore } from "@/utils/storeTwitterData";
 import { useAppContext } from "@/contexts/AppContext";
-import { getUserNotificationSettings, sendTelegramMessage } from "@/utils/notificationUtils"; 
 
 const TwitterFeedDialog = ({
   size,
@@ -271,18 +270,7 @@ const TwitterFeedDialog = ({
       console.log("Tweets array:", tweetsArray);
 
       await storeDataInFirestore(tweetsArray, userId);
-      console.log("Data stored in Firestore successfully for user:", userId);
-      const userSettings = await getUserNotificationSettings(userId);
-      console.log("Fetched User Settings:", userSettings);
-
-      // Check if userSettings exist and match the criteria to send a Telegram notification
-      if (userSettings && userSettings.istelegram == true && userSettings.isActive == true && userSettings.twitter == true) {
-        console.log("conditions matched lessgo");
-        const message = `New twitter analysis data available: ${JSON.stringify(tweetsArray)}`;
-        // Send the message to the user's Telegram account
-        await sendTelegramMessage(userSettings.telegramUserId, message);
-        console.log("Telegram message sent successfully.");
-      }
+      
     } catch (error) {
       console.error("Error processing and storing tweets:", error);
     } finally {

@@ -110,10 +110,12 @@ async function feedToGPT(
       // });
       // row.relevancy = response.choices[0].message.content ?? undefined;
       row.relevancy = "high";
-      if (shouldSendNotification(row.relevancy, notificationLevels)) {
-        const message = `${row.url}`;
-        await sendTelegramMessage(telegramUserId, message);
-      }
+      try {
+        if (shouldSendNotification(row.relevancy, notificationLevels)) {
+          const message = `${row.url}`;
+          await sendTelegramMessage(telegramUserId, message);
+        }
+      } catch (error) {}
     } catch (error) {
       console.error(`Error in GPT-4 processing: ${error}`);
     }
@@ -266,16 +268,15 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    const userSettings = await getUserNotificationSettings(userId);
-    if (!userSettings) {
-      return NextResponse.json(
-        { error: "User notification settings not found." },
-        { status: 404 }
-      );
-    }
-
-    const notificationLevels = userSettings.notificationLevels || [];
-    const telegramUserId = userSettings.telegramUserId || "";
+    var notificationLevels: string[] = [];
+    var telegramUserId: string = "";
+    try {
+      const userSettings = await getUserNotificationSettings(userId);
+      if (userSettings) {
+        notificationLevels = userSettings.notificationLevels || [];
+        telegramUserId = userSettings.telegramUserId || "";
+      }
+    } catch (error) {}
     const dfFinal = await fetchFeeds(
       twitterUrls,
       newTopic,
