@@ -84,8 +84,12 @@ function shouldSendNotification(
   relevancy: string,
   notificationLevels: string[]
 ): boolean {
-  return notificationLevels.includes(relevancy);
+  const lowercasedRelevancy = relevancy.toLowerCase();
+  const lowercasedNotificationLevels = notificationLevels.map(level => level.toLowerCase());
+
+  return lowercasedNotificationLevels.includes(lowercasedRelevancy);
 }
+
 
 async function feedToGPT(
   filtered: FilteredData[],
@@ -114,8 +118,13 @@ async function feedToGPT(
         if (shouldSendNotification(row.relevancy, notificationLevels)) {
           const message = `${row.url}`;
           await sendTelegramMessage(telegramUserId, message);
+        }else{
+          console.log(row.relevancy+ "\nheyyyyyyy")
+          console.log(notificationLevels+ "\nheyyyyyyy")
         }
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
     } catch (error) {
       console.error(`Error in GPT-4 processing: ${error}`);
     }
@@ -276,6 +285,9 @@ export async function POST(request: Request) {
         notificationLevels = userSettings.notificationLevels || [];
         telegramUserId = userSettings.telegramUserId || "";
       }
+      console.log(notificationLevels)
+      console.log(telegramUserId)
+
     } catch (error) {}
     const dfFinal = await fetchFeeds(
       twitterUrls,

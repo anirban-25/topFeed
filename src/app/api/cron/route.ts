@@ -80,7 +80,10 @@ function shouldSendNotification(
   relevancy: string,
   notificationLevels: string[]
 ): boolean {
-  return notificationLevels.includes(relevancy);
+  const lowercasedRelevancy = relevancy.toLowerCase();
+  const lowercasedNotificationLevels = notificationLevels.map(level => level.toLowerCase());
+
+  return lowercasedNotificationLevels.includes(lowercasedRelevancy);
 }
 
 async function feedToGPT(
@@ -286,7 +289,8 @@ export async function GET(request: NextRequest) {
             notificationLevels = userSettings.notificationLevels || [];
             telegramUserId = userSettings.telegramUserId || "";
           }
-          
+          // console.log("blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah" + notificationLevels)
+          // console.log(telegramUserId)
           if (tweetFeedData.twitterUrls && tweetFeedData.topic) {
             try {
               const result = await fetchFeeds(
