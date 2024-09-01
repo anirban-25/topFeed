@@ -170,7 +170,7 @@ async function fetchRssFeeds(
 
   // Filter and process data
   const currentDate = new Date();
-  const fifteenMinutesAgo = subMinutes(currentDate, 15);
+  const fifteenMinutesAgo = subMinutes(currentDate, 25);
   const filteredData = twitterData
     .filter((item) => parseISO(item.date_published) > fifteenMinutesAgo)
     .sort(
