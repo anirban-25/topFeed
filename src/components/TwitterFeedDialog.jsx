@@ -231,9 +231,9 @@ const TwitterFeedDialog = ({
         );
         console.log("New document written with ID: ", docRef.id);
         setExistingFeedId(docRef.id);
+        await processAndStoreTweets(user.uid, twitterUrls, newTopic);
       }
 
-      await processAndStoreTweets(user.uid, twitterUrls, newTopic);
     } catch (error) {
       console.error("Error:", error);
       alert("An error occurred while saving the feed. Please try again.");
