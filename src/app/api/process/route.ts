@@ -90,7 +90,7 @@ async function feedToGPT(filtered: FilteredData[], newTopic: string, notificatio
       // row.relevancy = response.choices[0].message.content ?? undefined;
       row.relevancy = "high";
       if (shouldSendNotification(row.relevancy, notificationLevels)) {
-        const message = `hellllllllllllllo`;
+        const message = `${row.text}\n\n${row.url}`;
         await sendTelegramMessage(telegramUserId, message);
       }
     } catch (error) {
