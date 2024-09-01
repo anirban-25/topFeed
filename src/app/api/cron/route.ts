@@ -258,14 +258,14 @@ async function fetchFeeds(
 export async function GET(request: NextRequest) {
   try {
     console.log("Starting GET function");
-    // const { searchParams } = new URL(request.url);
-    // const forceRefresh = searchParams.get('refresh') === 'true';
+    const { searchParams } = new URL(request.url);
+    const forceRefresh = searchParams.get('refresh') === 'true';
 
-    // if (forceRefresh) {
-    //   console.log("Force refresh requested. Bypassing cache.");
-    //   // You might want to add logic here to clear any local caches
-    //   // or set flags to ensure fresh data is fetched
-    // }
+    if (forceRefresh) {
+      console.log("Force refresh requested. Bypassing cache.");
+      // You might want to add logic here to clear any local caches
+      // or set flags to ensure fresh data is fetched
+    }
 
     const usersSnapshot = await db.collection("users").get();
     console.log(`Number of users: ${usersSnapshot.size}`);
