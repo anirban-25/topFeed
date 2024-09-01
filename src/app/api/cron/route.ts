@@ -93,20 +93,20 @@ async function feedToGPT(
     const summaryInput = `text: ${title}\nMeta Title of Data mentioned via url: ${contentText}`;
 
     try {
-      // const response = await client.chat.completions.create({
-      //   model: MODEL,
-      //   messages: [
-      //     {
-      //       role: "system",
-      //       content: `You are an AI assistant helping to categorize tweets based on their relevancy to -> ${newTopic}. PS: the words provided before should be strictly measured, Match in words should not be taken as relevancy, rather give preferrence to the algorithms and details. You will provide one word answer, either High, Medium, Low. The description will include detailed topics and areas of interest. Each tweet should be categorized into one of three relevancy levels: high, medium, or low. Use the following criteria to determine the relevancy:\nHigh Relevancy: The tweet directly discusses the key elements of the specified description in detail, providing valuable insights, updates, strategies, or news specifically about those elements. The content is focused and highly relevant to the description, addressing specific aspects or details mentioned in the description.\nMedium Relevancy: The tweet mentions elements of the specified description but does not focus exclusively on them. It may include some useful information, tips, or brief mentions related to the description. While it might cover related topics, it does not delve deeply into the specifics outlined in the description.\nLow Relevancy: The tweet mentions related but distinct topics or focuses on other areas. It does not provide substantial information or insights about the specific elements mentioned in the description. The relevance to the specified description is minimal or tangential.`,
-      //     },
-      //     { role: "user", content: title },
-      //   ],
-      //   max_tokens: 3000,
-      //   temperature: 0,
-      // });
-      // row.relevancy = response.choices[0].message.content ?? undefined;
-      row.relevancy = "high";
+      const response = await client.chat.completions.create({
+        model: MODEL,
+        messages: [
+          {
+            role: "system",
+            content: `You are an AI assistant helping to categorize tweets based on their relevancy to -> ${newTopic}. PS: the words provided before should be strictly measured, Match in words should not be taken as relevancy, rather give preferrence to the algorithms and details. You will provide one word answer, either High, Medium, Low. The description will include detailed topics and areas of interest. Each tweet should be categorized into one of three relevancy levels: high, medium, or low. Use the following criteria to determine the relevancy:\nHigh Relevancy: The tweet directly discusses the key elements of the specified description in detail, providing valuable insights, updates, strategies, or news specifically about those elements. The content is focused and highly relevant to the description, addressing specific aspects or details mentioned in the description.\nMedium Relevancy: The tweet mentions elements of the specified description but does not focus exclusively on them. It may include some useful information, tips, or brief mentions related to the description. While it might cover related topics, it does not delve deeply into the specifics outlined in the description.\nLow Relevancy: The tweet mentions related but distinct topics or focuses on other areas. It does not provide substantial information or insights about the specific elements mentioned in the description. The relevance to the specified description is minimal or tangential.`,
+          },
+          { role: "user", content: title },
+        ],
+        max_tokens: 3000,
+        temperature: 0,
+      });
+      row.relevancy = response.choices[0].message.content ?? "low";
+      // row.relevancy = "high";
       try {
         if (shouldSendNotification(row.relevancy, notificationLevels)) {
           const message = `${row.url}`;
