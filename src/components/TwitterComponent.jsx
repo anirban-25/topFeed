@@ -130,7 +130,7 @@ const TwitterComponent = () => {
         user.uid,
         "user_tweets"
       );
-      const userTweetsQuery = query(userTweetsCollectionRef,orderBy("timestamp", "desc"), // Order by timestamp in descending order
+      const userTweetsQuery = query(userTweetsCollectionRef, // Order by timestamp in descending order
       limit(150));
       const querySnapshot = await getDocs(userTweetsQuery);
 

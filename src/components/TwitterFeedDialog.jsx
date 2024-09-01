@@ -252,7 +252,7 @@ const TwitterFeedDialog = ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ twitterUrls: urls, newTopic: topic }),
+        body: JSON.stringify({ twitterUrls: urls, newTopic: topic , userId: userId}),
       });
 
       if (!response.ok) {

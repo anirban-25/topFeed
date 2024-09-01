@@ -4,6 +4,7 @@ import { parse } from 'node-html-parser';
 import admin from 'firebase-admin';
 import { OpenAI } from 'openai';
 import { parseISO, subHours } from 'date-fns';
+import { getUserNotificationSettings, sendTelegramMessage } from '@/utils/notificationUtils';
 
 // Initialize Firebase Admin SDK (if not already initialized elsewhere)
 if (!admin.apps.length) {
@@ -58,6 +59,7 @@ async function fetchMetaTitle(url: string): Promise<string> {
 
 interface FilteredData {
   text: string;
+  title?: string;
   meta_titles: string[];
   url?: string;
   content_html?: string;
@@ -65,7 +67,11 @@ interface FilteredData {
   relevancy?: string;
 }
 
-async function feedToGPT(filtered: FilteredData[], newTopic: string): Promise<FilteredData[]> {
+function shouldSendNotification(relevancy: string, notificationLevels: string[]): boolean {
+  return notificationLevels.includes(relevancy);
+}
+
+async function feedToGPT(filtered: FilteredData[], newTopic: string, notificationLevels: string[], telegramUserId: string): Promise<FilteredData[]> {
   for (const row of filtered) {
     const title = String(row.text).trim();
     const contentText = String(row.meta_titles);
@@ -82,7 +88,11 @@ async function feedToGPT(filtered: FilteredData[], newTopic: string): Promise<Fi
       //   temperature: 0,
       // });
       // row.relevancy = response.choices[0].message.content ?? undefined;
-      row.relevancy = "High";
+      row.relevancy = "high";
+      if (shouldSendNotification(row.relevancy, notificationLevels)) {
+        const message = `hellllllllllllllo`;
+        await sendTelegramMessage(telegramUserId, message);
+      }
     } catch (error) {
       console.error(`Error in GPT-4 processing: ${error}`);
     }
@@ -103,7 +113,7 @@ interface TwitterData {
   meta_titles?: string[];
 }
 
-async function fetchRssFeeds(urls: string[], newTopic: string): Promise<FilteredData[]> {
+async function fetchRssFeeds(urls: string[], newTopic: string, notificationLevels: string[], telegramUserId:string): Promise<FilteredData[]> {
   const twitterData: TwitterData[] = [];
 
   for (const url of urls) {
@@ -145,13 +155,13 @@ async function fetchRssFeeds(urls: string[], newTopic: string): Promise<Filtered
     item.meta_titles = await Promise.all((item.links ?? []).map(fetchMetaTitle));
   }
 
-  const filtered: FilteredData[] = filteredData.map(({ text, meta_titles, url, content_html, authors }) => 
-    ({ text: text ?? '', meta_titles: meta_titles ?? [], url, content_html, authors }));
+  const filtered: FilteredData[] = filteredData.map(({ text, meta_titles, url, content_html, authors, title }) => 
+    ({ text: text ?? '', meta_titles: meta_titles ?? [], url, content_html, authors, title }));
 
-  return feedToGPT(filtered, newTopic);
+  return feedToGPT(filtered, newTopic, notificationLevels, telegramUserId);
 }
 
-async function fetchFeeds(twitterUrls: string[], newTopic: string): Promise<FilteredData[]> {
+async function fetchFeeds(twitterUrls: string[], newTopic: string, notificationLevels: string[], telegramUserId:string): Promise<FilteredData[]> {
   const urls: string[] = [];
   const apiUrl = "https://api.rss.app/v1/feeds";
   const headers = {
@@ -184,18 +194,24 @@ async function fetchFeeds(twitterUrls: string[], newTopic: string): Promise<Filt
     }
   }
 
-  return fetchRssFeeds(urls, newTopic);
+  return fetchRssFeeds(urls, newTopic, notificationLevels, telegramUserId);
 }
 
 export async function POST(request: Request) {
   try {
-    const { twitterUrls, newTopic } = await request.json();
+    const { twitterUrls, newTopic, userId } = await request.json();
 
     if (!twitterUrls || !newTopic || !Array.isArray(twitterUrls)) {
       return NextResponse.json({ error: "Invalid input. 'twitterUrls' must be an array and 'newTopic' is required." }, { status: 400 });
     }
+ const userSettings = await getUserNotificationSettings(userId);
+    if (!userSettings) {
+      return NextResponse.json({ error: "User notification settings not found." }, { status: 404 });
+    }
 
-    const dfFinal = await fetchFeeds(twitterUrls, newTopic);
+    const notificationLevels = userSettings.notificationLevels || [];
+    const telegramUserId = userSettings.telegramUserId || "";
+    const dfFinal = await fetchFeeds(twitterUrls, newTopic, notificationLevels, telegramUserId);
     return NextResponse.json({ result: dfFinal });
   } catch (error) {
     console.error(`Error processing data: ${error}`);
