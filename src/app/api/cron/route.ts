@@ -107,9 +107,13 @@ async function feedToGPT(
       // });
       // row.relevancy = response.choices[0].message.content ?? undefined;
       row.relevancy = "high";
-      if (shouldSendNotification(row.relevancy, notificationLevels)) {
-        const message = `${row.url}`;
-        await sendTelegramMessage(telegramUserId, message);
+      try {
+        if (shouldSendNotification(row.relevancy, notificationLevels)) {
+          const message = `${row.url}`;
+          await sendTelegramMessage(telegramUserId, message);
+        }
+      } catch (error) {
+        
       }
     } catch (error) {
       console.error(`Error in GPT-4 processing: ${error}`);
@@ -275,17 +279,14 @@ export async function GET(request: NextRequest) {
           const tweetFeedDoc = tweetFeedSnapshot.docs[0];
           const tweetFeedData = tweetFeedDoc.data();
           console.log(`User ${userDoc.id} - Tweet feed data:`, tweetFeedData);
-
+          var notificationLevels: string[] = [];
+          var telegramUserId = ""
           const userSettings = await getUserNotificationSettings(userDoc.id);
-          if (!userSettings) {
-            return NextResponse.json(
-              { error: "User notification settings not found." },
-              { status: 404 }
-            );
+          if (userSettings) {
+            notificationLevels = userSettings.notificationLevels || [];
+            telegramUserId = userSettings.telegramUserId || "";
           }
-
-          const notificationLevels = userSettings.notificationLevels || [];
-          const telegramUserId = userSettings.telegramUserId || "";
+          
           if (tweetFeedData.twitterUrls && tweetFeedData.topic) {
             try {
               const result = await fetchFeeds(
