@@ -277,106 +277,106 @@ async function fetchFeeds(
   return fetchRssFeeds(urls, newTopic, id, notificationLevels, telegramUserId);
 }
 export async function GET(request: NextRequest) {
-  try {
-    console.log("Starting GET function");
-    const { searchParams } = new URL(request.url);
-    const forceRefresh = searchParams.get("refresh") === "true";
+  // try {
+  //   console.log("Starting GET function");
+  //   const { searchParams } = new URL(request.url);
+  //   const forceRefresh = searchParams.get("refresh") === "true";
 
-    if (forceRefresh) {
-      console.log("Force refresh requested. Bypassing cache.");
-      // You might want to add logic here to clear any local caches
-      // or set flags to ensure fresh data is fetched
-    }
+  //   if (forceRefresh) {
+  //     console.log("Force refresh requested. Bypassing cache.");
+  //     // You might want to add logic here to clear any local caches
+  //     // or set flags to ensure fresh data is fetched
+  //   }
 
-    const usersSnapshot = await db.collection("users").get();
-    console.log(`Number of users: ${usersSnapshot.size}`);
+  //   const usersSnapshot = await db.collection("users").get();
+  //   console.log(`Number of users: ${usersSnapshot.size}`);
 
-    const allResults = await Promise.all(
-      usersSnapshot.docs.map(async (userDoc) => {
-        console.log(`Processing user: ${userDoc.id}`);
-        const tweetFeedSnapshot = await userDoc.ref
-          .collection("tweet_feed")
-          .limit(1)
-          .get();
+  //   const allResults = await Promise.all(
+  //     usersSnapshot.docs.map(async (userDoc) => {
+  //       console.log(`Processing user: ${userDoc.id}`);
+  //       const tweetFeedSnapshot = await userDoc.ref
+  //         .collection("tweet_feed")
+  //         .limit(1)
+  //         .get();
 
-        if (!tweetFeedSnapshot.empty) {
-          const tweetFeedDoc = tweetFeedSnapshot.docs[0];
-          const tweetFeedData = tweetFeedDoc.data();
-          console.log(`User ${userDoc.id} - Tweet feed data:`, tweetFeedData);
-          var notificationLevels: string[] = [];
-          var telegramUserId = "";
-          const userSettings = await getUserNotificationSettings(userDoc.id);
-          if (userSettings) {
-            notificationLevels = userSettings.notificationLevels || [];
-            telegramUserId = userSettings.telegramUserId || "";
-          }
-          // console.log("blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah" + notificationLevels)
-          // console.log(telegramUserId)
-          if (tweetFeedData.twitterUrls && tweetFeedData.topic) {
-            try {
-              const result = await fetchFeeds(
-                tweetFeedData.twitterUrls,
-                tweetFeedData.topic,
-                userDoc.id,
-                notificationLevels,
-                telegramUserId
-              );
-              console.log(`User ${userDoc.id} - fetchFeeds result:`, result);
+  //       if (!tweetFeedSnapshot.empty) {
+  //         const tweetFeedDoc = tweetFeedSnapshot.docs[0];
+  //         const tweetFeedData = tweetFeedDoc.data();
+  //         console.log(`User ${userDoc.id} - Tweet feed data:`, tweetFeedData);
+  //         var notificationLevels: string[] = [];
+  //         var telegramUserId = "";
+  //         const userSettings = await getUserNotificationSettings(userDoc.id);
+  //         if (userSettings) {
+  //           notificationLevels = userSettings.notificationLevels || [];
+  //           telegramUserId = userSettings.telegramUserId || "";
+  //         }
+  //         // console.log("blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah" + notificationLevels)
+  //         // console.log(telegramUserId)
+  //         if (tweetFeedData.twitterUrls && tweetFeedData.topic) {
+  //           try {
+  //             const result = await fetchFeeds(
+  //               tweetFeedData.twitterUrls,
+  //               tweetFeedData.topic,
+  //               userDoc.id,
+  //               notificationLevels,
+  //               telegramUserId
+  //             );
+  //             console.log(`User ${userDoc.id} - fetchFeeds result:`, result);
 
-              // Update user_tweets subcollection
-              const userTweetsRef = userDoc.ref.collection("user_tweets");
-              const batch = db.batch();
+  //             // Update user_tweets subcollection
+  //             const userTweetsRef = userDoc.ref.collection("user_tweets");
+  //             const batch = db.batch();
 
-              for (const tweet of result) {
-                const newTweetRef = userTweetsRef.doc();
-                batch.set(newTweetRef, {
-                  content_html: tweet.content_html,
-                  authors: tweet.authors,
-                  relevancy: tweet.relevancy,
-                });
-              }
+  //             for (const tweet of result) {
+  //               const newTweetRef = userTweetsRef.doc();
+  //               batch.set(newTweetRef, {
+  //                 content_html: tweet.content_html,
+  //                 authors: tweet.authors,
+  //                 relevancy: tweet.relevancy,
+  //               });
+  //             }
 
-              await batch.commit();
-              console.log(`Updated user_tweets for user ${userDoc.id}`);
+  //             await batch.commit();
+  //             console.log(`Updated user_tweets for user ${userDoc.id}`);
 
-              return {
-                userId: userDoc.id,
-                tweetFeedId: tweetFeedDoc.id,
-                result,
-              };
-            } catch (error) {
-              console.error(
-                `Error in fetchFeeds for user ${userDoc.id}:`,
-                error
-              );
-              return null;
-            }
-          } else {
-            console.log(`Missing twitterUrls or topic for user ${userDoc.id}`);
-          }
-        } else {
-          console.log(`No tweet_feed found for user ${userDoc.id}`);
-        }
-        return null;
-      })
-    );
+  //             return {
+  //               userId: userDoc.id,
+  //               tweetFeedId: tweetFeedDoc.id,
+  //               result,
+  //             };
+  //           } catch (error) {
+  //             console.error(
+  //               `Error in fetchFeeds for user ${userDoc.id}:`,
+  //               error
+  //             );
+  //             return null;
+  //           }
+  //         } else {
+  //           console.log(`Missing twitterUrls or topic for user ${userDoc.id}`);
+  //         }
+  //       } else {
+  //         console.log(`No tweet_feed found for user ${userDoc.id}`);
+  //       }
+  //       return null;
+  //     })
+  //   );
 
-    const filteredResults = allResults.filter((result) => result !== null);
-    console.log(`Total results: ${filteredResults.length}`);
-    const response = NextResponse.json({
-      results: filteredResults,
-      timestamp: new Date().toISOString(),
-    });
+  //   const filteredResults = allResults.filter((result) => result !== null);
+  //   console.log(`Total results: ${filteredResults.length}`);
+  //   const response = NextResponse.json({
+  //     results: filteredResults,
+  //     timestamp: new Date().toISOString(),
+  //   });
 
-    response.headers.set("Cache-Control", "no-store, max-age=0");
-    return response;
-  } catch (error) {
-    console.error(`Error processing data:`, error);
-    const errorResponse = NextResponse.json(
-      { error: String(error) },
-      { status: 500 }
-    );
-    errorResponse.headers.set("Cache-Control", "no-store, max-age=0");
-  // return NextResponse.json({ message: "hey" });
-  }
+  //   response.headers.set("Cache-Control", "no-store, max-age=0");
+  //   return response;
+  // } catch (error) {
+  //   console.error(`Error processing data:`, error);
+  //   const errorResponse = NextResponse.json(
+  //     { error: String(error) },
+  //     { status: 500 }
+  //   );
+  //   errorResponse.headers.set("Cache-Control", "no-store, max-age=0");
+  return NextResponse.json({ message: "hey" });
+  // }
 }
