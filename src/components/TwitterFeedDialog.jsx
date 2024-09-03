@@ -231,8 +231,8 @@ const TwitterFeedDialog = ({
         );
         console.log("New document written with ID: ", docRef.id);
         setExistingFeedId(docRef.id);
-        await processAndStoreTweets(user.uid, twitterUrls, newTopic);
       }
+      await processAndStoreTweets(user.uid, twitterUrls, newTopic);
 
     } catch (error) {
       console.error("Error:", error);
