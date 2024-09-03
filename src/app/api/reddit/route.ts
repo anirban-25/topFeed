@@ -14,7 +14,7 @@ const lambdaClient = new LambdaClient({
 
 export async function POST(req: Request) {
   try {
-    const { subreddits, userId, isRefresh } = await req.json();
+    const { subreddits, userId} = await req.json();
 
     // Log the incoming request data
     console.log("Subreddits:", subreddits);
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
       // await sendTelegramMessage('Atishab', 'Test message from bot');
 
       // Store the processed data, subreddits, and increment the refresh count in Firestore
-      await storeDataInFirestore(analysisData, userId, subreddits, isRefresh);
+      await storeDataInFirestore(analysisData, userId, subreddits);
       console.log("Fetching user notification settings for:", userId);
 
       // Fetch user notification settings from Firestore
