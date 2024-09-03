@@ -57,7 +57,7 @@ export async function POST(req: Request) {
       console.log("Fetching user notification settings for:", userId);
 
       // Fetch user notification settings from Firestore
-      // const userSettings = await getUserNotificationSettings(userId);
+      const userSettings = await getUserNotificationSettings(userId);
       // console.log("Fetched User Settings:", userSettings);
 
       // // Check if userSettings exist and match the criteria to send a Telegram notification
