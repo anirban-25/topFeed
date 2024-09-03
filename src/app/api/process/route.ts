@@ -85,11 +85,12 @@ function shouldSendNotification(
   notificationLevels: string[]
 ): boolean {
   const lowercasedRelevancy = relevancy.toLowerCase();
-  const lowercasedNotificationLevels = notificationLevels.map(level => level.toLowerCase());
+  const lowercasedNotificationLevels = notificationLevels.map((level) =>
+    level.toLowerCase()
+  );
 
   return lowercasedNotificationLevels.includes(lowercasedRelevancy);
 }
-
 
 async function feedToGPT(
   filtered: FilteredData[],
@@ -106,8 +107,11 @@ async function feedToGPT(
       const response = await client.chat.completions.create({
         model: MODEL,
         messages: [
-          { role: "system", content: `You are an AI assistant helping to categorize tweets based on their relevancy to -> ${newTopic}. PS: the words provided before should be strictly measured, Match in words should not be taken as relevancy, rather give preferrence to the algorithms and details. You will provide one word answer, either High, Medium, Low. The description will include detailed topics and areas of interest. Each tweet should be categorized into one of three relevancy levels: high, medium, or low. Use the following criteria to determine the relevancy:\nHigh Relevancy: The tweet directly discusses the key elements of the specified description in detail, providing valuable insights, updates, strategies, or news specifically about those elements. The content is focused and highly relevant to the description, addressing specific aspects or details mentioned in the description.\nMedium Relevancy: The tweet mentions elements of the specified description but does not focus exclusively on them. It may include some useful information, tips, or brief mentions related to the description. While it might cover related topics, it does not delve deeply into the specifics outlined in the description.\nLow Relevancy: The tweet mentions related but distinct topics or focuses on other areas. It does not provide substantial information or insights about the specific elements mentioned in the description. The relevance to the specified description is minimal or tangential.` },
-          { role: "user", content: title }
+          {
+            role: "system",
+            content: `You are an AI assistant helping to categorize tweets based on their relevancy to -> ${newTopic}. PS: the words provided before should be strictly measured, Match in words should not be taken as relevancy, rather give preferrence to the algorithms and details. You will provide one word answer, either High, Medium, Low. The description will include detailed topics and areas of interest. Each tweet should be categorized into one of three relevancy levels: high, medium, or low. Use the following criteria to determine the relevancy:\nHigh Relevancy: The tweet directly discusses the key elements of the specified description in detail, providing valuable insights, updates, strategies, or news specifically about those elements. The content is focused and highly relevant to the description, addressing specific aspects or details mentioned in the description.\nMedium Relevancy: The tweet mentions elements of the specified description but does not focus exclusively on them. It may include some useful information, tips, or brief mentions related to the description. While it might cover related topics, it does not delve deeply into the specifics outlined in the description.\nLow Relevancy: The tweet mentions related but distinct topics or focuses on other areas. It does not provide substantial information or insights about the specific elements mentioned in the description. The relevance to the specified description is minimal or tangential.`,
+          },
+          { role: "user", content: title },
         ],
         max_tokens: 3000,
         temperature: 0,
@@ -118,9 +122,9 @@ async function feedToGPT(
         if (shouldSendNotification(row.relevancy, notificationLevels)) {
           const message = `${row.url}`;
           await sendTelegramMessage(telegramUserId, message);
-        }else{
-          console.log(row.relevancy+ "\nheyyyyyyy")
-          console.log(notificationLevels+ "\nheyyyyyyy")
+        } else {
+          console.log(row.relevancy + "\nheyyyyyyy");
+          console.log(notificationLevels + "\nheyyyyyyy");
         }
       } catch (error) {
         console.log(error);
@@ -263,41 +267,64 @@ async function fetchFeeds(
 
   return fetchRssFeeds(urls, newTopic, notificationLevels, telegramUserId);
 }
-
+const withTimeout = (promise: Promise<any>, timeoutMs: number) => {
+  let timeoutHandle: NodeJS.Timeout;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutHandle = setTimeout(() => reject(new Error('Operation timed out')), timeoutMs);
+  });
+  return Promise.race([
+    promise,
+    timeoutPromise
+  ]).then((result) => {
+    clearTimeout(timeoutHandle);
+    return result;
+  }).catch((error) => {
+    clearTimeout(timeoutHandle);
+    throw error;
+  });
+};
 export async function POST(request: Request) {
   try {
-    const { twitterUrls, newTopic, userId } = await request.json();
+    const timeoutMs = 300000; // 5 minutes timeout
 
-    if (!twitterUrls || !newTopic || !Array.isArray(twitterUrls)) {
-      return NextResponse.json(
-        {
-          error:
-            "Invalid input. 'twitterUrls' must be an array and 'newTopic' is required.",
-        },
-        { status: 400 }
-      );
-    }
-    var notificationLevels: string[] = [];
-    var telegramUserId: string = "";
-    try {
-      const userSettings = await getUserNotificationSettings(userId);
-      if (userSettings) {
-        notificationLevels = userSettings.notificationLevels || [];
-        telegramUserId = userSettings.telegramUserId || "";
-      }
-      console.log(notificationLevels)
-      console.log(telegramUserId)
-
-    } catch (error) {}
-    const dfFinal = await fetchFeeds(
-      twitterUrls,
-      newTopic,
-      notificationLevels,
-      telegramUserId
-    );
-    return NextResponse.json({ result: dfFinal });
+    const result = await withTimeout(processRequest(request), timeoutMs);
+    return NextResponse.json(result);
   } catch (error) {
     console.error(`Error processing data: ${error}`);
     return NextResponse.json({ error: String(error) }, { status: 500 });
   }
+}
+
+async function processRequest(request: Request) {
+  const { twitterUrls, newTopic, userId } = await request.json();
+
+  if (!twitterUrls || !newTopic || !Array.isArray(twitterUrls)) {
+    throw new Error(
+      "Invalid input. 'twitterUrls' must be an array and 'newTopic' is required."
+    );
+  }
+
+  let notificationLevels: string[] = [];
+  let telegramUserId: string = "";
+
+  try {
+    const userSettings = await getUserNotificationSettings(userId);
+    if (userSettings) {
+      notificationLevels = userSettings.notificationLevels || [];
+      telegramUserId = userSettings.telegramUserId || "";
+    }
+    console.log(notificationLevels);
+    console.log(telegramUserId);
+  } catch (error) {
+    // Handle error if needed
+  }
+
+  const dfFinal = await fetchFeeds(
+    twitterUrls,
+    newTopic,
+    notificationLevels,
+    telegramUserId
+  );
+
+  return { result: dfFinal };
 }
