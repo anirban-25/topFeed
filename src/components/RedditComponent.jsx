@@ -48,6 +48,9 @@ const RedditComponent = () => {
       const response = await axios.post("/api/reddit", {
         subreddits: docData.subreddits,
         userId,
+      },
+      {
+        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
       });
 
       if (response.status !== 200) {
@@ -62,6 +65,9 @@ const RedditComponent = () => {
       const response = await axios.post("/api/reddit", {
         subreddits: cleanedTopics,
         userId,
+      },
+      {
+        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
       });
 
       if (response.status !== 200) {
