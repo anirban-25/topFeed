@@ -377,6 +377,6 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
     errorResponse.headers.set("Cache-Control", "no-store, max-age=0");
-  // return NextResponse.json({ message: "hey" });
+    return errorResponse;
   }
 }
