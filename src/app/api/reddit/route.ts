@@ -58,16 +58,16 @@ export async function POST(req: Request) {
 
       // Fetch user notification settings from Firestore
       const userSettings = await getUserNotificationSettings(userId);
-      // console.log("Fetched User Settings:", userSettings);
+      console.log("Fetched User Settings:", userSettings);
 
-      // // Check if userSettings exist and match the criteria to send a Telegram notification
-      // if (userSettings && userSettings.istelegram == true && userSettings.isActive == true && userSettings.reddit == true) {
-      //   console.log("conditions matched lessgo");
-      //   const message = `New Reddit analysis data available: ${JSON.stringify(analysisData)}`;
-      //   // Send the message to the user's Telegram account
-      //   await sendTelegramMessage(userSettings.telegramUserId, message);
-      //   console.log("Telegram message sent successfully.");
-      // }
+      // Check if userSettings exist and match the criteria to send a Telegram notification
+      if (userSettings && userSettings.istelegram == true && userSettings.isActive == true && userSettings.reddit == true) {
+        console.log("conditions matched lessgo");
+        const message = `New Reddit analysis data available: ${JSON.stringify(analysisData)}`;
+        // Send the message to the user's Telegram account
+        await sendTelegramMessage(userSettings.telegramUserId, message);
+        console.log("Telegram message sent successfully.");
+      }
 
       return NextResponse.json({ message: "Data processed, stored, and notification sent if applicable", analysisData }, { status: 200 });
     } else {
