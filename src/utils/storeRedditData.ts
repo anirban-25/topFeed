@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { collection, doc, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { collection, doc, setDoc } from 'firebase/firestore';
 
 type SubHeading = {
   title: string;
@@ -18,7 +18,7 @@ type TrendsAndQuestions = {
 
 type APIResponseType = (Heading | TrendsAndQuestions)[];
 
-export async function storeDataInFirestore(data: APIResponseType, user: string, subreddits: string[], isRefresh: boolean = false) {
+export async function storeDataInFirestore(data: APIResponseType, user: string, subreddits: string[]) {
   if (!user) {
     console.error("No user ID provided.");
     return;
@@ -35,12 +35,6 @@ export async function storeDataInFirestore(data: APIResponseType, user: string, 
       subreddits: subreddits,
       timestamp: new Date(),
     }, { merge: true });  // This will overwrite existing fields
-
-    if (isRefresh) {
-      await updateDoc(userDocRef, {
-        refreshCount: increment(1),
-      });
-    }
 
     console.log("Document updated with ID: ", latestDocRef.id);
     return latestDocRef;
