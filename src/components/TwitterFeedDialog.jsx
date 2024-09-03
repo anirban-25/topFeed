@@ -239,20 +239,40 @@ const TwitterFeedDialog = ({
       alert("An error occurred while saving the feed. Please try again.");
     }
   };
-
+  function timeoutPromise(ms, promise) {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error("Request timed out"));
+      }, ms);
+  
+      promise
+        .then((response) => {
+          clearTimeout(timer);
+          resolve(response);
+        })
+        .catch((err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
+    });
+  }
   const processAndStoreTweets = async (userId, urls, topic) => {
     localStorage.setItem("TwitterLoader", true);
     setTwitterLoader(true);
     onFeedCreated();
     handleOpen(null);
     try {
-      const response = await fetch("/api/process", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ twitterUrls: urls, newTopic: topic , userId: userId}),
-      });
+      const response = await timeoutPromise(
+        240000, // 3 minutes timeout
+        fetch("/api/process", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ twitterUrls: urls, newTopic: topic, userId: userId }),
+        })
+      );
+  
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
