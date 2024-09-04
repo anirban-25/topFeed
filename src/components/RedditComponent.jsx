@@ -39,44 +39,36 @@ const RedditComponent = () => {
       FunctionName: "chatgpt",
       Payload: JSON.stringify(eventPayload),
     };
-  
-    try {
-      const command = new InvokeCommand(params);
-      const lambdaResponse = await lambdaClient.send(command);
-      console.log("Lambda response:", lambdaResponse);
-  
-      if (lambdaResponse.StatusCode === 200 && lambdaResponse.Payload) {
-        const responseBuffer = lambdaResponse.Payload instanceof Uint8Array 
-          ? lambdaResponse.Payload 
-          : new Uint8Array(lambdaResponse.Payload);
-        const parsedResponse = JSON.parse(Buffer.from(responseBuffer).toString());
-  
-        if (parsedResponse.statusCode === 400) {
-          throw new Error(parsedResponse.body);
-        }
-  
-        const parsedBody = JSON.parse(parsedResponse.body);
-        const analysisData = parsedBody;
-  
-        console.log("Analysis data to store in Firestore:", analysisData);
-  
-        if (!analysisData) {
-          throw new Error("No analysis data found in the Lambda response.");
-        }
-  
-        // Store the processed data, subreddits, and increment the refresh count in Firestore
-        await storeDataInFirestore(analysisData, userId, subreddits);
-  
-        return analysisData;
-      } else {
-        throw new Error("Failed to invoke Lambda function");
+    const command = new InvokeCommand(params);
+    const lambdaResponse = await LambdaClient.send(command);
+    console.log("Lambda response:", lambdaResponse);
+    if (lambdaResponse.StatusCode === 200 && lambdaResponse.Payload) {
+      const parsedResponse = JSON.parse(Buffer.from(lambdaResponse.Payload).toString());
+      if (parsedResponse.statusCode === 400) {
+        throw new Error(parsedResponse.body);
       }
-    } catch (error) {
-      console.error("Error invoking Lambda:", error);
-      throw error;
+      const parsedBody = JSON.parse(parsedResponse.body);
+      const analysisData = parsedBody;
+      console.log("Analysis data to store in Firestore:", analysisData);
+      if (!analysisData) {
+        throw new Error("No analysis data found in the Lambda response.");
+      }
+      // Store the processed data, subreddits, and increment the refresh count in Firestore
+      await storeDataInFirestore(analysisData, userId, subreddits);
+      // console.log("Fetching user notification settings for:", userId);
+      // const userSettings = await getUserNotificationSettings(userId);
+      // console.log("Fetched User Settings:", userSettings);
+      // if (userSettings && userSettings.istelegram && userSettings.isActive && userSettings.reddit) {
+      //   console.log("conditions matched lessgo");
+      //   const message = `New Reddit analysis data available: ${JSON.stringify(analysisData)}`;
+      //   await sendTelegramMessage(userSettings.telegramUserId, message);
+      //   console.log("Telegram message sent successfully.");
+      // }
+      return analysisData;
+    } else {
+      throw new Error("Failed to invoke Lambda function");
     }
   }
-
   const handleRefresh = async (cleanedTopics) => {
     setLoading(true);
     try {
@@ -101,12 +93,11 @@ const RedditComponent = () => {
       await fetchLatestRedditData();
     } catch (error) {
       console.error("Error in handleRefresh:", error);
-      setError(error.message);
+      // Handle the error appropriately
     } finally {
       setLoading(false);
     }
   };
-    
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
