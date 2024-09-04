@@ -13,7 +13,6 @@ import { Bars } from "react-loader-spinner";
 import { IoSearch } from "react-icons/io5";
 import RedditMasonryLayout from "./MasonryLayoutReddit";
 import { useAppContext } from "@/contexts/AppContext";
-
 const RedditComponent = () => {
   const { redditDataFetch, setRedditDataFetch } = useAppContext();
   const [redditData, setRedditData] = useState(null);
@@ -24,15 +23,7 @@ const RedditComponent = () => {
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const lambdaClient = new LambdaClient({
-    region: 'us-east-2', // Replace with your AWS region
-    credentials: {
-      accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
-    },
-  });
   const handleOpen = (value) => setOpen(value);
-
   const handleSubmit = async (cleanedTopics) => {
     await handleRefresh(cleanedTopics);
     handleOpen(false);
@@ -41,11 +32,9 @@ const RedditComponent = () => {
     console.log("Subreddits:", subreddits);
     console.log("User ID:", userId);
     console.log("-------------------------------------------");
-  
     const eventPayload = {
       body: JSON.stringify({ subreddits }),
     };
-  
     const params = {
       FunctionName: "chatgpt",
       Payload: JSON.stringify(eventPayload),
@@ -90,7 +79,6 @@ const RedditComponent = () => {
 
   const handleRefresh = async (cleanedTopics) => {
     setLoading(true);
-  
     try {
       const user = auth.currentUser;
       if (!user) {
@@ -100,7 +88,6 @@ const RedditComponent = () => {
       const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
       const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
       const querySnapshot = await getDocs(q);
-  
       let subredditsToUse;
       if (!querySnapshot.empty) {
         const docData = querySnapshot.docs[0].data();
@@ -109,10 +96,8 @@ const RedditComponent = () => {
       } else {
         subredditsToUse = cleanedTopics;
       }
-  
       const analysisData = await processRedditData(subredditsToUse, userId);
       console.log("Received analysis data:", analysisData);
-  
       await fetchLatestRedditData();
     } catch (error) {
       console.error("Error in handleRefresh:", error);
@@ -126,10 +111,8 @@ const RedditComponent = () => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
-
     return () => unsubscribe();
   }, []);
-
   const fetchLatestRedditData = async () => {
     setLoading(true);
     if (!user) return;
@@ -138,15 +121,12 @@ const RedditComponent = () => {
       const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
       const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
       const querySnapshot = await getDocs(q);
-
       if (!querySnapshot.empty) {
         const latestDoc = querySnapshot.docs[0];
         const data = latestDoc.data();
         console.log("Fetched data:", data);
-
         const analysisData = data.analysis || [];
         console.log("Analysis data:", analysisData);
-
         setRedditData(analysisData);
       } else {
         console.log("No documents found in user_reddits");
@@ -160,7 +140,6 @@ const RedditComponent = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     if (user) {
       fetchLatestRedditData();
@@ -189,16 +168,13 @@ useEffect(() => {
         point.toLowerCase().includes(searchTerm.toLowerCase())
       )
   );
-
   useEffect(() => {
     if(redditDataFetch){
       setLoading(redditDataFetch);
     }else{
       fetchLatestRedditData();
-
     }
   }, [redditDataFetch]);
-  
   if (loaderInitial) {
     return (
       <div className="flex items-center justify-center min-h-[90%]">
@@ -224,7 +200,6 @@ useEffect(() => {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="font-kumbh-sans-medium flex flex-col items-center justify-center p-8">
@@ -232,7 +207,6 @@ useEffect(() => {
       </div>
     );
   }
-
   if (!redditData || redditData.length === 0) {
     return (
       <div className="font-kumbh-sans-medium flex flex-col items-center justify-center p-8">
@@ -267,7 +241,6 @@ useEffect(() => {
       </div>
     );
   }
-
   return (
     <div className="font-kumbh-sans-Medium p-8">
       <div className="flex justify-end mb-6">
@@ -288,17 +261,27 @@ useEffect(() => {
           Update Instant Refresh
         </button>
       </div>
-
       <RedditMasonryLayout filteredRedditData={filteredData} />
     </div>
   );
 };
-
 const formatTitle = (title) => {
   return title
     .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 };
-
 export default RedditComponent;
+
+
+
+
+
+
+
+
+
+
+
+
+

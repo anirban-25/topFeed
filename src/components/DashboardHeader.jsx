@@ -76,7 +76,7 @@ const DashboardHeader = () => {
         const analysisData = parsedBody;
   
         console.log("Analysis data to store in Firestore:", analysisData);
-                     
+                       
         if (!analysisData) {
           throw new Error("No analysis data found in the Lambda response.");
         }
