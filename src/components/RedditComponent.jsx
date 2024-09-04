@@ -28,6 +28,13 @@ const RedditComponent = () => {
     await handleRefresh(cleanedTopics);
     handleOpen(false);
   };
+  const lambdaClient = new LambdaClient({
+    region: 'us-east-2', // Replace with your AWS region
+    credentials: {
+      accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+    },
+  });
   async function processRedditData(subreddits, userId) {
     console.log("Subreddits:", subreddits);
     console.log("User ID:", userId);
