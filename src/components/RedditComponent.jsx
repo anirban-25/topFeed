@@ -1,10 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { storeDataInFirestore } from "@/utils/storeRedditData";
 import { db, auth } from "../firebase";
-import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
-import { getUserNotificationSettings, sendTelegramMessage } from "@/utils/notificationUtils";
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import CreateFeedPopup from "../components/CreateFeedPopup";
@@ -28,74 +25,47 @@ const RedditComponent = () => {
     await handleRefresh(cleanedTopics);
     handleOpen(false);
   };
-  async function processRedditData(subreddits, userId) {
-    console.log("Subreddits:", subreddits);
-    console.log("User ID:", userId);
-    console.log("-------------------------------------------");
-    const eventPayload = {
-      body: JSON.stringify({ subreddits }),
-    };
-    const params = {
-      FunctionName: "chatgpt",
-      Payload: JSON.stringify(eventPayload),
-    };
-    const command = new InvokeCommand(params);
-    const lambdaResponse = await LambdaClient.send(command);
-    console.log("Lambda response:", lambdaResponse);
-    if (lambdaResponse.StatusCode === 200 && lambdaResponse.Payload) {
-      const parsedResponse = JSON.parse(Buffer.from(lambdaResponse.Payload).toString());
-      if (parsedResponse.statusCode === 400) {
-        throw new Error(parsedResponse.body);
-      }
-      const parsedBody = JSON.parse(parsedResponse.body);
-      const analysisData = parsedBody;
-      console.log("Analysis data to store in Firestore:", analysisData);
-      if (!analysisData) {
-        throw new Error("No analysis data found in the Lambda response.");
-      }
-      // Store the processed data, subreddits, and increment the refresh count in Firestore
-      await storeDataInFirestore(analysisData, userId, subreddits);
-      // console.log("Fetching user notification settings for:", userId);
-      // const userSettings = await getUserNotificationSettings(userId);
-      // console.log("Fetched User Settings:", userSettings);
-      // if (userSettings && userSettings.istelegram && userSettings.isActive && userSettings.reddit) {
-      //   console.log("conditions matched lessgo");
-      //   const message = `New Reddit analysis data available: ${JSON.stringify(analysisData)}`;
-      //   await sendTelegramMessage(userSettings.telegramUserId, message);
-      //   console.log("Telegram message sent successfully.");
-      // }
-      return analysisData;
-    } else {
-      throw new Error("Failed to invoke Lambda function");
-    }
-  }
   const handleRefresh = async (cleanedTopics) => {
     setLoading(true);
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        throw new Error("User is not authenticated.");
-      }
-      const userId = user.uid;
-      const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
-      const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
-      const querySnapshot = await getDocs(q);
-      let subredditsToUse;
-      if (!querySnapshot.empty) {
-        const docData = querySnapshot.docs[0].data();
-        subredditsToUse = docData.subreddits || [];
-        setSubreddits(subredditsToUse);
-      } else {
-        subredditsToUse = cleanedTopics;
-      }
-      const analysisData = await processRedditData(subredditsToUse, userId);
-      console.log("Received analysis data:", analysisData);
-      await fetchLatestRedditData();
-    } catch (error) {
-      console.error("Error in handleRefresh:", error);
-      // Handle the error appropriately
-    } finally {
+    const user = auth.currentUser;
+    if (!user) {
       setLoading(false);
+      throw new Error("User is not authenticated.");
+    }
+    const userId = user.uid;
+    const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
+    const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const docData = querySnapshot.docs[0].data();
+      setSubreddits(docData.subreddits || []);
+      const response = await axios.post("/api/reddit", {
+        subreddits: docData.subreddits,
+        userId,
+      },
+      {
+        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
+      });
+      if (response.status !== 200) {
+        setLoading(false);
+        throw new Error("Failed to fetch data from server");
+      }
+      console.log("Received response from API:", response.data);
+      await fetchLatestRedditData();
+    } else {
+      const response = await axios.post("/api/reddit", {
+        subreddits: cleanedTopics,
+        userId,
+      },
+      {
+        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
+      });
+      if (response.status !== 200) {
+        setLoading(false);
+        throw new Error("Failed to fetch data from server");
+      }
+      console.log("Received response from API:", response.data);
+      await fetchLatestRedditData();
     }
   };
   useEffect(() => {
