@@ -46,7 +46,7 @@ const RedditComponent = () => {
     };
   
     const command = new InvokeCommand(params);
-    const lambdaResponse = await lambdaClient.send(command);
+    const lambdaResponse = await LambdaClient.send(command);
     console.log("Lambda response:", lambdaResponse);
   
     if (lambdaResponse.StatusCode === 200 && lambdaResponse.Payload) {
