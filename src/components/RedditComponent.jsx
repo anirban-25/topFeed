@@ -263,16 +263,3 @@ const formatTitle = (title) => {
     .join(" ");
 };
 export default RedditComponent;
-
-
-
-
-
-
-
-
-
-
-
-
-
