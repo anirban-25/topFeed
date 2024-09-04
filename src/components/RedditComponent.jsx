@@ -24,7 +24,13 @@ const RedditComponent = () => {
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const lambdaClient = new LambdaClient({
+    region: 'us-east-2', // Replace with your AWS region
+    credentials: {
+      accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+    },
+  });
   const handleOpen = (value) => setOpen(value);
 
   const handleSubmit = async (cleanedTopics) => {
@@ -45,45 +51,43 @@ const RedditComponent = () => {
       Payload: JSON.stringify(eventPayload),
     };
   
-    const command = new InvokeCommand(params);
-    const lambdaResponse = await LambdaClient.send(command);
-    console.log("Lambda response:", lambdaResponse);
+    try {
+      const command = new InvokeCommand(params);
+      const lambdaResponse = await lambdaClient.send(command);
+      console.log("Lambda response:", lambdaResponse);
   
-    if (lambdaResponse.StatusCode === 200 && lambdaResponse.Payload) {
-      const parsedResponse = JSON.parse(Buffer.from(lambdaResponse.Payload).toString());
+      if (lambdaResponse.StatusCode === 200 && lambdaResponse.Payload) {
+        const responseBuffer = lambdaResponse.Payload instanceof Uint8Array 
+          ? lambdaResponse.Payload 
+          : new Uint8Array(lambdaResponse.Payload);
+        const parsedResponse = JSON.parse(Buffer.from(responseBuffer).toString());
   
-      if (parsedResponse.statusCode === 400) {
-        throw new Error(parsedResponse.body);
+        if (parsedResponse.statusCode === 400) {
+          throw new Error(parsedResponse.body);
+        }
+  
+        const parsedBody = JSON.parse(parsedResponse.body);
+        const analysisData = parsedBody;
+  
+        console.log("Analysis data to store in Firestore:", analysisData);
+  
+        if (!analysisData) {
+          throw new Error("No analysis data found in the Lambda response.");
+        }
+  
+        // Store the processed data, subreddits, and increment the refresh count in Firestore
+        await storeDataInFirestore(analysisData, userId, subreddits);
+  
+        return analysisData;
+      } else {
+        throw new Error("Failed to invoke Lambda function");
       }
-  
-      const parsedBody = JSON.parse(parsedResponse.body);
-      const analysisData = parsedBody;
-  
-      console.log("Analysis data to store in Firestore:", analysisData);
-  
-      if (!analysisData) {
-        throw new Error("No analysis data found in the Lambda response.");
-      }
-  
-      // Store the processed data, subreddits, and increment the refresh count in Firestore
-      await storeDataInFirestore(analysisData, userId, subreddits);
-      
-      // console.log("Fetching user notification settings for:", userId);
-      // const userSettings = await getUserNotificationSettings(userId);
-      // console.log("Fetched User Settings:", userSettings);
-  
-      // if (userSettings && userSettings.istelegram && userSettings.isActive && userSettings.reddit) {
-      //   console.log("conditions matched lessgo");
-      //   const message = `New Reddit analysis data available: ${JSON.stringify(analysisData)}`;
-      //   await sendTelegramMessage(userSettings.telegramUserId, message);
-      //   console.log("Telegram message sent successfully.");
-      // }
-  
-      return analysisData;
-    } else {
-      throw new Error("Failed to invoke Lambda function");
+    } catch (error) {
+      console.error("Error invoking Lambda:", error);
+      throw error;
     }
   }
+
   const handleRefresh = async (cleanedTopics) => {
     setLoading(true);
   
@@ -112,12 +116,12 @@ const RedditComponent = () => {
       await fetchLatestRedditData();
     } catch (error) {
       console.error("Error in handleRefresh:", error);
-      // Handle the error appropriately
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
-
+    
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
