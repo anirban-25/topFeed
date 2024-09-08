@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import admin from "firebase-admin"; // Assume fetchFeeds is exported from a utils file
 import axios from "axios";
 import { parse } from "node-html-parser";
-import admin from "firebase-admin";
 import { OpenAI } from "openai";
-import { parseISO, subHours } from "date-fns";
+import { isAfter, parseISO, subHours, subMinutes } from "date-fns";
 import {
   getUserNotificationSettings,
   sendTelegramMessage,
 } from "@/utils/notificationUtils";
-import { storeDataInFirestore } from "@/utils/storeTwitterData";
-
 // Initialize Firebase Admin SDK (if not already initialized elsewhere)
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -73,11 +72,10 @@ async function fetchMetaTitle(url: string): Promise<string> {
 
 interface FilteredData {
   text: string;
-  title?: string;
   meta_titles: string[];
   url?: string;
-  content_html?: string;
-  authors?: { name: string }[];
+  content_html: string;
+  authors?: string[];
   relevancy?: string;
 }
 
@@ -86,15 +84,17 @@ function shouldSendNotification(
   notificationLevels: string[]
 ): boolean {
   const lowercasedRelevancy = relevancy.toLowerCase();
-  const lowercasedNotificationLevels = notificationLevels.map(level => level.toLowerCase());
+  const lowercasedNotificationLevels = notificationLevels.map((level) =>
+    level.toLowerCase()
+  );
 
   return lowercasedNotificationLevels.includes(lowercasedRelevancy);
 }
 
-
 async function feedToGPT(
   filtered: FilteredData[],
   newTopic: string,
+  id: string,
   notificationLevels: string[],
   telegramUserId: string
 ): Promise<FilteredData[]> {
@@ -107,8 +107,11 @@ async function feedToGPT(
       const response = await client.chat.completions.create({
         model: MODEL,
         messages: [
-          { role: "system", content: `You are an AI assistant helping to categorize tweets based on their relevancy to -> ${newTopic}. PS: the words provided before should be strictly measured, Match in words should not be taken as relevancy, rather give preferrence to the algorithms and details. You will provide one word answer, either High, Medium, Low. The description will include detailed topics and areas of interest. Each tweet should be categorized into one of three relevancy levels: high, medium, or low. Use the following criteria to determine the relevancy:\nHigh Relevancy: The tweet directly discusses the key elements of the specified description in detail, providing valuable insights, updates, strategies, or news specifically about those elements. The content is focused and highly relevant to the description, addressing specific aspects or details mentioned in the description.\nMedium Relevancy: The tweet mentions elements of the specified description but does not focus exclusively on them. It may include some useful information, tips, or brief mentions related to the description. While it might cover related topics, it does not delve deeply into the specifics outlined in the description.\nLow Relevancy: The tweet mentions related but distinct topics or focuses on other areas. It does not provide substantial information or insights about the specific elements mentioned in the description. The relevance to the specified description is minimal or tangential.` },
-          { role: "user", content: title }
+          {
+            role: "system",
+            content: `You are an AI assistant helping to categorize tweets based on their relevancy to -> ${newTopic}. PS: the words provided before should be strictly measured, Match in words should not be taken as relevancy, rather give preferrence to the algorithms and details. You will provide one word answer, either High, Medium, Low. The description will include detailed topics and areas of interest. Each tweet should be categorized into one of three relevancy levels: high, medium, or low. Use the following criteria to determine the relevancy:\nHigh Relevancy: The tweet directly discusses the key elements of the specified description in detail, providing valuable insights, updates, strategies, or news specifically about those elements. The content is focused and highly relevant to the description, addressing specific aspects or details mentioned in the description.\nMedium Relevancy: The tweet mentions elements of the specified description but does not focus exclusively on them. It may include some useful information, tips, or brief mentions related to the description. While it might cover related topics, it does not delve deeply into the specifics outlined in the description.\nLow Relevancy: The tweet mentions related but distinct topics or focuses on other areas. It does not provide substantial information or insights about the specific elements mentioned in the description. The relevance to the specified description is minimal or tangential.`,
+          },
+          { role: "user", content: title },
         ],
         max_tokens: 3000,
         temperature: 0,
@@ -119,13 +122,8 @@ async function feedToGPT(
         if (shouldSendNotification(row.relevancy, notificationLevels)) {
           const message = `${row.url}`;
           await sendTelegramMessage(telegramUserId, message);
-        }else{
-          console.log(row.relevancy+ "\nheyyyyyyy")
-          console.log(notificationLevels+ "\nheyyyyyyy")
         }
-      } catch (error) {
-        console.log(error);
-      }
+      } catch (error) {}
     } catch (error) {
       console.error(`Error in GPT-4 processing: ${error}`);
     }
@@ -149,25 +147,50 @@ interface TwitterData {
 async function fetchRssFeeds(
   urls: string[],
   newTopic: string,
+  id: string,
   notificationLevels: string[],
   telegramUserId: string
 ): Promise<FilteredData[]> {
   const twitterData: TwitterData[] = [];
+
+  // Fetch the last processed item's date for this user
+  const userRef = db.collection("users").doc(id);
+  const lastProcessedDoc = await userRef.collection("last_processed").doc("rss_feed").get();
+  let lastProcessedDate = lastProcessedDoc.exists ? parseISO(lastProcessedDoc.data()?.date) : new Date(0);
 
   for (const url of urls) {
     try {
       const response = await axios.get(url);
       if (response.status === 200) {
         const items = response.data.items || [];
+        let newestItemDate = lastProcessedDate;
+
         for (const item of items) {
-          twitterData.push({
-            title: item.title,
-            link: item.link,
-            date_published: item.date_published,
-            content_html: item.content_html,
-            content_text: item.content_text,
-            url: item.url,
-            authors: item.authors,
+          const itemDate = parseISO(item.date_published);
+          
+          // Only process items newer than the last processed date
+          if (isAfter(itemDate, lastProcessedDate)) {
+            twitterData.push({
+              title: item.title,
+              link: item.link,
+              date_published: item.date_published,
+              content_html: item.content_html,
+              content_text: item.content_text,
+              url: item.url,
+              authors: item.authors,
+            });
+
+            // Keep track of the newest item date
+            if (isAfter(itemDate, newestItemDate)) {
+              newestItemDate = itemDate;
+            }
+          }
+        }
+
+        // Update the last processed date if we found newer items
+        if (isAfter(newestItemDate, lastProcessedDate)) {
+          await userRef.collection("last_processed").doc("rss_feed").set({
+            date: newestItemDate.toISOString()
           });
         }
       }
@@ -176,16 +199,9 @@ async function fetchRssFeeds(
     }
   }
 
-  // Filter and process data
-  const currentDate = new Date();
-  const twoWeeksAgo = subHours(currentDate, 12 * 2);
+  // Filter and process data (no need to filter by date again)
   const filteredData = twitterData
-    .filter((item) => parseISO(item.date_published) > twoWeeksAgo)
-    .sort(
-      (a, b) =>
-        parseISO(b.date_published).getTime() -
-        parseISO(a.date_published).getTime()
-    )
+    .sort((a, b) => parseISO(b.date_published).getTime() - parseISO(a.date_published).getTime())
     .map((item) => ({
       ...item,
       links: extractLinks(item.content_text),
@@ -194,28 +210,26 @@ async function fetchRssFeeds(
 
   // Fetch meta titles
   for (const item of filteredData) {
-    item.meta_titles = await Promise.all(
-      (item.links ?? []).map(fetchMetaTitle)
-    );
+    item.meta_titles = await Promise.all((item.links ?? []).map(fetchMetaTitle));
   }
 
   const filtered: FilteredData[] = filteredData.map(
-    ({ text, meta_titles, url, content_html, authors, title }) => ({
+    ({ text, meta_titles, url, content_html, authors }) => ({
       text: text ?? "",
       meta_titles: meta_titles ?? [],
       url,
       content_html,
-      authors: authors?.map(author => ({ name: author })),
-      title,
+      authors,
     })
   );
 
-  return feedToGPT(filtered, newTopic, notificationLevels, telegramUserId);
+  return feedToGPT(filtered, newTopic, id, notificationLevels, telegramUserId);
 }
 
 async function fetchFeeds(
   twitterUrls: string[],
   newTopic: string,
+  id: string,
   notificationLevels: string[],
   telegramUserId: string
 ): Promise<FilteredData[]> {
@@ -262,57 +276,109 @@ async function fetchFeeds(
     }
   }
 
-  return fetchRssFeeds(urls, newTopic, notificationLevels, telegramUserId);
+  return fetchRssFeeds(urls, newTopic, id, notificationLevels, telegramUserId);
 }
-
-export async function POST(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const { twitterUrls, newTopic, userId } = await request.json();
+    console.log("Starting GET function");
+    const { searchParams } = new URL(request.url);
+    const forceRefresh = searchParams.get("refresh") === "true";
 
-    if (!twitterUrls || !newTopic || !Array.isArray(twitterUrls)) {
-      return NextResponse.json(
-        {
-          error:
-            "Invalid input. 'twitterUrls' must be an array and 'newTopic' is required.",
-        },
-        { status: 400 }
-      );
+    if (forceRefresh) {
+      console.log("Force refresh requested. Bypassing cache.");
+      // You might want to add logic here to clear any local caches
+      // or set flags to ensure fresh data is fetched
     }
-    
-    var notificationLevels: string[] = [];
-    var telegramUserId: string = "";
-    try {
-      const userSettings = await getUserNotificationSettings(userId);
-      if (userSettings) {
-        notificationLevels = userSettings.notificationLevels || [];
-        telegramUserId = userSettings.telegramUserId || "";
-      }
-      console.log(notificationLevels)
-      console.log(telegramUserId)
 
-    } catch (error) {
-      console.error("Error fetching user settings:", error);
-    }
-    
-    const dfFinal = await fetchFeeds(
-      twitterUrls,
-      newTopic,
-      notificationLevels,
-      telegramUserId
+    const usersSnapshot = await db.collection("users").get();
+    console.log(`Number of users: ${usersSnapshot.size}`);
+
+    const allResults = await Promise.all(
+      usersSnapshot.docs.map(async (userDoc) => {
+        console.log(`Processing user: ${userDoc.id}`);
+        const tweetFeedSnapshot = await userDoc.ref
+          .collection("tweet_feed")
+          .limit(1)
+          .get();
+
+        if (!tweetFeedSnapshot.empty) {
+          const tweetFeedDoc = tweetFeedSnapshot.docs[0];
+          const tweetFeedData = tweetFeedDoc.data();
+          console.log(`User ${userDoc.id} - Tweet feed data:`, tweetFeedData);
+          var notificationLevels: string[] = [];
+          var telegramUserId = "";
+          const userSettings = await getUserNotificationSettings(userDoc.id);
+          if (userSettings) {
+            notificationLevels = userSettings.notificationLevels || [];
+            telegramUserId = userSettings.telegramUserId || "";
+          }
+          // console.log("blaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah" + notificationLevels)
+          // console.log(telegramUserId)
+          if (tweetFeedData.twitterUrls && tweetFeedData.topic) {
+            try {
+              const result = await fetchFeeds(
+                tweetFeedData.twitterUrls,
+                tweetFeedData.topic,
+                userDoc.id,
+                notificationLevels,
+                telegramUserId
+              );
+              console.log(`User ${userDoc.id} - fetchFeeds result:`, result);
+
+              // Update user_tweets subcollection
+              const userTweetsRef = userDoc.ref.collection("user_tweets");
+              const batch = db.batch();
+
+              for (const tweet of result) {
+                const newTweetRef = userTweetsRef.doc();
+                batch.set(newTweetRef, {
+                  content_html: tweet.content_html,
+                  authors: tweet.authors,
+                  relevancy: tweet.relevancy,
+                });
+              }
+
+              await batch.commit();
+              console.log(`Updated user_tweets for user ${userDoc.id}`);
+
+              return {
+                userId: userDoc.id,
+                tweetFeedId: tweetFeedDoc.id,
+                result,
+              };
+            } catch (error) {
+              console.error(
+                `Error in fetchFeeds for user ${userDoc.id}:`,
+                error
+              );
+              return null;
+            }
+          } else {
+            console.log(`Missing twitterUrls or topic for user ${userDoc.id}`);
+          }
+        } else {
+          console.log(`No tweet_feed found for user ${userDoc.id}`);
+        }
+        return null;
+      })
     );
-    
-    // Transform the data to match the expected format for Firestore
-    const transformedData = dfFinal.map(item => ({
-      content_html: item.content_html || "",
-      relevancy: item.relevancy || "low",
-      authors: item.authors || [],
-      // Add other fields as needed
-    }));
 
-    await storeDataInFirestore(transformedData, userId);
-    return NextResponse.json({ result: dfFinal });
+    const filteredResults = allResults.filter((result) => result !== null);
+    console.log(`Total results: ${filteredResults.length}`);
+    const response = NextResponse.json({
+      results: filteredResults,
+      timestamp: new Date().toISOString(),
+    });
+
+    response.headers.set("Cache-Control", "no-store, max-age=0");
+    return response;
   } catch (error) {
-    console.error(`Error processing data: ${error}`);
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    console.error(`Error processing data:`, error);
+    const errorResponse = NextResponse.json(
+      { error: String(error) },
+      { status: 500 }
+    );
+    errorResponse.headers.set("Cache-Control", "no-store, max-age=0");
+  // return NextResponse.json({ message: "hey" });
   }
 }
