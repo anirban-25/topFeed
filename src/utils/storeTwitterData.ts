@@ -15,11 +15,11 @@ export async function storeDataInFirestore(data: APIDataType[], userId: string) 
   }
 
   const userDocRef = doc(db, 'users', userId);
-  const userRedditsCollectionRef = collection(userDocRef, 'user_reddits');
+  const userTwitterRef = collection(userDocRef, 'user_tweets');
 
   try {
     // Delete existing documents
-    const querySnapshot = await getDocs(userRedditsCollectionRef);
+    const querySnapshot = await getDocs(userTwitterRef);
     const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
     await Promise.all(deletePromises);
     console.log(`Deleted ${querySnapshot.size} existing documents for user ${userId}`);
@@ -27,7 +27,7 @@ export async function storeDataInFirestore(data: APIDataType[], userId: string) 
     // Store new data
     const addPromises = data.map(async (item, index) => {
       try {
-        const docRef = await addDoc(userRedditsCollectionRef, {
+        const docRef = await addDoc(userTwitterRef, {
           content_html: item.content_html,
           relevancy: item.relevancy,
           authors: item.authors,
