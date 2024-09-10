@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import { storeDataInFirestore } from "@/utils/storeRedditData";
-import { getUserNotificationSettings, sendTelegramMessage } from "@/utils/notificationUtils";
 
 // Initialize AWS SDK Lambda client
 const lambdaClient = new LambdaClient({
@@ -12,15 +11,14 @@ const lambdaClient = new LambdaClient({
   },
 });
 
-// Define the types for the parameters
-interface ProcessRedditDataParams {
-  subreddits: string[];  // assuming subreddits is an array of strings
-  userId: string;        // assuming userId is a string
-}
-
-// Asynchronous function to handle processing
-async function processRedditData({ subreddits, userId }: ProcessRedditDataParams): Promise<void> {
+export async function POST(req: Request) {
   try {
+    const { subreddits, userId, isRefresh } = await req.json();  // Accept isRefresh flag
+    console.log("Subreddits:", subreddits);
+    console.log("User ID:", userId);
+    console.log("Is Refresh:", isRefresh);
+    console.log("-------------------------------------------");
+
     const eventPayload = {
       body: JSON.stringify({ subreddits }),
     };
@@ -38,7 +36,7 @@ async function processRedditData({ subreddits, userId }: ProcessRedditDataParams
       const parsedResponse = JSON.parse(Buffer.from(lambdaResponse.Payload).toString());
 
       if (parsedResponse.statusCode === 400) {
-        throw new Error(parsedResponse.body);
+        return NextResponse.json({ error: parsedResponse.body }, { status: 400 });
       }
 
       const parsedBody = JSON.parse(parsedResponse.body);
@@ -50,43 +48,13 @@ async function processRedditData({ subreddits, userId }: ProcessRedditDataParams
         throw new Error("No analysis data found in the Lambda response.");
       }
 
-      // Store the processed data in Firestore
-      await storeDataInFirestore(analysisData, userId, subreddits);
+      // Store the processed data, subreddits, and increment the refresh count in Firestore
+      await storeDataInFirestore(analysisData, userId, subreddits);  // Pass isRefresh flag
 
-      // Fetch user notification settings from Firestore
-      const userSettings = await getUserNotificationSettings(userId);
-      console.log("Fetched User Settings:", userSettings);
-
-      // Send Telegram notification if applicable
-      if (userSettings && userSettings.istelegram && userSettings.isActive && userSettings.reddit) {
-        const message = `New Reddit analysis data available: ${JSON.stringify(analysisData)}`;
-        await sendTelegramMessage(userSettings.telegramUserId, message);
-        console.log("Telegram message sent successfully.");
-      }
+      return NextResponse.json({ message: "Data processed and stored successfully", analysisData }, { status: 200 });
     } else {
-      console.error("Failed to invoke Lambda function");
+      return NextResponse.json({ error: "Failed to invoke Lambda function" }, { status: 500 });
     }
-  } catch (error) {
-    console.error("Error in processing Reddit data:", error);
-  }
-}
-
-export async function POST(req: Request) {
-  try {
-    // Define the expected structure of the request body
-    const { subreddits, userId }: { subreddits: string[], userId: string } = await req.json();
-
-    // Log the incoming request data
-    console.log("Subreddits:", subreddits);
-    console.log("User ID:", userId);
-
-    // Immediately return a 202 Accepted response to indicate the request has been received
-    const response = NextResponse.json({ message: "Request received and is being processed" }, { status: 202 });
-
-    // Asynchronously process the Reddit data in the background
-    processRedditData({ subreddits, userId });
-
-    return response;
   } catch (error) {
     console.error("Error in API route:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
