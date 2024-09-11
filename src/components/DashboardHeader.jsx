@@ -8,30 +8,39 @@ import axios from "axios";
 import { MdOutlineSettings } from "react-icons/md";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useAppContext } from "@/contexts/AppContext";
+
 const DashboardHeader = () => {
   const { redditDataFetch,setRedditDataFetch } = useAppContext();
   const [open, setOpen] = useState(false);
   const [redditDataExists, setRedditDataExists] = useState(false);
+  
   const [user] = useAuthState(auth);
   const [loading, setLoading] = useState(true);
+
   const handleOpen = (value) => setOpen(value);
   useEffect(() => {
     checkRedditData();
   }, [redditDataFetch])
+  
   const checkRedditData = async () => {
     if (!user) return;
+
     const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
     const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
     const querySnapshot = await getDocs(q);
+
     setRedditDataExists(!querySnapshot.empty);
     // setRedditDataFetch(!querySnapshot.empty);
   };
+
   const handleSubmit = async (cleanedTopics) => {
     try {
       if (!user) {
         throw new Error("User is not authenticated.");
       }
+
       const userId = user.uid;
+
       // Send the POST request to the API
       const response = await axios.post("/api/reddit", {
         subreddits: cleanedTopics,
@@ -40,23 +49,33 @@ const DashboardHeader = () => {
       {
         timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
       });
+
       if (response.status !== 200) {
         throw new Error("Failed to fetch data from server");
       }
+
       console.log("Received response from API:", response.data);
+
       // Close the popup after the data is successfully generated
       setOpen(false);
+
       // Automatically check and fetch the updated document from Firestore
       checkRedditData();
+
     } catch (error) {
       console.error("Error during feed generation:", error);
     }
   };
+  
+
   useEffect(() => {
     if (user) {
       checkRedditData();
     }
   }, [user]);
+
+
+
   return (
     <header className="flex justify-between items-center p-4 bg-white shadow-md">
       <h1 className="text-xl text-[#8D8D8D] font-semibold ml-2">
@@ -88,7 +107,9 @@ const DashboardHeader = () => {
         handleOpen={handleOpen}
         handleSubmit={handleSubmit}
       />
+      
     </header>
   );
 };
+
 export default DashboardHeader;

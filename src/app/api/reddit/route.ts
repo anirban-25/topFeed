@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
-import { NodeHttpHandler} from '@smithy/node-http-handler';
 import { storeDataInFirestore } from "@/utils/storeRedditData";
+import { getUserNotificationSettings, sendTelegramMessage } from "@/utils/notificationUtils"; 
 
 // Initialize AWS SDK Lambda client
 const lambdaClient = new LambdaClient({
@@ -10,18 +10,16 @@ const lambdaClient = new LambdaClient({
     accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY!,
   },
-  requestHandler: new NodeHttpHandler({
-    connectionTimeout: 80000, // 30 seconds timeout
-    socketTimeout: 80000, // 30 seconds timeout
-  }),
 });
 
 export async function POST(req: Request) {
   try {
-    const { subreddits, userId, isRefresh } = await req.json();  // Accept isRefresh flag
+    const { subreddits, userId} = await req.json();
+
+    // Log the incoming request data
     console.log("Subreddits:", subreddits);
     console.log("User ID:", userId);
-    console.log("Is Refresh:", isRefresh);
+    //console.log("Is Refresh:", isRefresh);
     console.log("-------------------------------------------");
 
     const eventPayload = {
@@ -52,11 +50,26 @@ export async function POST(req: Request) {
       if (!analysisData) {
         throw new Error("No analysis data found in the Lambda response.");
       }
+      // await sendTelegramMessage('Atishab', 'Test message from bot');
 
       // Store the processed data, subreddits, and increment the refresh count in Firestore
-      await storeDataInFirestore(analysisData, userId, subreddits);  // Pass isRefresh flag
+      await storeDataInFirestore(analysisData, userId, subreddits);
+      console.log("Fetching user notification settings for:", userId);
 
-      return NextResponse.json({ message: "Data processed and stored successfully", analysisData }, { status: 200 });
+      // Fetch user notification settings from Firestore
+      const userSettings = await getUserNotificationSettings(userId);
+      console.log("Fetched User Settings:", userSettings);
+
+      // Check if userSettings exist and match the criteria to send a Telegram notification
+      if (userSettings && userSettings.istelegram == true && userSettings.isActive == true && userSettings.reddit == true) {
+        console.log("conditions matched lessgo");
+        const message = `New Reddit analysis data available: ${JSON.stringify(analysisData)}`;
+        // Send the message to the user's Telegram account
+        await sendTelegramMessage(userSettings.telegramUserId, message);
+        console.log("Telegram message sent successfully.");
+      }
+
+      return NextResponse.json({ message: "Data processed, stored, and notification sent if applicable", analysisData }, { status: 200 });
     } else {
       return NextResponse.json({ error: "Failed to invoke Lambda function" }, { status: 500 });
     }
