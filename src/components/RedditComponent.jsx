@@ -45,7 +45,8 @@ const RedditComponent = () => {
     if (!querySnapshot.empty) {
       const docData = querySnapshot.docs[0].data();
       setSubreddits(docData.subreddits || []);
-      const response = await axios.post("/api/reddit", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await axios.post(`${apiUrl}/api/reddit`, {
         subreddits: docData.subreddits,
         userId,
       },
@@ -66,7 +67,8 @@ const RedditComponent = () => {
 
       await fetchLatestRedditData();
     } else {
-      const response = await axios.post("/api/reddit", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await axios.post(`${apiUrl}/api/reddit`, {
         subreddits: cleanedTopics,
         userId,
       },
