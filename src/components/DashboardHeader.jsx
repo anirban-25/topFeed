@@ -47,6 +47,9 @@ const DashboardHeader = () => {
         userId,
       },
       {
+        headers: {
+          'Content-Type': 'application/json',
+        },
         timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
       });
 
