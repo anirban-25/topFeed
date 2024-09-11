@@ -14,12 +14,11 @@ const lambdaClient = new LambdaClient({
 
 export async function POST(req: Request) {
   try {
-    const { subreddits, userId} = await req.json();
+    const { subreddits, userId } = await req.json();
 
     // Log the incoming request data
     console.log("Subreddits:", subreddits);
     console.log("User ID:", userId);
-    //console.log("Is Refresh:", isRefresh);
     console.log("-------------------------------------------");
 
     const eventPayload = {
@@ -50,23 +49,34 @@ export async function POST(req: Request) {
       if (!analysisData) {
         throw new Error("No analysis data found in the Lambda response.");
       }
-      // await sendTelegramMessage('Atishab', 'Test message from bot');
 
-      // Store the processed data, subreddits, and increment the refresh count in Firestore
-      await storeDataInFirestore(analysisData, userId, subreddits);
-      console.log("Fetching user notification settings for:", userId);
+      // After the Lambda response is successfully retrieved, store the data in Firestore
+      try {
+        // Store the processed data, subreddits, and increment the refresh count in Firestore
+        await storeDataInFirestore(analysisData, userId, subreddits);
+        console.log("Data successfully stored in Firestore.");
+      } catch (firestoreError) {
+        console.error("Error storing data in Firestore:", firestoreError);
+        return NextResponse.json({ error: "Error storing data in Firestore" }, { status: 500 });
+      }
 
       // Fetch user notification settings from Firestore
-      const userSettings = await getUserNotificationSettings(userId);
-      console.log("Fetched User Settings:", userSettings);
+      try {
+        const userSettings = await getUserNotificationSettings(userId);
+        console.log("Fetched User Settings:", userSettings);
 
-      // Check if userSettings exist and match the criteria to send a Telegram notification
-      if (userSettings && userSettings.istelegram == true && userSettings.isActive == true && userSettings.reddit == true) {
-        console.log("conditions matched lessgo");
-        const message = `New Reddit analysis data available: ${JSON.stringify(analysisData)}`;
-        // Send the message to the user's Telegram account
-        await sendTelegramMessage(userSettings.telegramUserId, message);
-        console.log("Telegram message sent successfully.");
+        // Check if userSettings exist and match the criteria to send a Telegram notification
+        if (userSettings && userSettings.istelegram == true && userSettings.isActive == true && userSettings.reddit == true) {
+          console.log("Notification conditions matched.");
+          const message = `New Reddit analysis data available: ${JSON.stringify(analysisData)}`;
+
+          // Send the message to the user's Telegram account
+          await sendTelegramMessage(userSettings.telegramUserId, message);
+          console.log("Telegram message sent successfully.");
+        }
+      } catch (notificationError) {
+        console.error("Error fetching user settings or sending Telegram notification:", notificationError);
+        // You can continue with the process even if notifications fail, so we don’t return an error here.
       }
 
       return NextResponse.json({ message: "Data processed, stored, and notification sent if applicable", analysisData }, { status: 200 });

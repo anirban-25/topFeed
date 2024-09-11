@@ -45,8 +45,7 @@ const RedditComponent = () => {
     if (!querySnapshot.empty) {
       const docData = querySnapshot.docs[0].data();
       setSubreddits(docData.subreddits || []);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await axios.post(`${apiUrl}/api/reddit`, {
+      const response = await axios.post("/api/reddit", {
         subreddits: docData.subreddits,
         userId,
       },
@@ -56,7 +55,7 @@ const RedditComponent = () => {
         },
       
         timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
-    });
+      });
 
       if (response.status !== 200) {
         setLoading(false);
@@ -67,8 +66,7 @@ const RedditComponent = () => {
 
       await fetchLatestRedditData();
     } else {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await axios.post(`${apiUrl}/api/reddit`, {
+      const response = await axios.post("/api/reddit", {
         subreddits: cleanedTopics,
         userId,
       },

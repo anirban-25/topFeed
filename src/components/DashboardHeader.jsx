@@ -42,8 +42,7 @@ const DashboardHeader = () => {
       const userId = user.uid;
 
       // Send the POST request to the API
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await axios.post(`${apiUrl}/api/reddit`, {
+      const response = await axios.post("/api/reddit", {
         subreddits: cleanedTopics,
         userId,
       },
