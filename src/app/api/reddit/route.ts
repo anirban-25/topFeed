@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
+import {FetchHttpHandler} from '@smithy/fetch-http-handler'
 import { storeDataInFirestore } from "@/utils/storeRedditData";
 
 // Initialize AWS SDK Lambda client
@@ -9,6 +10,9 @@ const lambdaClient = new LambdaClient({
     accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY!,
   },
+  requestHandler : new FetchHttpHandler({
+    requestTimeout: 120000
+  })
 });
 
 export async function POST(req: Request) {
