@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import { storeDataInFirestore } from "@/utils/storeRedditData";
-import { getUserNotificationSettings, sendTelegramMessage } from "@/utils/notificationUtils";
+import { getUserNotificationSettings, sendTelegramMessage } from "@/utils/notificationUtils"; 
 
 // Initialize AWS SDK Lambda client
 const lambdaClient = new LambdaClient({
@@ -14,11 +14,12 @@ const lambdaClient = new LambdaClient({
 
 export async function POST(req: Request) {
   try {
-    const { subreddits, userId } = await req.json();
+    const { subreddits, userId} = await req.json();
 
     // Log the incoming request data
     console.log("Subreddits:", subreddits);
     console.log("User ID:", userId);
+    //console.log("Is Refresh:", isRefresh);
     console.log("-------------------------------------------");
 
     const eventPayload = {
@@ -49,20 +50,21 @@ export async function POST(req: Request) {
       if (!analysisData) {
         throw new Error("No analysis data found in the Lambda response.");
       }
+      // await sendTelegramMessage('Atishab', 'Test message from bot');
 
-      // Optimize Firestore operations
-      // 1. Store data in a single batch write operation
-      await storeDataInFirestore(analysisData, userId, subreddits);
+      // Store the processed data, subreddits, and increment the refresh count in Firestore
+      //await storeDataInFirestore(analysisData, userId, subreddits);
+      console.log("Fetching user notification settings for:", userId);
 
-      // 2. Fetch user settings in a single operation
+      // Fetch user notification settings from Firestore
       const userSettings = await getUserNotificationSettings(userId);
       console.log("Fetched User Settings:", userSettings);
 
-      if (userSettings && userSettings.istelegram && userSettings.isActive && userSettings.reddit) {
+      // Check if userSettings exist and match the criteria to send a Telegram notification
+      if (userSettings && userSettings.istelegram == true && userSettings.isActive == true && userSettings.reddit == true) {
         console.log("conditions matched lessgo");
-
-        // 3. Send a notification if conditions match
         const message = `New Reddit analysis data available: ${JSON.stringify(analysisData)}`;
+        // Send the message to the user's Telegram account
         await sendTelegramMessage(userSettings.telegramUserId, message);
         console.log("Telegram message sent successfully.");
       }
