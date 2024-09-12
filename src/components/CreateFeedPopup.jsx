@@ -109,7 +109,7 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
           console.error("Request timeout:", err);
           setError("Request timed out. Please try again.");
         } else {
-          console.error("Error during feed generation:", err);
+          console.error("Error during feed gen:", err);
           setError("An error occurred while processing your request.");
         }
         return; // Exit the function if there's an error
