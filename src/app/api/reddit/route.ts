@@ -53,7 +53,7 @@ export async function POST(req: Request) {
       // await sendTelegramMessage('Atishab', 'Test message from bot');
 
       // Store the processed data, subreddits, and increment the refresh count in Firestore
-      //await storeDataInFirestore(analysisData, userId, subreddits);
+      await storeDataInFirestore(analysisData, userId, subreddits);
       console.log("Fetching user notification settings for:", userId);
 
       // Fetch user notification settings from Firestore
