@@ -96,29 +96,20 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
     setLoading(true);
     setError(null);
     handleOpen(null);
-  
+
     try {
       const cleanedTopics = topics.map(cleanSubredditName);
-      console.log("Cleaned Topics:", cleanedTopics);
-  
-      // Ensure handleSubmit is awaited correctly
       await handleSubmit(cleanedTopics);
-      console.log("Feed generated successfully");
-  
-      // Temporarily comment out fetchLastUpdatedSubreddits
-      // await fetchLastUpdatedSubreddits();
-      
+      await fetchLastUpdatedSubreddits();
     } catch (err) {
       console.error("Error during feed generation:", err);
       setError("An error occurred while processing your request.");
     } finally {
-      // Ensure that the state updates are properly handled
       setRedditDataFetch(false);
       setLoading(false);
-      console.log("Feed generation process complete");
+      await fetchLastUpdatedSubreddits();
     }
   };
-  
 
   return (
     <Dialog open={open} size="lg" handler={handleOpen}>
