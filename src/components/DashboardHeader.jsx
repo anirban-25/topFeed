@@ -39,25 +39,22 @@ const DashboardHeader = () => {
   const handleSubmit = async (cleanedTopics) => {
     try {
       if (!user) throw new Error("User is not authenticated.");
-  
+
       const userId = user.uid;
-  
-      // Send the POST request to the API (this will return quickly with 202 status)
+
+      // Send the POST request to the API
       const response = await axios.post(
         "/api/reddit",
         { subreddits: cleanedTopics, userId },
-        { headers: { 'Content-Type': 'application/json' }, timeout: 240000 } // Adjusted timeout just in case
+        { headers: { 'Content-Type': 'application/json' }, timeout: 240000 }
       );
-  
-      if (response.status !== 202) throw new Error("Failed to process data on the server");
-  
-      console.log("Processing Reddit analysis, will poll for result...");
-  
-      // Close the modal or perform any immediate UI changes
+
+      if (response.status !== 200) throw new Error("Failed to fetch data from server");
+
+      console.log("Received response from API:", response.data);
+
       setOpen(false);
-  
-      // Start polling for the result
-      pollRedditDataStatus(userId); // Pass the userId to the polling function
+      checkRedditData();
     } catch (error) {
       console.error("Error during feed generation:", error);
     }
