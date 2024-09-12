@@ -96,20 +96,36 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
     setLoading(true);
     setError(null);
     handleOpen(null);
-
+  
     try {
       const cleanedTopics = topics.map(cleanSubredditName);
-      await handleSubmit(cleanedTopics);
+  
+      // Wrap handleSubmit in try-catch for better error handling
+      try {
+        await handleSubmit(cleanedTopics);
+      } catch (err) {
+        // Specific handling for request timeout
+        if (err.code === 'ECONNABORTED') {
+          console.error("Request timeout:", err);
+          setError("Request timed out. Please try again.");
+        } else {
+          console.error("Error during feed generation:", err);
+          setError("An error occurred while processing your request.");
+        }
+        return; // Exit the function if there's an error
+      }
+  
+      // Fetch last updated subreddits after the successful request
       await fetchLastUpdatedSubreddits();
     } catch (err) {
-      console.error("Error during feed generation:", err);
-      setError("An error occurred while processing your request.");
+      console.error("Unexpected error during feed generation:", err);
+      setError("An unexpected error occurred. Please try again later.");
     } finally {
       setRedditDataFetch(false);
       setLoading(false);
-      await fetchLastUpdatedSubreddits();
     }
   };
+  
 
   return (
     <Dialog open={open} size="lg" handler={handleOpen}>
