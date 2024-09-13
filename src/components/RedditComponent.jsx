@@ -10,6 +10,7 @@ import axios from "axios";
 import { IoSearch } from "react-icons/io5";
 import RedditMasonryLayout from "./MasonryLayoutReddit";
 import { useAppContext } from "@/contexts/AppContext";
+
 const RedditComponent = () => {
   const { redditDataFetch, setRedditDataFetch } = useAppContext();
   const [redditData, setRedditData] = useState(null);
@@ -20,13 +21,17 @@ const RedditComponent = () => {
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+
   const handleOpen = (value) => setOpen(value);
+
   const handleSubmit = async (cleanedTopics) => {
     await handleRefresh(cleanedTopics);
     handleOpen(false);
   };
+
   const handleRefresh = async (cleanedTopics) => {
     setLoading(true);
+
     const user = auth.currentUser;
     if (!user) {
       setLoading(false);
@@ -36,50 +41,58 @@ const RedditComponent = () => {
     const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
     const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
     const querySnapshot = await getDocs(q);
+
     if (!querySnapshot.empty) {
       const docData = querySnapshot.docs[0].data();
       setSubreddits(docData.subreddits || []);
-      const response = await axios.post(
-        "/api/reddit",
-        {
-          subreddits: docData.subreddits,
-          userId,
+      const response = await axios.post("/api/reddit", {
+        subreddits: docData.subreddits,
+        userId,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
-        }
-      );
+      
+        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
+      });
+
       if (response.status !== 200) {
         setLoading(false);
         throw new Error("Failed to fetch data from server");
       }
+
       console.log("Received response from API:", response.data);
+
       await fetchLatestRedditData();
     } else {
-      const response = await axios.post(
-        "/api/reddit",
-        {
-          subreddits: cleanedTopics,
-          userId,
-        },
-        {
-          timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
-        }
-      );
+      const response = await axios.post("/api/reddit", {
+        subreddits: cleanedTopics,
+        userId,
+      },
+      {
+        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
+      });
+
       if (response.status !== 200) {
         setLoading(false);
         throw new Error("Failed to fetch data from server");
       }
+
       console.log("Received response from API:", response.data);
+
       await fetchLatestRedditData();
     }
   };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
+
     return () => unsubscribe();
   }, []);
+
   const fetchLatestRedditData = async () => {
     setLoading(true);
     if (!user) return;
@@ -88,12 +101,15 @@ const RedditComponent = () => {
       const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
       const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
       const querySnapshot = await getDocs(q);
+
       if (!querySnapshot.empty) {
         const latestDoc = querySnapshot.docs[0];
         const data = latestDoc.data();
         console.log("Fetched data:", data);
+
         const analysisData = data.analysis || [];
         console.log("Analysis data:", analysisData);
+
         setRedditData(analysisData);
       } else {
         console.log("No documents found in user_reddits");
@@ -107,6 +123,7 @@ const RedditComponent = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     if (user) {
       fetchLatestRedditData();
@@ -135,13 +152,16 @@ const RedditComponent = () => {
         point.toLowerCase().includes(searchTerm.toLowerCase())
       )
   );
+
   useEffect(() => {
     if (redditDataFetch) {
       setLoading(redditDataFetch);
     } else {
       fetchLatestRedditData();
+
     }
   }, [redditDataFetch]);
+  
   if (loaderInitial) {
     return (
       <div className="flex items-center justify-center min-h-[90%]">
@@ -167,6 +187,7 @@ const RedditComponent = () => {
       </div>
     );
   }
+
   if (error) {
     return (
       <div className="font-kumbh-sans-medium flex flex-col items-center justify-center p-8">
@@ -174,6 +195,7 @@ const RedditComponent = () => {
       </div>
     );
   }
+
   if (!redditData || redditData.length === 0) {
     return (
       <div className="font-kumbh-sans-medium flex flex-col items-center justify-center p-8">
@@ -208,6 +230,7 @@ const RedditComponent = () => {
       </div>
     );
   }
+
   return (
     <div className="font-kumbh-sans-Medium px-3 py-8 md:p-8">
       <div className=" w-full flex justify-items-center md:justify-end mb-6">
@@ -229,14 +252,17 @@ const RedditComponent = () => {
           <div className="md:hidden">Refresh</div>
         </button>
       </div>
+
       <RedditMasonryLayout filteredRedditData={filteredData} />
     </div>
   );
 };
+
 const formatTitle = (title) => {
   return title
     .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 };
+
 export default RedditComponent;
