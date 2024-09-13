@@ -24,54 +24,65 @@ const RedditComponent = () => {
 
   const handleOpen = (value) => setOpen(value);
 
-  const handleSubmit = (cleanedTopics) => {
-    handleRefresh(cleanedTopics); // Do not await the handleRefresh function
-    handleOpen(false); // Close the popup
+  const handleSubmit = async (cleanedTopics) => {
+    await handleRefresh(cleanedTopics);
+    handleOpen(false);
   };
-  
+
   const handleRefresh = async (cleanedTopics) => {
+    //setLoading(true);
+
     const user = auth.currentUser;
     if (!user) {
+      setLoading(false);
       throw new Error("User is not authenticated.");
     }
-  
     const userId = user.uid;
     const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
     const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
     const querySnapshot = await getDocs(q);
-  
-    const fetchData = async () => {
-      try {
-        const subreddits = !querySnapshot.empty
-          ? querySnapshot.docs[0].data().subreddits
-          : cleanedTopics;
-  
-        const response = await axios.post(
-          "/api/reddit",
-          {
-            subreddits,
-            userId,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            timeout: 240000, // Timeout in milliseconds
-          }
-        );
-  
-        if (response.status === 200) {
-          console.log("Received response from API:", response.data);
-          await fetchLatestRedditData(); // Fetch the latest data once the response is successful
-        } else {
-          console.error("Failed to fetch data from server");
-        }
-      } catch (error) {
-        console.error("Error during feed generation:", error);
+
+    if (!querySnapshot.empty) {
+      const docData = querySnapshot.docs[0].data();
+      setSubreddits(docData.subreddits || []);
+      const response = await axios.post("/api/reddit", {
+        subreddits: docData.subreddits,
+        userId,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      
+        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
+      });
+
+      if (response.status !== 200) {
+        //setLoading(false);
+        throw new Error("Failed to fetch data from server");
       }
-    };
-  
-    fetchData(); // Call fetchData without awaiting
+
+      console.log("Received response from API:", response.data);
+
+      //await fetchLatestRedditData();
+    } else {
+      const response = await axios.post("/api/reddit", {
+        subreddits: cleanedTopics,
+        userId,
+      },
+      {
+        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
+      });
+
+      if (response.status !== 200) {
+        //setLoading(false);
+        throw new Error("Failed to fetch data from server");
+      }
+
+      console.log("Received response from API:", response.data);
+
+      //await fetchLatestRedditData();
+    }
   };
 
   useEffect(() => {
@@ -142,14 +153,14 @@ useEffect(() => {
       )
   );
 
-  useEffect(() => {
+  /*useEffect(() => {
     if(redditDataFetch){
       setLoading(redditDataFetch);
     }else{
       fetchLatestRedditData();
 
     }
-  }, [redditDataFetch]);
+  }, [redditDataFetch]);*/
   
   if (loaderInitial) {
     return (
