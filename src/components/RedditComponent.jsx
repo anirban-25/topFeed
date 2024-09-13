@@ -54,7 +54,7 @@ const RedditComponent = () => {
           'Content-Type': 'application/json',
         },
       
-        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
+        timeout: process.env.NEXT_PUBLIC_TIMEOUT || 30000, // Timeout in milliseconds (5000ms = 5 seconds)
       });
 
       if (response.status !== 200) {
@@ -71,7 +71,7 @@ const RedditComponent = () => {
         userId,
       },
       {
-        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
+        timeout: process.env.NEXT_PUBLIC_TIMEOUT || 30000, // Timeout in milliseconds (5000ms = 5 seconds)
       });
 
       if (response.status !== 200) {

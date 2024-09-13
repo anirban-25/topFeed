@@ -46,7 +46,7 @@ const DashboardHeader = () => {
       const response = await axios.post(
         "/api/reddit",
         { subreddits: cleanedTopics, userId },
-        { headers: { 'Content-Type': 'application/json' }, timeout: 240000 }
+        { headers: { 'Content-Type': 'application/json' }, timeout: process.env.NEXT_PUBLIC_TIMEOUT || 30000, }
       );
 
       if (response.status !== 200) throw new Error("Failed to fetch data from server");
