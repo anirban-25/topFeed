@@ -136,20 +136,20 @@ const Page = () => {
       <div className="px-5 md:px-20">
         <Navbar />
       </div>
-      <div className="mt-10 text-white">
-        <div className=" text-center text-4xl font-kumbh-sans">
+      <div className="mt-10 text-white px-3">
+        <div className=" text-center text-xl md:text-4xl font-kumbh-sans">
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#FFFFFF] via-[#55A3F8] to-[#7567D9]">
             Your gateway
           </span>{" "}
           to affordable AI news feed
         </div>
-        <div className="text-center text-[#E6E6E6] font-kumbh-sans-light mt-5">
+        <div className="text-center text-[#E6E6E6] text-xs md:text-base font-kumbh-sans-light mt-5">
           Whether you&apos;re just getting started or are a large enterprise, we have
           a plan for you.
         </div>
       </div>
       <div>
-        <div className="flex justify-center mt-20 mb-5 font-kumbh-sans-light text-sm text-[#B5B5B5] space-x-3">
+        <div className="flex justify-center mt-20 mb-5 font-kumbh-sans-light text-xs md:text-sm text-[#B5B5B5] space-x-3">
           <div>Pay Monthly</div>
           <Switch defaultChecked onChange={onChange} />
           <div>Pay Yearly</div>

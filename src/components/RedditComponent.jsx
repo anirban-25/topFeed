@@ -6,14 +6,14 @@ import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import CreateFeedPopup from "../components/CreateFeedPopup";
 import axios from "axios";
-import { Bars } from "react-loader-spinner";
+
 import { IoSearch } from "react-icons/io5";
 import RedditMasonryLayout from "./MasonryLayoutReddit";
 import { useAppContext } from "@/contexts/AppContext";
 const RedditComponent = () => {
   const { redditDataFetch, setRedditDataFetch } = useAppContext();
   const [redditData, setRedditData] = useState(null);
-  const [loaderInitial, setLoaderInitial] = useState(true)
+  const [loaderInitial, setLoaderInitial] = useState(true);
   const [subreddits, setSubreddits] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,13 +39,16 @@ const RedditComponent = () => {
     if (!querySnapshot.empty) {
       const docData = querySnapshot.docs[0].data();
       setSubreddits(docData.subreddits || []);
-      const response = await axios.post("/api/reddit", {
-        subreddits: docData.subreddits,
-        userId,
-      },
-      {
-        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
-      });
+      const response = await axios.post(
+        "/api/reddit",
+        {
+          subreddits: docData.subreddits,
+          userId,
+        },
+        {
+          timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
+        }
+      );
       if (response.status !== 200) {
         setLoading(false);
         throw new Error("Failed to fetch data from server");
@@ -53,13 +56,16 @@ const RedditComponent = () => {
       console.log("Received response from API:", response.data);
       await fetchLatestRedditData();
     } else {
-      const response = await axios.post("/api/reddit", {
-        subreddits: cleanedTopics,
-        userId,
-      },
-      {
-        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
-      });
+      const response = await axios.post(
+        "/api/reddit",
+        {
+          subreddits: cleanedTopics,
+          userId,
+        },
+        {
+          timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
+        }
+      );
       if (response.status !== 200) {
         setLoading(false);
         throw new Error("Failed to fetch data from server");
@@ -97,7 +103,7 @@ const RedditComponent = () => {
       console.error("Error fetching Reddit data:", err);
       setError(err.message);
     } finally {
-      setLoaderInitial(false)
+      setLoaderInitial(false);
       setLoading(false);
     }
   };
@@ -106,7 +112,7 @@ const RedditComponent = () => {
       fetchLatestRedditData();
     }
   }, [user]);
-useEffect(() => {
+  useEffect(() => {
     import("ldrs").then(({ cardio }) => {
       cardio.register();
     });
@@ -130,9 +136,9 @@ useEffect(() => {
       )
   );
   useEffect(() => {
-    if(redditDataFetch){
+    if (redditDataFetch) {
       setLoading(redditDataFetch);
-    }else{
+    } else {
       fetchLatestRedditData();
     }
   }, [redditDataFetch]);
@@ -203,8 +209,8 @@ useEffect(() => {
     );
   }
   return (
-    <div className="font-kumbh-sans-Medium p-8">
-      <div className="flex justify-end mb-6">
+    <div className="font-kumbh-sans-Medium px-3 py-8 md:p-8">
+      <div className=" w-full flex justify-items-center md:justify-end mb-6">
         <div className="relative flex items-center">
           <IoSearch className="absolute left-3 text-gray-500" />
           <input
@@ -219,7 +225,8 @@ useEffect(() => {
           className="bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg ml-4"
           onClick={() => handleRefresh(null)}
         >
-          Update Instant Refresh
+          <div className="hidden md:block">Update Instant Refresh</div>
+          <div className="md:hidden">Refresh</div>
         </button>
       </div>
       <RedditMasonryLayout filteredRedditData={filteredData} />

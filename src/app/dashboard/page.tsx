@@ -7,11 +7,11 @@ const page = () => {
     return (
         <div className="flex">
             <div className="flex fixed h-full">
-                <div className="relative w-full z-10 flex justify-center items-center top-0 mx-auto">
+                <div className="relative hidden w-full z-10 md:flex justify-center items-center top-0 mx-auto">
                     <SidePanel />
                 </div>
             </div>
-            <div className="min-h-screen flex-grow bg-white ml-64 w-[calc(100%-16rem)]">
+            <div className="min-h-screen flex-grow bg-white md:ml-64 w-[calc(100%-16rem)]">
                 <DashboardHeader />
                 <RedditComponent />
             </div>

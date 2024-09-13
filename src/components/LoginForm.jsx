@@ -71,21 +71,21 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="w-full max-w-md p-8 bg-transparent">
+    <div className="w-full max-w-md md:p-8 bg-transparent">
       <div className="flex justify-center">
-        <h1 className="text-5xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white via-[#55A3F8] to-[#7567D9] relative whitespace-nowrap">
+        <h1 className="text-xl md:text-5xl  font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white via-[#55A3F8] to-[#7567D9] relative whitespace-nowrap">
           Welcome <span className="text-white">to TopFeed</span>
         </h1>
       </div>
 
-      <p className="text-sm text-center text-[#E6E6E6] mb-4 mt-5">
+      <p className="text-xs md:text-sm text-center text-[#E6E6E6] mb-4 mt-5">
         Please enter your email ID to receive a login link. Click the link in
         your email to be signed in instantly.
       </p>
 
       {!isEmailSent ? (
         <form className="mb-5" onSubmit={handleSendSignInLink}>
-          <label className="block text-white mb-2" htmlFor="email">
+          <label className="text-sm md:text-base block text-white mb-2" htmlFor="email">
             Email
           </label>
           <input

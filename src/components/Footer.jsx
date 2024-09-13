@@ -5,7 +5,7 @@ import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className=" text-white py-8 md:px-20 pl-5">
+    <footer className=" text-white py-8 px-3  md:px-20 md:pl-5">
       <div className="container mx-auto">
         <div className="flex flex-col w-full md:flex-row justify-between items-start mb-20">
           <div className="mb-6 md:mb-0">
@@ -14,11 +14,11 @@ const Footer = () => {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="bg-white text-black px-4 py-2 rounded-md w-48  md:w-64"
+                className="bg-white text-black px-2  md:px-4 py-1  md:py-2 rounded-md w-48  md:w-64"
               />
               <button
                 type="submit"
-                className="bg-[#146EF5] text-white px-4 py-2 rounded-md"
+                className="bg-[#146EF5] text-white  px-2 md:px-4 py-2 rounded-md"
               >
                 Subscribe
               </button>

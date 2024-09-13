@@ -9,11 +9,11 @@ const DashboardPage = () => {
     return (
         <div className="flex">
             <div className="flex fixed h-full">
-                <div className="relative w-full z-10 flex justify-center items-center top-0 mx-auto">
+                <div className="relative hidden w-full z-10 md:flex justify-center items-center top-0 mx-auto">
                     <SidePanel />
                 </div>
             </div>
-            <div className="flex-grow bg-white min-h-screen ml-64 w-[calc(100%-16rem)]">
+            <div className="flex-grow bg-white min-h-screen md:ml-64 w-[calc(100%-16rem)]">
                 <TwitterHeader />
                 <TwitterComponent />
             </div>
