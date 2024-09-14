@@ -30,7 +30,7 @@ const RedditComponent = () => {
   };
 
   const handleRefresh = async (cleanedTopics) => {
-    //setLoading(true);
+    setLoading(true);
 
     const user = auth.currentUser;
     if (!user) {
@@ -58,13 +58,13 @@ const RedditComponent = () => {
       });
 
       if (response.status !== 200) {
-        //setLoading(false);
+        setLoading(false);
         throw new Error("Failed to fetch data from server");
       }
 
       console.log("Received response from API:", response.data);
 
-      //await fetchLatestRedditData();
+      await fetchLatestRedditData();
     } else {
       const response = await axios.post("/api/reddit", {
         subreddits: cleanedTopics,
@@ -75,13 +75,13 @@ const RedditComponent = () => {
       });
 
       if (response.status !== 200) {
-        //setLoading(false);
+        setLoading(false);
         throw new Error("Failed to fetch data from server");
       }
 
       console.log("Received response from API:", response.data);
 
-      //await fetchLatestRedditData();
+      await fetchLatestRedditData();
     }
   };
 
@@ -153,14 +153,14 @@ useEffect(() => {
       )
   );
 
-  /*useEffect(() => {
+  useEffect(() => {
     if(redditDataFetch){
       setLoading(redditDataFetch);
     }else{
       fetchLatestRedditData();
 
     }
-  }, [redditDataFetch]);*/
+  }, [redditDataFetch]);
   
   if (loaderInitial) {
     return (

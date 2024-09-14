@@ -93,21 +93,21 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
 
   const handleGenerateFeed = async () => {
     setRedditDataFetch(true);
-    //setLoading(true);
+    setLoading(true);
     setError(null);
     handleOpen(null);
 
     try {
       const cleanedTopics = topics.map(cleanSubredditName);
       await handleSubmit(cleanedTopics);
-      //await fetchLastUpdatedSubreddits();
+      await fetchLastUpdatedSubreddits();
     } catch (err) {
       console.error("Error during feed generation:", err);
       setError("An error occurred while processing your request.");
     } finally {
       setRedditDataFetch(false);
-      //setLoading(false);
-      //await fetchLastUpdatedSubreddits();
+      setLoading(false);
+      await fetchLastUpdatedSubreddits();
     }
   };
 
