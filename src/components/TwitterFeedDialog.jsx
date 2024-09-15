@@ -6,7 +6,6 @@ import {
   DialogBody,
   DialogFooter,
 } from "@material-tailwind/react";
-import { waitUntil } from '@vercel/functions';
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { X, Loader2 } from "lucide-react";
 import { db, auth } from "../firebase";
@@ -258,7 +257,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
     onFeedCreated();
     handleOpen(null);
     try {
-      const response = awaitwaitUntil(fetch("/api/process", {
+      const response = await fetch("/api/process", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -268,7 +267,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
           newTopic: topic,
           userId: userId,
         }),
-      }));
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

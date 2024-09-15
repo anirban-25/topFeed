@@ -81,8 +81,7 @@
     "swr": "1.1.2",
     "tailwind-merge": "^2.2.1",
     "unfetch": "^5.0.0",
-    "use-react-countries": "^2.0.1",
-    "vercel": "^37.4.2"
+    "use-react-countries": "^2.0.1"
   },
   "devDependencies": {
     "@types/node": "^20",
