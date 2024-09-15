@@ -10,6 +10,8 @@ import {
 } from "@/utils/notificationUtils";
 import { storeDataInFirestore } from "@/utils/storeTwitterData";
 
+export const runtime = 'nodejs';
+export const maxDuration = 60;
 // Initialize Firebase Admin SDK (if not already initialized elsewhere)
 if (!admin.apps.length) {
   admin.initializeApp({

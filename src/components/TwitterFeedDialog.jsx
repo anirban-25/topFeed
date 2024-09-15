@@ -6,6 +6,7 @@ import {
   DialogBody,
   DialogFooter,
 } from "@material-tailwind/react";
+import { waitUntil } from '@vercel/functions';
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { X, Loader2 } from "lucide-react";
 import { db, auth } from "../firebase";
@@ -23,11 +24,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { storeDataInFirestore } from "@/utils/storeTwitterData";
 import { useAppContext } from "@/contexts/AppContext";
 
-const TwitterFeedDialog = ({
-  size,
-  handleOpen,
-  onFeedCreated,
-}) => {
+const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
   const { twitterLoader, setTwitterLoader } = useAppContext();
   const [newTopic, setNewTopic] = useState("");
   const [twitterUrls, setTwitterUrls] = useState([""]);
@@ -233,7 +230,6 @@ const TwitterFeedDialog = ({
         setExistingFeedId(docRef.id);
       }
       await processAndStoreTweets(user.uid, twitterUrls, newTopic);
-
     } catch (error) {
       console.error("Error:", error);
       alert("An error occurred while saving the feed. Please try again.");
@@ -244,7 +240,7 @@ const TwitterFeedDialog = ({
       const timer = setTimeout(() => {
         reject(new Error("Request timed out"));
       }, ms);
-  
+
       promise
         .then((response) => {
           clearTimeout(timer);
@@ -262,17 +258,17 @@ const TwitterFeedDialog = ({
     onFeedCreated();
     handleOpen(null);
     try {
-      const response = await timeoutPromise(
-        240000, // 3 minutes timeout
-        fetch("/api/process", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ twitterUrls: urls, newTopic: topic, userId: userId }),
-        })
-      );
-  
+      const response = awaitwaitUntil(fetch("/api/process", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          twitterUrls: urls,
+          newTopic: topic,
+          userId: userId,
+        }),
+      }));
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -290,7 +286,6 @@ const TwitterFeedDialog = ({
       console.log("Tweets array:", tweetsArray);
 
       await storeDataInFirestore(tweetsArray, userId);
-      
     } catch (error) {
       console.error("Error processing and storing tweets:", error);
     } finally {
