@@ -257,7 +257,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
     onFeedCreated();
     handleOpen(null);
     try {
-      const response = await fetch("/api/process", {
+      const response = await fetch("http://topfeed-backend2-dev2.us-east-2.elasticbeanstalk.com/api/feed", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
