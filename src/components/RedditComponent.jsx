@@ -45,7 +45,7 @@ const RedditComponent = () => {
     if (!querySnapshot.empty) {
       const docData = querySnapshot.docs[0].data();
       setSubreddits(docData.subreddits || []);
-      const response = await axios.post("/api/reddit", {
+      const response = await axios.post("https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process", {
         subreddits: docData.subreddits,
         userId,
       },

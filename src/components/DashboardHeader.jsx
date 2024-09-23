@@ -53,7 +53,7 @@ const DashboardHeader = () => {
 
       // Send the POST request to the API
       const response = await axios.post(
-        "/api/reddit",
+        "https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process",
         { subreddits: cleanedTopics, userId },
         { headers: { 'Content-Type': 'application/json' }, timeout: 240000 }
       );
