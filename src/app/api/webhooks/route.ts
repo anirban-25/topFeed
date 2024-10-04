@@ -3,6 +3,9 @@ import { setDoc, doc } from 'firebase/firestore';
 import { db } from '@/firebase'; // Ensure Firebase config is imported correctly
 
 export async function POST(req: Request) {
+  console.log('Received request:', req.method); // Log HTTP method
+  console.log('Request URL:', req.url); // Log request URL
+
   const webhookSecret = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_SECRET;
   const signature = req.headers.get('x-signature');
 
@@ -17,7 +20,7 @@ export async function POST(req: Request) {
 
     // Extract the userId from the metadata
     const userId = data.data.attributes.metadata.user_id; // Firebase userId passed via metadata
-    const plan = data.data.attributes.subscription_name; // Extract the subscription plan name
+    const plan = data.data.attributes.subscription_id; // Extract the subscription plan name
 
     console.log(`User ID: ${userId}, Plan: ${plan}`); // Log user ID and plan
 
