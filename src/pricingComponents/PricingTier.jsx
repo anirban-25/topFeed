@@ -1,7 +1,12 @@
 import React from "react";
 import { FaStar } from "react-icons/fa6";
 import { LuRocket } from "react-icons/lu";
-const PricingTier = ({ name, price, yearlyPrice, popular, features }) => {
+const PricingTier = ({ name, price, yearlyPrice, popular, features, lemonSqueezyMonthlyUrl, lemonSqueezyYearlyUrl, clicked   }) => {
+  const handleCheckout = () => {
+    const checkoutUrl = clicked ? lemonSqueezyYearlyUrl : lemonSqueezyMonthlyUrl;
+    window.location.href = checkoutUrl; 
+  };
+  const monthlyEquivalent = clicked ? (yearlyPrice / 12) : price;
   return (
     <div
       className={`bg-[#292929] rounded-lg p-6 flex flex-col h-full ${
@@ -30,10 +35,10 @@ const PricingTier = ({ name, price, yearlyPrice, popular, features }) => {
           </div>
           <div className="flex justify-between items-center mt-9">
             <div className="text-3xl font-bold text-white">
-              ${price}
+              ${clicked ? (yearlyPrice / 12) : price}
               <span className="text-sm font-normal">/mo</span>
             </div>
-            {yearlyPrice != 0 && (
+            {clicked && yearlyPrice>0 && (
               <div className="text-sm text-gray-400">
                 billed <span className="text-white">${yearlyPrice}</span> yearly
               </div>
@@ -47,6 +52,7 @@ const PricingTier = ({ name, price, yearlyPrice, popular, features }) => {
             ? "bg-blue-500 text-white"
             : "bg-[#3D3D3D] text-white border-[#8F8F8F] border"
         }`}
+        onClick={handleCheckout}
       >
         Start a FREE trial
       </button>
