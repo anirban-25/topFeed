@@ -13,10 +13,13 @@ export async function POST(req: Request) {
 
   try {
     const data = await req.json(); // Parse the JSON body
+    console.log("Webhook Payload:", data); 
 
     // Extract the userId from the metadata
     const userId = data.data.attributes.metadata.user_id; // Firebase userId passed via metadata
     const plan = data.data.attributes.subscription_name; // Extract the subscription plan name
+
+    console.log(`User ID: ${userId}, Plan: ${plan}`); // Log user ID and plan
 
     if (!userId) {
       return NextResponse.json({ message: 'No user ID found in metadata' }, { status: 400 });
