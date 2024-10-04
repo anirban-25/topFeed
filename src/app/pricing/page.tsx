@@ -9,7 +9,6 @@ import { Switch } from 'antd';
 import { useAuthState } from "react-firebase-hooks/auth";
 
 const Page = () => {
-  const [user] = useAuthState(auth);
 
   const [clicked, setClicked] = useState(true);
   const userId = auth.currentUser?.uid;
@@ -30,7 +29,7 @@ const Page = () => {
         "Basic Analytics",
       ],
       lemonSqueezyMonthlyUrl:
-        `https://topfeed.lemonsqueezy.com/buy/8413ab3b-25e5-4d3b-8a0e-8cdee7987c75?media=0&discount=0&metadata[user_id]=${userId}`,
+        "https://topfeed.lemonsqueezy.com/buy/8413ab3b-25e5-4d3b-8a0e-8cdee7987c75?media=0&discount=0",
       lemonSqueezyYearlyUrl:
         `https://topfeed.lemonsqueezy.com/buy/454ef42c-8b02-4af4-96bc-35997e088994?media=0&discount=0&metadata[user_id]=${userId}`,
     },
