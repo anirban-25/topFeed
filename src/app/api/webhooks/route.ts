@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server';
-import { setDoc, doc } from 'firebase/firestore';
-import { db } from '@/firebase'; // Ensure Firebase config is imported correctly
 
 export async function POST(req: Request) {
   console.log('Received request:', req.method); // Log HTTP method
@@ -16,24 +14,12 @@ export async function POST(req: Request) {
 
   try {
     const data = await req.json(); // Parse the JSON body
-    console.log("Webhook Payload:", data); 
+    console.log("Webhook Payload:", data); // Log the webhook payload
 
-    // Extract the userId from the metadata
-    const userId = 'w5rlvFrCbQf03286AD5gVH4Qxff1'; // Firebase userId passed via metadata
-    const plan = data.data.attributes.product_name; // Extract the subscription plan name
+    // You can perform other operations with the webhook data here if needed
+    // For now, we'll just log the payload and return a success response
 
-    console.log(`User ID: ${userId}, Plan: ${plan}`); // Log user ID and plan
-
-    if (!userId) {
-      return NextResponse.json({ message: 'No user ID found in metadata' }, { status: 400 });
-    }
-
-    // Update the user document in Firestore with the subscription plan
-    await setDoc(doc(db, 'users', userId), {
-      plan: plan || 'free', // Default to 'free' if no plan is found
-    }, { merge: true });
-
-    return NextResponse.json({ message: 'User plan updated successfully' });
+    return NextResponse.json({ message: 'Webhook received successfully', data: data });
 
   } catch (error) {
     console.error('Error processing webhook:', error);
