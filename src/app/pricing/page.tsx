@@ -11,7 +11,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 const Page = () => {
 
   const [clicked, setClicked] = useState(true);
-  const userId = auth.currentUser?.uid;
+  //const userId = auth.currentUser?.uid;
   const onChange = () => {
     setClicked(!clicked);
   };
