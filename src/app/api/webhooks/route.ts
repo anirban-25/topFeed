@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 
     // Extract the userId from the metadata
     const userId = data.data.attributes.metadata.user_id; // Firebase userId passed via metadata
-    const plan = data.data.attributes.subscription_id; // Extract the subscription plan name
+    const plan = data.data.attributes.product_name; // Extract the subscription plan name
 
     console.log(`User ID: ${userId}, Plan: ${plan}`); // Log user ID and plan
 
