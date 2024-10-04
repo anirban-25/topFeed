@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
     // Update the user document in Firestore with the subscription plan
     await setDoc(doc(db, 'users', userId), {
-      hasPlan: plan || 'free', // Default to 'free' if no plan is found
+      plan: plan || 'free', // Default to 'free' if no plan is found
     }, { merge: true });
 
     return NextResponse.json({ message: 'User plan updated successfully' });
