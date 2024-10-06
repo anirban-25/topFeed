@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     console.log('Webhook Payload:', data); // Log the webhook payload for debugging
 
     // Extract the userId from the metadata passed by Lemon Squeezy
-    const userId = data?.data?.id; // Firebase userId passed via metadata
+    const userId = data?.meta?.custom_data?.user_id; // Firebase userId passed via metadata
     const plan = data?.data?.attributes?.product_name; // Extract the subscription plan name from webhook
 
     console.log(`User ID: ${userId}, Plan: ${plan}`); // Log the user ID and plan for debugging
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 
     // Update the user document in Firestore with the new subscription plan
     await setDoc(doc(db, 'users', userId), {
-      hasPlan: plan || 'free', // Set the user's subscription plan; default to 'free' if no plan is provided
+      plan: plan || 'free', // Set the user's subscription plan; default to 'free' if no plan is provided
     }, { merge: true }); // Use merge: true to update only the plan without overwriting other user data
 
     // Return a success response after successfully updating Firestore
