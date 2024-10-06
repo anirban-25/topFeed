@@ -8,6 +8,8 @@ export async function POST(req: Request) {
   const signature = req.headers.get('x-signature');
 
   // Verify the signature to confirm the request is from Lemon Squeezy
+  console.log(signature)
+  console.log(webhookSecret)
   if (signature !== webhookSecret) {
     return NextResponse.json({ message: 'Invalid signature' }, { status: 403 });
   }
