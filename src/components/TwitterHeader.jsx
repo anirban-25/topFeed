@@ -29,6 +29,9 @@ const TwitterHeader = () => {
   useEffect(() => {
     checkExistingFeed();
   }, [twitterLoader]);
+  // useEffect(() => {
+  //   checkExistingFeed();
+  // }, []);
 
   const checkExistingFeed = async () => {
     try {

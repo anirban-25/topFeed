@@ -19,7 +19,7 @@ try {
   throw error; // Re-throw the error to stop execution if Firebase can't be initialized
 }
 
-async function twitterLinksChecker(requestBody) {
+async function  twitterLinksChecker(requestBody) {
   const { twitter_url } = requestBody;  
   console.log('Received Twitter URL:', twitter_url);
 

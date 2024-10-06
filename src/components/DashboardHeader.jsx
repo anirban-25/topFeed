@@ -52,11 +52,16 @@ const DashboardHeader = () => {
       const userId = user.uid;
 
       // Send the POST request to the API
-      const response = await axios.post(
-        "https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process",
-        { subreddits: cleanedTopics, userId },
-        { headers: { 'Content-Type': 'application/json' }, timeout: 240000 }
-      );
+      const response = await fetch("https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subreddits: cleanedTopics,
+          userId
+        }),
+      });
 
       if (response.status !== 200) throw new Error("Failed to fetch data from server");
 

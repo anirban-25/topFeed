@@ -8,7 +8,8 @@ const AuthorSelectionDropdown = ({
   onClearFilters,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-
+  console.log(typeof(authors));
+  console.log(authors)
   const filteredAuthors = authors.filter((author) =>
     author.toLowerCase().includes(searchTerm.toLowerCase())
   );
