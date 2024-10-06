@@ -139,9 +139,6 @@ const Page = () => {
                 lemonSqueezyMonthlyUrl={tier.lemonSqueezyMonthlyUrl}
                 lemonSqueezyYearlyUrl={tier.lemonSqueezyYearlyUrl}
                 clicked={clicked}
-                
-
-                
               />
             ))}
           </div>
