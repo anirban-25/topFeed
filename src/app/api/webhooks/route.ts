@@ -5,7 +5,7 @@ export async function POST(req: Request) {
   console.log('Request URL:', req.url); // Log request URL
 
   const webhookSecret = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_SECRET;
-  const signature = req.headers.get('x-signature');
+  const signature = req.headers.get('x-signature') || req.headers.get('X-Signature');
 
   // Verify the signature to confirm the request is from Lemon Squeezy
   console.log(signature)
