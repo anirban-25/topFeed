@@ -67,7 +67,7 @@ const UserMenu = () => {
       {menuOpen && user && (
         <div
           ref={menuRef}
-          className="absolute right-0 mt-5 mr-2 min-w-[300px] max-w-[90vw] bg-white border border-gray-300 rounded-lg shadow-lg"
+          className="absolute right-0 mt-5 mr-2 min-w-[300px] z-50 max-w-[90vw] bg-white border border-gray-300 rounded-lg shadow-lg"
         >
           <div className="flex items-center p-4">
             <img
@@ -76,10 +76,10 @@ const UserMenu = () => {
               className="w-12 h-12 rounded-full mr-4 flex-shrink-0"
             />
             <div className="text-sm text-gray-700 overflow-hidden">
-              <div className="font-medium break-words">
+              <div className="font-medium break-words font-kumbh-sans-medium">
                 {user.displayName || "User"}
               </div>
-              <div className="text-xs text-gray-500 break-all">
+              <div className="text-xs text-gray-500 break-all font-kumbh-sans-regular">
                 {user.email}
               </div>
             </div>
