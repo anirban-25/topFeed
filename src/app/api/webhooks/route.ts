@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     console.log('Webhook Payload:', data); // Log the webhook payload for debugging
 
     // Extract the userId from the metadata passed by Lemon Squeezy
-    const userId = data.data.meta.user_id; // Firebase userId passed via metadata
+    const userId = data.data.meta.custom.user_id; // Firebase userId passed via metadata
     const plan = data.data.attributes.product_name; // Extract the subscription plan name from webhook
 
     console.log(`User ID: ${userId}, Plan: ${plan}`); // Log the user ID and plan for debugging
