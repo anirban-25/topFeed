@@ -1,20 +1,39 @@
 "use client";
 import Navbar from "@/components/Navbar";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PricingTier from "@/pricingComponents/PricingTier";
 import Footer from "@/components/Footer";
-import { auth } from "@/firebase";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import { app } from "@/firebase";
 import { Switch } from 'antd';
-import { useAuthState } from "react-firebase-hooks/auth";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
+  const [user, setUser] = useState<User | null>(null);  // Type User | null
+  const router = useRouter();
+  const auth = getAuth(app);
 
   const [clicked, setClicked] = useState(true);
-  //const userId = auth.currentUser?.uid;
   const onChange = () => {
     setClicked(!clicked);
   };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);  // Set the Firebase user when logged in
+      } else {
+        router.push("/login");  // Redirect to login if no user is found
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth, router]);
+
+  // Use user?.uid and user?.email to safely access these properties
+  const userId = user?.uid;
+  const userEmail = user?.email;
 
   const tiers = [
     {
@@ -29,9 +48,9 @@ const Page = () => {
         "Basic Analytics",
       ],
       lemonSqueezyMonthlyUrl:
-        "https://topfeed.lemonsqueezy.com/buy/8413ab3b-25e5-4d3b-8a0e-8cdee7987c75?media=0&discount=0",
+        `https://topfeed.lemonsqueezy.com/buy/8413ab3b-25e5-4d3b-8a0e-8cdee7987c75?media=0&discount=0&metadata[user_id]=${userId}&checkout[email]=${userEmail}`,
       lemonSqueezyYearlyUrl:
-        "https://topfeed.lemonsqueezy.com/buy/454ef42c-8b02-4af4-96bc-35997e088994?media=0&discount=0",
+        `https://topfeed.lemonsqueezy.com/buy/454ef42c-8b02-4af4-96bc-35997e088994?media=0&discount=0&metadata[user_id]=${userId}&checkout[email]=${userEmail}`,
     },
     {
       name: "Growth",
@@ -47,9 +66,9 @@ const Page = () => {
         "Priority Support",
       ],
       lemonSqueezyMonthlyUrl:
-        "https://topfeed.lemonsqueezy.com/buy/c9908381-4dac-4539-ae62-d6eadf10bddf?media=0&discount=0",
+        `https://topfeed.lemonsqueezy.com/buy/c9908381-4dac-4539-ae62-d6eadf10bddf?media=0&discount=0&metadata[user_id]=${userId}&checkout[email]=${userEmail}`,
       lemonSqueezyYearlyUrl:
-        "https://topfeed.lemonsqueezy.com/buy/74c9438d-2424-4e0e-920e-f29c5912852b?media=0&discount=0",
+        `https://topfeed.lemonsqueezy.com/buy/74c9438d-2424-4e0e-920e-f29c5912852b?media=0&discount=0&metadata[user_id]=${userId}&checkout[email]=${userEmail}`,
     },
     {
       name: "Scale",
@@ -67,9 +86,9 @@ const Page = () => {
         "API access",
       ],
       lemonSqueezyMonthlyUrl:
-        "https://topfeed.lemonsqueezy.com/buy/e434c319-7b78-4449-8a5c-2514cc1832a6?media=0&discount=0",
+        `https://topfeed.lemonsqueezy.com/buy/e434c319-7b78-4449-8a5c-2514cc1832a6?media=0&discount=0&metadata[user_id]=${userId}&checkout[email]=${userEmail}`,
       lemonSqueezyYearlyUrl:
-        "https://topfeed.lemonsqueezy.com/buy/5e76b568-a6df-4404-af3d-da5137f029aa?media=0&discount=0",
+        `https://topfeed.lemonsqueezy.com/buy/5e76b568-a6df-4404-af3d-da5137f029aa?media=0&discount=0&metadata[user_id]=${userId}&checkout[email]=${userEmail}`,
     },
   ];
 
