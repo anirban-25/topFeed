@@ -1,18 +1,32 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from 'firebase/firestore';
 import { db, app } from '@/firebase';
+import { useRouter } from 'next/navigation';
 
 const ManageSubscription = () => {
   const [subscriptionDetails, setSubscriptionDetails] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const auth = getAuth(app);
+  const [user, setUser] = useState(null);
+  const router = useRouter();
+  
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUser(user);  // Set the Firebase user when logged in
+      } else {
+        router.push("/login");  // Redirect to login if no user is found
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth, router]);
+  useEffect(() => {
     const fetchSubscriptionDetails = async () => {
-      const user = auth.currentUser;
       if (user) {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
@@ -74,18 +88,17 @@ const ManageSubscription = () => {
   };
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-lg w-full font-kumbh-sans">
         <h2 className="text-2xl font-bold mb-6 text-center">Subscription Details</h2>
-        <p><strong>Plan: </strong> {subscriptionDetails.attributes.product_name}</p>
-        <p><strong>Status:</strong> {subscriptionDetails.attributes.status_formatted}</p>
-        <p><strong>Free Trial Ends at:</strong> {new Date(subscriptionDetails.attributes.trial_ends_at).toLocaleString()}</p>
+        <p><strong>Plan: </strong> {subscriptionDetails?.attributes.product_name}</p>
+        <p><strong>Status:</strong> {subscriptionDetails?.attributes.status_formatted}</p>
+        <p><strong>Free Trial Ends at:</strong> {new Date(subscriptionDetails?.attributes?.trial_ends_at).toLocaleString()}</p>
         
 
-        {subscriptionDetails.attributes.cancelled ? (
+        {subscriptionDetails?.attributes.cancelled ? (
           <p className="mt-4 text-red-500 text-center">Your subscription has been cancelled.</p>
         ) : (
           <div className="flex justify-center mt-6">
