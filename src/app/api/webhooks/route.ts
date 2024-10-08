@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { setDoc, doc } from 'firebase/firestore';
-import { db } from '@/firebase'; // Ensure Firebase config is imported correctly
+import { db } from '@/firebase'; 
 
 export async function POST(req: Request) {
   const webhookSecret = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_SECRET;

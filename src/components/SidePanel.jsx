@@ -79,7 +79,7 @@ const SidePanel = () => {
           <Image src="/images/logo.png" height={120} width={120} alt="logo" />
         </Link>
       </div>
-      <div className="font-kumbh-sans-Bold text-[#8D8D8D] flex flex-col space-y-4 mt-8 items-left ml-5 mr-5 z-10">
+      <div className="font-kumbh-sans-bold text-[#8D8D8D] flex flex-col space-y-4 mt-8 items-left ml-5 mr-5 z-10">
         <div className="group">
           <Link href="/dashboard/reddit">
             <div
@@ -147,11 +147,11 @@ const SidePanel = () => {
           </Link>
         </div>
       </div>
-      <div className="font-kumbh-sans-Medium mt-auto mb-9 items-center">
+      <div className="font-kumbh-sans-medium mt-auto mb-9 items-center">
         <div className=" space-x-2 bg-[#2A2A2A] p-3 rounded-md w-3/2 ml-3 mr-3 ">
-          <div className="font-kumbh-sans-Medium flex items-center space-x-10 ml-3 mb-5">
-            <span className="text-[#8D8D8D] text-sm">My Current Plan</span>
-            <span className="font-kumbh-sans-SemiBold text-white uppercase">{plan}</span>
+          <div className="font-kumbh-sans-medium flex items-center justify-between ml-3 mb-5">
+            <span className="text-[#8D8D8D] text-sm whitespace-nowrap">Current Plan</span>
+            <span className="font-kumbh-sans-semibold text-white uppercase whitespace-nowrap">{plan}</span>
           </div>
 
           {plan === "free" ? (
