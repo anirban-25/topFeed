@@ -22,9 +22,36 @@ const HandleEmailLink = () => {
             window.localStorage.removeItem("emailForSignIn");
             
             // Update user's plan in Firestore
-            await setDoc(doc(db, "users", result.user.uid), {
-              plan: "free"
-            }, { merge: true });
+            const updateUserPlan = async (userId) => {
+              try {
+                // Get the user document reference
+                const userDocRef = doc(db, "users", userId);
+            
+                // Get the current user data
+                const userDoc = await getDoc(userDocRef);
+            
+                if (userDoc.exists()) {
+                  const userData = userDoc.data();
+            
+                  if (userData.plan) {
+                    console.log("User already has a plan. No update needed.");
+                    return;
+                  }
+                  await setDoc(
+                    userDocRef,
+                    {
+                      plan: "free",
+                    },
+                    { merge: true }
+                  );
+                  console.log("User plan updated successfully to free");
+                } else {
+                  console.log("User document does not exist");
+                }
+              } catch (error) {
+                console.error("Error updating user plan:", error);
+              }
+            };
 
             router.push("/dashboard/reddit");
           } catch (error) {

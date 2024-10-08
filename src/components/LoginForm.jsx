@@ -9,7 +9,7 @@ import {
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { app, db } from "@/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -23,14 +23,29 @@ const LoginForm = () => {
   const router = useRouter();
   const updateUserPlan = async (userId) => {
     try {
-      await setDoc(
-        doc(db, "users", userId),
-        {
-          plan: "free",
-        },
-        { merge: true }
-      );
-      console.log("User plan updated successfully");
+      const userDocRef = doc(db, "users", userId);
+
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+
+        if (userData.plan) {
+          console.log("User already has a plan. No update needed.");
+          return;
+        }
+
+        await setDoc(
+          userDocRef,
+          {
+            plan: "free",
+          }, 
+          { merge: true }
+        );
+        console.log("User plan updated successfully to free");
+      } else {
+        console.log("User document does not exist");
+      }
     } catch (error) {
       console.error("Error updating user plan:", error);
     }
@@ -59,7 +74,6 @@ const LoginForm = () => {
     try {
       const result = await signInWithPopup(auth, provider);
       if (result.user) {
-        
         await updateUserPlan(result.user.uid);
         router.push("/dashboard/reddit");
       }
@@ -85,7 +99,10 @@ const LoginForm = () => {
 
       {!isEmailSent ? (
         <form className="mb-5" onSubmit={handleSendSignInLink}>
-          <label className="text-sm md:text-base block text-white mb-2" htmlFor="email">
+          <label
+            className="text-sm md:text-base block text-white mb-2"
+            htmlFor="email"
+          >
             Email
           </label>
           <input

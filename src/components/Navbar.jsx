@@ -4,9 +4,23 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { LiaHamburgerSolid } from "react-icons/lia";
 import { RxCrossCircled } from "react-icons/rx";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { app } from "@/firebase";
 const Navbar = () => {
+  const [user, setUser] = useState(null);
+  const router = useRouter();
+  const auth = getAuth(app);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user); // Set the Firebase user when logged in
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth, router]);
   const [visibleIndex, setVisibleIndex] = useState(false);
   const toggleVisibility = () => {
     setVisibleIndex(!visibleIndex);
@@ -75,11 +89,19 @@ const Navbar = () => {
           </Link>
         </div>
         <div>
-          <Link href="/login">
-            <div className=" bg-[#2A2A2A] text-xs md:text-sm p-1 md:p-2 ring-1 hover:bg-[#1d1d1d] hover:scale-105 transition-all duration-200  cursor-pointer ring-[#3D3D3D] px-3 md:px-4 rounded-md">
-              Login
-            </div>
-          </Link>
+          {!user ? (
+            <Link href="/login">
+              <div className=" bg-[#2A2A2A] text-xs md:text-sm p-1 md:p-2 ring-1 hover:bg-[#1d1d1d] hover:scale-105 transition-all duration-200  cursor-pointer ring-[#3D3D3D] px-3 md:px-4 rounded-md">
+                Login
+              </div>
+            </Link>
+          ) : (
+            <Link href="/dashboard">
+              <div className=" bg-[#2A2A2A] text-xs md:text-sm p-1 md:p-2 ring-1 hover:bg-[#1d1d1d] hover:scale-105 transition-all duration-200  cursor-pointer ring-[#3D3D3D] px-3 md:px-4 rounded-md">
+                Dashboard
+              </div>
+            </Link>
+          )}
         </div>
       </div>
     </div>
