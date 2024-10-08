@@ -25,11 +25,11 @@ const SidePanel = () => {
       if (user) {
         setUser(user);  // Set the Firebase user when logged in
         
-        // Fetch user plan from Firestore
+
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          setPlan(userData.plan || 'FREE'); // Set plan from Firestore, default to 'FREE' if not found
+          setPlan(userData.plan || "free" ); // Set plan from Firestore, default to 'FREE' if not found
         } else {
           console.error("No user document found in Firestore");
         }
@@ -154,7 +154,7 @@ const SidePanel = () => {
             <span className="font-kumbh-sans-SemiBold text-white uppercase">{plan}</span>
           </div>
 
-          {plan === 'FREE' ? (
+          {plan === "free" ? (
             <Link
               href="/pricing"
               className="flex items-center justify-center px-4 py-2 bg-[#146EF5] text-white rounded-lg hover:bg-blue-900 transition-all duration-200 mr-6"
