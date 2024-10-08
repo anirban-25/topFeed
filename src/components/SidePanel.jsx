@@ -122,19 +122,6 @@ const SidePanel = () => {
         </div>
         <div className="group">
           <Link
-            href="/dashboard/support"
-            className={` flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full cursor-pointer group-hover:text-white  ${
-              pathname == "/dashboard/support" ? "bg-gray-700 text-white" : ""
-            }`}
-          >
-            <div>
-              <HiOutlineSupport className="mr-5 scale-125" />
-            </div>
-            Support
-          </Link>
-        </div>
-        <div className="group">
-          <Link
             href="/pricing"
             className={` flex items-center space-x-2 hover:bg-gray-700 px-4 py-2 rounded-md w-full cursor-pointer group-hover:text-white  ${
               pathname == "/dashboard/support" ? "bg-gray-700 text-white" : ""
