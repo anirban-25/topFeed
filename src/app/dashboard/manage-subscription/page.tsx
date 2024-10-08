@@ -1,7 +1,7 @@
 import React from "react";
 import SidePanel from '@/components/SidePanel';
 import ManageSubscription from '@/pricingComponents/ManageSubscription';
-
+import UserMenu from "@/components/UserMenu";
 
 const page = () => {
     return (
@@ -11,8 +11,12 @@ const page = () => {
                     <SidePanel />
                 </div>
             </div>
+            
+            
             <div className="min-h-screen flex-grow bg-white md:ml-64 w-[calc(100%-16rem)]">
+                
                 <ManageSubscription />
+
             </div>
         </div>
     );

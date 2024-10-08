@@ -16,18 +16,12 @@ const ManageSubscription = () => {
       if (user) {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
-          const { customer_id, subscription_id } = userDoc.data(); // Ensure subscription_id is fetched
+          const { customer_id, subscription_id } = userDoc.data(); 
           console.log('Customer ID:', customer_id);
-          console.log('Subscription ID:', subscription_id); // Log subscription ID
-
-          if (!customer_id || !subscription_id) {
-            setError('Customer ID or Subscription ID is missing.');
-            setLoading(false);
-            return;
-          }
+          console.log('Subscription ID:', subscription_id);
 
           try {
-            const response = await fetch(`https://api.lemonsqueezy.com/v1/customers/${customer_id}/subscriptions`, {
+            const response = await fetch(`https://api.lemonsqueezy.com/v1/subscriptions/${subscription_id}`, {
               method: 'GET',
               headers: {
                 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_LEMON_SQUEEZY_API_KEY}`,
@@ -36,79 +30,74 @@ const ManageSubscription = () => {
             });
 
             if (!response.ok) {
-              const responseBody = await response.text();
-              throw new Error(`Failed to fetch subscription details: ${responseBody}`);
+              throw new Error('Failed to fetch subscription details');
             }
 
             const data = await response.json();
-            console.log('API Response:', data); // Log the API response
-
-            // Find the subscription using the subscription_id
-            const subscription = data.data.find(sub => sub.id === subscription_id);
-            console.log('Fetched Subscriptions:', data.data); // Log all subscriptions
-
-            if (subscription) {
-              setSubscriptionDetails(subscription);
-            } else {
-              setError('Subscription not found');
-            }
-          } catch (err) {
-            setError(`Error fetching subscription details: ${err.message}`);
-          } finally {
-            setLoading(false);
+            setSubscriptionDetails(data.data);
+          } catch (fetchError) {
+            setError(fetchError.message);
           }
         } else {
-          setError('User document not found');
-          setLoading(false);
+          setError('User document does not exist');
         }
       } else {
-        setError('User is not logged in');
-        setLoading(false);
+        setError('No user is signed in');
       }
+      setLoading(false);
     };
 
     fetchSubscriptionDetails();
   }, [auth]);
 
   const handleCancelSubscription = async () => {
-    if (!subscriptionDetails) return;
+    if (!confirm('Are you sure you want to cancel your subscription?')) return;
 
     try {
-      const response = await fetch(`https://api.lemonsqueezy.com/v1/subscriptions/${subscriptionDetails.id}/cancel`, {
-        method: 'POST',
+      const response = await fetch(`https://api.lemonsqueezy.com/v1/subscriptions/${subscriptionDetails.id}`, {
+        method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${process.env.NEXT_PUBLIC_LEMON_SQUEEZY_API_KEY}`,
           'Content-Type': 'application/json',
         },
       });
 
-      if (response.ok) {
-        alert('Subscription cancelled successfully');
-        setSubscriptionDetails(null); // Optionally refresh the subscription details
-      } else {
-        const responseBody = await response.text();
-        throw new Error(`Failed to cancel subscription: ${responseBody}`);
+      if (!response.ok) {
+        throw new Error('Failed to cancel the subscription');
       }
+
+      alert('Subscription cancelled successfully.');
+      setSubscriptionDetails((prev) => ({ ...prev, attributes: { ...prev.attributes, status: 'cancelled' } }));
     } catch (error) {
-      alert(`Error: ${error.message}`);
+      setError(error.message);
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
-    <div>
-      <h1>Manage Subscription</h1>
-      {subscriptionDetails && (
-        <div>
-          <p>Status: {subscriptionDetails.attributes.status}</p>
-          <p>Plan: {subscriptionDetails.attributes.product_name}</p>
-          <p>Trial: {subscriptionDetails.attributes.trial ? 'Yes' : 'No'}</p>
-          <p>Days Remaining: {subscriptionDetails.attributes.days_remaining}</p>
-          <button onClick={handleCancelSubscription}>Cancel Subscription</button>
-        </div>
-      )}
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="bg-white shadow-lg rounded-lg p-8 max-w-lg w-full font-kumbh-sans">
+        <h2 className="text-2xl font-bold mb-6 text-center">Subscription Details</h2>
+        <p><strong>Plan: </strong> {subscriptionDetails.attributes.product_name}</p>
+        <p><strong>Status:</strong> {subscriptionDetails.attributes.status_formatted}</p>
+        <p><strong>Free Trial Ends at:</strong> {new Date(subscriptionDetails.attributes.trial_ends_at).toLocaleString()}</p>
+        
+
+        {subscriptionDetails.attributes.cancelled ? (
+          <p className="mt-4 text-red-500 text-center">Your subscription has been cancelled.</p>
+        ) : (
+          <div className="flex justify-center mt-6">
+            <button
+              onClick={handleCancelSubscription}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Cancel Subscription
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
