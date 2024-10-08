@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { setDoc, doc, deleteDoc } from 'firebase/firestore';
+import { setDoc, doc } from 'firebase/firestore';
 import { db } from '@/firebase'; // Ensure Firebase config is imported correctly
 
 export async function POST(req: Request) {
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   }
 
   const signature = req.headers.get('x-signature') || req.headers.get('X-Signature');
-  const rawBody = await req.text();
+  const rawBody = await req.text(); 
 
   const expectedSignature = crypto
     .createHmac('sha256', webhookSecret)
@@ -26,42 +26,33 @@ export async function POST(req: Request) {
   try {
     const data = JSON.parse(rawBody);
 
-    const userId = data?.meta?.custom_data?.user_id; // Firebase userId from metadata
-    const eventType = data?.meta?.event_name; // Extract the event type from the webhook payload
+    const userId = data?.meta?.custom_data?.user_id; 
+    const plan = data?.data?.attributes?.product_name; 
+    const customer_id = data?.data?.attributes?.customer_id;
+    const subscription_id = data?.data?.attributes?.first_subscription_item?.subscription_id;
+    const isCancelled = data?.data?.attributes?.cancelled; // Check if the subscription is cancelled
 
     if (!userId) {
       return NextResponse.json({ message: 'No user ID found in metadata' }, { status: 400 });
     }
 
-    if (eventType === 'subscription_cancelled' || eventType === 'subscription_deleted') {
-      // Handle subscription cancellation or deletion
-      console.log(`Handling ${eventType} event for user: ${userId}`);
-      
-      // Optionally update the user's plan status in Firebase or delete the subscription
+    // If subscription is cancelled, update the user's plan to 'free'
+    if (isCancelled) {
       await setDoc(doc(db, 'users', userId), {
-        plan: 'free', // Downgrade plan to 'free' upon cancellation or deletion
-        subscription_id: '', // Clear subscription ID
-      }, { merge: true });
-      
-      // You can also choose to delete the user's document or subscription info entirely:
-      // await deleteDoc(doc(db, 'users', userId));
-
+        plan: 'free',
+        customer_id: '',
+        subscription_id: '',
+      }, { merge: true }); 
     } else {
-      // For other events, continue updating the user's plan/subscription
-      const plan = data?.data?.attributes?.product_name;
-      const customer_id = data?.data?.attributes?.customer_id;
-      const subscription_id = data?.data?.attributes?.first_subscription_item?.subscription_id;
-
-      console.log(`Handling ${eventType} event for user: ${userId}, Plan: ${plan}`);
-
+      // Otherwise, update with the current subscription plan
       await setDoc(doc(db, 'users', userId), {
-        plan: plan || 'free',
+        plan: plan || 'free', 
         customer_id: customer_id || '',
         subscription_id: subscription_id || '',
       }, { merge: true });
     }
 
-    return NextResponse.json({ message: 'Webhook processed successfully' });
+    return NextResponse.json({ message: 'User plan updated successfully' });
 
   } catch (error) {
     console.error('Error processing webhook:', error);
