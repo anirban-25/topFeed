@@ -2,13 +2,13 @@
 import { useEffect, useState } from 'react';
 import { getAuth } from "firebase/auth";
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/firebase';
+import { db, app } from '@/firebase';
 
 const ManageSubscription = () => {
   const [subscriptionDetails, setSubscriptionDetails] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const auth = getAuth();
+  const auth = getAuth(app);
 
   useEffect(() => {
     const fetchSubscriptionDetails = async () => {
@@ -16,7 +16,15 @@ const ManageSubscription = () => {
       if (user) {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
-          const { customer_id, subscription_id } = userDoc.data();
+          const { customer_id, subscription_id } = userDoc.data(); // Ensure subscription_id is fetched
+          console.log('Customer ID:', customer_id);
+          console.log('Subscription ID:', subscription_id); // Log subscription ID
+
+          if (!customer_id || !subscription_id) {
+            setError('Customer ID or Subscription ID is missing.');
+            setLoading(false);
+            return;
+          }
 
           try {
             const response = await fetch(`https://api.lemonsqueezy.com/v1/customers/${customer_id}/subscriptions`, {
@@ -28,18 +36,24 @@ const ManageSubscription = () => {
             });
 
             if (!response.ok) {
-              throw new Error('Failed to fetch subscription details');
+              const responseBody = await response.text();
+              throw new Error(`Failed to fetch subscription details: ${responseBody}`);
             }
 
             const data = await response.json();
+            console.log('API Response:', data); // Log the API response
+
+            // Find the subscription using the subscription_id
             const subscription = data.data.find(sub => sub.id === subscription_id);
+            console.log('Fetched Subscriptions:', data.data); // Log all subscriptions
+
             if (subscription) {
               setSubscriptionDetails(subscription);
             } else {
               setError('Subscription not found');
             }
           } catch (err) {
-            setError(err.message);
+            setError(`Error fetching subscription details: ${err.message}`);
           } finally {
             setLoading(false);
           }
@@ -47,6 +61,9 @@ const ManageSubscription = () => {
           setError('User document not found');
           setLoading(false);
         }
+      } else {
+        setError('User is not logged in');
+        setLoading(false);
       }
     };
 
@@ -66,15 +83,14 @@ const ManageSubscription = () => {
       });
 
       if (response.ok) {
-        // Handle successful cancellation, e.g., show a message or redirect
         alert('Subscription cancelled successfully');
-        // Optionally refresh the subscription details
-        setSubscriptionDetails(null);
+        setSubscriptionDetails(null); // Optionally refresh the subscription details
       } else {
-        throw new Error('Failed to cancel subscription');
+        const responseBody = await response.text();
+        throw new Error(`Failed to cancel subscription: ${responseBody}`);
       }
     } catch (error) {
-      alert(error.message);
+      alert(`Error: ${error.message}`);
     }
   };
 
