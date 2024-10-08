@@ -44,8 +44,8 @@ export async function POST(req: Request) {
     const customer_id= data?.data?.attributes?.customer_id;
     const subscription_id= data?.data?.attributes?.first_subscription_item?.subscription_id
     console.log(subscription_id)
-    console.log("..............................")
-    console.log(customer_id)
+    //console.log("..............................")
+    //console.log(customer_id)
     //console.log(`User ID: ${userId}, Plan: ${plan}`); // Log the user ID and plan for debugging
 
     // If userId is not present, return a 400 Bad Request response
