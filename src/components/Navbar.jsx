@@ -96,7 +96,7 @@ const Navbar = () => {
               </div>
             </Link>
           ) : (
-            <Link href="/dashboard">
+            <Link href="/dashboard/reddit">
               <div className=" bg-[#2A2A2A] text-xs md:text-sm p-1 md:p-2 ring-1 hover:bg-[#1d1d1d] hover:scale-105 transition-all duration-200  cursor-pointer ring-[#3D3D3D] px-3 md:px-4 rounded-md">
                 Dashboard
               </div>
