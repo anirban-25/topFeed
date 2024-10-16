@@ -28,18 +28,19 @@ const RedditComponent = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUser(user);  // Set the Firebase user when logged in
+        setUser(user);  
         
 
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          setPlan(userData.plan || "free" ); // Set plan from Firestore, default to 'FREE' if not found
+          setPlan(userData.plan || "free" );
+          console.log("plan", userData.plan); 
         } else {
           console.error("No user document found in Firestore");
         }
       } else {
-        router.push("/login");  // Redirect to login if no user is found
+        router.push("/login"); 
       }
     });
 
@@ -55,10 +56,17 @@ const RedditComponent = () => {
   
   const fetchIsRefreshCount = async () => {
     if (!user) return 0;
-    const userRef = doc(db, "users", user.uid);
-    const userDoc = await getDoc(userRef);
-    return userDoc.exists() ? userDoc.data().isRefresh || 0 : 0;
-  };
+    const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
+    const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+        const docData = querySnapshot.docs[0].data();
+        return docData.isRefresh || 0;  // Fetch isRefresh from the most recent document in user_reddits
+    } else {
+        return 0;  // Default value if no documents found
+    }
+};
   
 
   const handleRefresh = async (cleanedTopics) => {
@@ -73,11 +81,11 @@ const RedditComponent = () => {
   const isRefreshCount = await fetchIsRefreshCount();
   
   const userPlan = plan;
-  console.log("plan", plan);
+  
   const planLimits = {
     free: 10,
     Starter: 20,
-    Growth: 50,
+    Growth: 5,
     Scale: 80,
   };
 
@@ -157,6 +165,7 @@ const RedditComponent = () => {
         const latestDoc = querySnapshot.docs[0];
         const data = latestDoc.data();
         console.log("Fetched data:", data);
+        
 
         const analysisData = data.analysis || [];
         console.log("Analysis data:", analysisData);
