@@ -48,8 +48,14 @@ const RedditComponent = () => {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
+          
           setPlan(userData.plan || "free");
-          console.log("plan", userData.plan);
+         
+          //console.log("plan", userData.plan);
+
+
+          
+
         } else {
           console.error("No user document found in Firestore");
         }
@@ -102,7 +108,7 @@ const RedditComponent = () => {
       Growth: 50,
       Scale: 80,
     };
-
+    
     if (isRefreshCount >= planLimits[userPlan]) {
       alert(`You have reached the refresh limit for your ${userPlan} plan.`);
       setLoading(false);
@@ -201,7 +207,26 @@ const RedditComponent = () => {
         console.log("Fetched data:", data);
 
         const analysisData = data.analysis || [];
+        const isRefreshCount = await fetchIsRefreshCount();
+        setIsRefreshCount(isRefreshCount);
+        const planLimits = {
+          free: 10,
+          Starter: 20,
+          Growth: 50,
+          Scale: 80,
+        };
+        const userPlan = plan;
+        setPlan(userPlan);
+        console.log(plan);
+        const remainingRefreshes = planLimits ? (planLimits[userPlan] - isRefreshCount) : 0;
+
+
+        console.log("sfnskfns",isRefreshCount);
+        
+        
+
         console.log("Analysis data:", analysisData);
+        
 
         setRedditData(analysisData);
       } else {
@@ -346,7 +371,7 @@ const RedditComponent = () => {
           <div className="md:hidden">Refresh</div>
         </button>
 
-        {showInfoButton && (
+        
         <div className="relative inline-block">
           
           <button
@@ -358,11 +383,11 @@ const RedditComponent = () => {
           </button>
           {hovered && (
             <div className="absolute bg-gray-800 text-white text-sm rounded p-2 shadow-lg -top-8 left-6 z-10">
-              {plan-isRefreshCount} left 
+              {isRefreshCount} refreshes
             </div>
           )}
         </div>
-      )}
+      
     </div>
 
       <RedditMasonryLayout filteredRedditData={filteredData} />
