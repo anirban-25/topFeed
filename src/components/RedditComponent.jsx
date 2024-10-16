@@ -369,21 +369,19 @@ const RedditComponent = () => {
 
         
         <div className="relative inline-block">
-          
-          <button
-            className="text-gray-500 hover:text-blue-500"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-          >
-            <AiOutlineInfoCircle size={24} />
-          </button>
-          {hovered && (
-            <div className="absolute bg-gray-800 text-white text-sm rounded p-2 shadow-lg -top-8 left-6 z-10">
-              {remainingRefreshes} refreshes left
-            </div>
-          )}
-        </div>
-      
+  <button
+    className="text-gray-500 hover:text-blue-500"
+    onMouseEnter={() => setHovered(true)}
+    onMouseLeave={() => setHovered(false)}
+  >
+    <AiOutlineInfoCircle size={24} />
+  </button>
+  {hovered && (
+    <div className="absolute bg-gray-800 text-white text-sm rounded p-2 shadow-lg top-0 left-0 z-10 whitespace-nowrap transform -translate-x-full -translate-y-full">
+      {remainingRefreshes} refreshes left
+    </div>
+  )}
+</div>
     </div>
 
       <RedditMasonryLayout filteredRedditData={filteredData} />
