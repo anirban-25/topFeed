@@ -14,7 +14,7 @@ import { useAppContext } from "@/contexts/AppContext";
 
 const RedditComponent = () => {
   const { redditDataFetch, setRedditDataFetch, feedSetting, setFeedSetting } = useAppContext();
-  const [redditData, setRedditData] = useState(null);
+  const [redditData, setRedditData] = useState([]);
   const [loaderInitial, setLoaderInitial] = useState(true);
   const [subreddits, setSubreddits] = useState(null);
   const [loading, setLoading] = useState(true);
