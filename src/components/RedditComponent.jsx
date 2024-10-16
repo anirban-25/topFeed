@@ -1,8 +1,19 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { db, auth } from "../firebase";
-import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc } from "firebase/firestore";
+import { db, auth, app } from "../firebase";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { onAuthStateChanged, getAuth } from "firebase/auth";
 import CreateFeedPopup from "../components/CreateFeedPopup";
 import axios from "axios";
@@ -11,9 +22,9 @@ import { IoSearch } from "react-icons/io5";
 import RedditMasonryLayout from "./MasonryLayoutReddit";
 import { useAppContext } from "@/contexts/AppContext";
 
-
 const RedditComponent = () => {
-  const { redditDataFetch, setRedditDataFetch, feedSetting, setFeedSetting } = useAppContext();
+  const { redditDataFetch, setRedditDataFetch, feedSetting, setFeedSetting } =
+    useAppContext();
   const [redditData, setRedditData] = useState([]);
   const [loaderInitial, setLoaderInitial] = useState(true);
   const [subreddits, setSubreddits] = useState(null);
@@ -28,18 +39,17 @@ const RedditComponent = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUser(user);  // Set the Firebase user when logged in
-        
+        setUser(user); // Set the Firebase user when logged in
 
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          setPlan(userData.plan || "free" ); // Set plan from Firestore, default to 'FREE' if not found
+          setPlan(userData.plan || "free"); // Set plan from Firestore, default to 'FREE' if not found
         } else {
           console.error("No user document found in Firestore");
         }
       } else {
-        router.push("/login");  // Redirect to login if no user is found
+        router.push("/login"); // Redirect to login if no user is found
       }
     });
 
@@ -52,14 +62,13 @@ const RedditComponent = () => {
     await handleRefresh(cleanedTopics);
     handleOpen(false);
   };
-  
+
   const fetchIsRefreshCount = async () => {
     if (!user) return 0;
     const userRef = doc(db, "users", user.uid);
     const userDoc = await getDoc(userRef);
     return userDoc.exists() ? userDoc.data().isRefresh || 0 : 0;
   };
-  
 
   const handleRefresh = async (cleanedTopics) => {
     setLoading(true);
@@ -70,23 +79,22 @@ const RedditComponent = () => {
       throw new Error("User is not authenticated.");
     }
 
-  const isRefreshCount = await fetchIsRefreshCount();
-  
-  const userPlan = plan;
-  console.log("plan", plan);
-  const planLimits = {
-    free: 10,
-    Starter: 20,
-    Growth: 50,
-    Scale: 80,
-  };
+    const isRefreshCount = await fetchIsRefreshCount();
 
+    const userPlan = plan;
+    console.log("plan", plan);
+    const planLimits = {
+      free: 10,
+      Starter: 20,
+      Growth: 50,
+      Scale: 80,
+    };
 
-  if (isRefreshCount >= planLimits[userPlan]) {
-    alert(`You have reached the refresh limit for your ${userPlan} plan.`);
-    setLoading(false);
-    return;
-  }
+    if (isRefreshCount >= planLimits[userPlan]) {
+      alert(`You have reached the refresh limit for your ${userPlan} plan.`);
+      setLoading(false);
+      return;
+    }
 
     const userId = user.uid;
     const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
@@ -102,24 +110,26 @@ const RedditComponent = () => {
       });
     } else {
       // If the document exists, update it
-      
     }
     setFeedSetting(true);
     if (!querySnapshot.empty) {
       const docData = querySnapshot.docs[0].data();
       setSubreddits(docData.subreddits || []);
 
-      const response = await axios.post("https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process", {
-        subreddits: docData.subreddits,
-        userId,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await axios.post(
+        "https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process",
+        {
+          subreddits: docData.subreddits,
+          userId,
         },
-      
-        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
+        }
+      );
 
       if (response.status !== 200) {
         setLoading(false);
@@ -130,13 +140,16 @@ const RedditComponent = () => {
 
       await fetchLatestRedditData();
     } else {
-      const response = await axios.post("https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process", {
-        subreddits: cleanedTopics,
-        userId,
-      },
-      {
-        timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
-      });
+      const response = await axios.post(
+        "https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process",
+        {
+          subreddits: cleanedTopics,
+          userId,
+        },
+        {
+          timeout: 240000, // Timeout in milliseconds (5000ms = 5 seconds)
+        }
+      );
 
       if (response.status !== 200) {
         setLoading(false);
@@ -202,32 +215,31 @@ const RedditComponent = () => {
     });
   }, []);
   const filteredData = Array.isArray(redditData)
-  ? redditData.filter(
-      (item) =>
-        item.heading?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.sub_headings?.some(
-          (sub) =>
-            sub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            sub.points.some((point) =>
-              point.toLowerCase().includes(searchTerm.toLowerCase())
-            )
-        ) ||
-        item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.points?.some((point) =>
-          point.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    )
-  : [];
+    ? redditData.filter(
+        (item) =>
+          item.heading?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.sub_headings?.some(
+            (sub) =>
+              sub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              sub.points.some((point) =>
+                point.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+          ) ||
+          item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.points?.some((point) =>
+            point.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+      )
+    : [];
 
   useEffect(() => {
     if (redditDataFetch) {
       setLoading(redditDataFetch);
     } else {
       fetchLatestRedditData();
-
     }
   }, [redditDataFetch]);
-  
+
   if (loaderInitial) {
     return (
       <div className="flex items-center justify-center min-h-[90%]">
