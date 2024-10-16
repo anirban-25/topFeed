@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { db, auth, app } from "../firebase";
+import { AiOutlineInfoCircle } from "react-icons/ai";
 import {
   addDoc,
   collection,
@@ -34,6 +35,9 @@ const RedditComponent = () => {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [plan, setPlan] = useState(null);
+  const [hovered, setHovered] = useState(false);
+  const [isRefreshCount, setIsRefreshCount] = useState(0);
+  const [showInfoButton, setShowInfoButton] = useState(false);
   const router = useRouter();
   const auth = getAuth(app);
   useEffect(() => {
@@ -88,13 +92,14 @@ const RedditComponent = () => {
     }
 
     const isRefreshCount = await fetchIsRefreshCount();
+    setIsRefreshCount(isRefreshCount);
 
     const userPlan = plan;
 
     const planLimits = {
       free: 10,
       Starter: 20,
-      Growth: 5,
+      Growth: 50,
       Scale: 80,
     };
 
@@ -103,6 +108,8 @@ const RedditComponent = () => {
       setLoading(false);
       return;
     }
+
+    setShowInfoButton(true);
 
     const userId = user.uid;
     const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
@@ -168,6 +175,7 @@ const RedditComponent = () => {
 
       await fetchLatestRedditData();
     }
+    
   };
 
   useEffect(() => {
@@ -337,7 +345,25 @@ const RedditComponent = () => {
           <div className="hidden md:block">Update Instant Refresh</div>
           <div className="md:hidden">Refresh</div>
         </button>
-      </div>
+
+        {showInfoButton && (
+        <div className="relative inline-block">
+          
+          <button
+            className="text-gray-500 hover:text-blue-500"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+          >
+            <AiOutlineInfoCircle size={24} />
+          </button>
+          {hovered && (
+            <div className="absolute bg-gray-800 text-white text-sm rounded p-2 shadow-lg -top-8 left-6 z-10">
+              {plan-isRefreshCount} left 
+            </div>
+          )}
+        </div>
+      )}
+    </div>
 
       <RedditMasonryLayout filteredRedditData={filteredData} />
     </div>
