@@ -37,6 +37,7 @@ const RedditComponent = () => {
   const [plan, setPlan] = useState(null);
   const [hovered, setHovered] = useState(false);
   const [isRefreshCount, setIsRefreshCount] = useState(0);
+  const [remainingRefreshes, setRemainingRefreshes] = useState(0);
   const [showInfoButton, setShowInfoButton] = useState(false);
   const router = useRouter();
   const auth = getAuth(app);
@@ -194,7 +195,7 @@ const RedditComponent = () => {
 
   const fetchLatestRedditData = async () => {
     setLoading(true);
-    if (!user) return;
+    if (!user || !plan) return;
     try {
       console.log("Fetching data for user:", user.uid);
       const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
@@ -215,17 +216,11 @@ const RedditComponent = () => {
           Growth: 50,
           Scale: 80,
         };
-        const userPlan = plan;
-        setPlan(userPlan);
-        console.log(plan);
-        const remainingRefreshes = planLimits ? (planLimits[userPlan] - isRefreshCount) : 0;
-
-
-        console.log("sfnskfns",isRefreshCount);
         
-        
+        setRemainingRefreshes(plan ? (planLimits[plan] - isRefreshCount) : 0);
 
-        console.log("Analysis data:", analysisData);
+
+        console.log("sfnskfns",remainingRefreshes);
         
 
         setRedditData(analysisData);
@@ -243,10 +238,11 @@ const RedditComponent = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && plan) {
       fetchLatestRedditData();
     }
-  }, [user]);
+  }, [user, plan]);
+
   useEffect(() => {
     import("ldrs").then(({ cardio }) => {
       cardio.register();
@@ -383,7 +379,7 @@ const RedditComponent = () => {
           </button>
           {hovered && (
             <div className="absolute bg-gray-800 text-white text-sm rounded p-2 shadow-lg -top-8 left-6 z-10">
-              {isRefreshCount} refreshes
+              {remainingRefreshes} refreshes left
             </div>
           )}
         </div>
