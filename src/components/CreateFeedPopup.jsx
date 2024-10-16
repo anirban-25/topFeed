@@ -11,12 +11,20 @@ import { db, auth } from "@/firebase";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import axios from "axios";
-import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  updateDoc,
+} from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useAppContext } from "@/contexts/AppContext";
 
 const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
-  const { setRedditDataFetch } = useAppContext();
+  const { setRedditDataFetch, feedSetting } = useAppContext();
   const [topics, setTopics] = useState([]);
   const [newTopic, setNewTopic] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,9 +44,12 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
         );
         const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
         const querySnapshot = await getDocs(q);
+        console.log(querySnapshot);
 
         if (!querySnapshot.empty) {
           const docData = querySnapshot.docs[0].data();
+          console.log(docData.subreddits);
+          console.log("hey");
           setTopics(docData.subreddits || []);
         }
       }
@@ -51,6 +62,12 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
       fetchLastUpdatedSubreddits();
     }
   }, [user]);
+
+  useEffect(() => {
+    console.log(feedSetting);
+    fetchLastUpdatedSubreddits();
+  }, [feedSetting]);
+
   useEffect(() => {
     if (newTopic) {
       const fetchSuggestions = async () => {
@@ -92,23 +109,49 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
   };
 
   const handleGenerateFeed = async () => {
-    setRedditDataFetch(true);
-    setLoading(true);
-    setError(null);
     handleOpen(null);
-
-    try {
+    console.log(feedSetting);
+    if (feedSetting) {
       const cleanedTopics = topics.map(cleanSubredditName);
-      await handleSubmit(cleanedTopics);
-      await fetchLastUpdatedSubreddits();
-    } catch (err) {
-      console.error("Error during feed generation:", err);
-      setError("An error occurred while processing your request.");
-    } finally {
-      setRedditDataFetch(false);
-      setLoading(false);
-      await fetchLastUpdatedSubreddits();
+      const user = auth.currentUser;
+      const userId = user.uid;
+      const latestAnalysisRef = doc(
+        db,
+        "users",
+        userId,
+        "user_reddits",
+        "latest_analysis"
+      );
+      
+      try {
+        await updateDoc(latestAnalysisRef, {
+          subreddits: cleanedTopics,
+        });
+        
+        setLoading(false);
+        console.log("Document successfully updated");
+      } catch (error) {
+        console.error("Error updating document: ", error);
+        setLoading(false);
+      }
+    } else {
+      setError(null);
+      setRedditDataFetch(true);
+      setLoading(true);
+      try {
+        const cleanedTopics = topics.map(cleanSubredditName);
+        await handleSubmit(cleanedTopics);
+        await fetchLastUpdatedSubreddits();
+      } catch (err) {
+        console.error("Error during feed generation:", err);
+        setError("An error occurred while processing your request.");
+      } finally {
+        setRedditDataFetch(false);
+        setLoading(false);
+        await fetchLastUpdatedSubreddits();
+      }
     }
+    setLoading(false);
   };
 
   return (
@@ -196,8 +239,8 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
         >
           Cancel
         </Button>
-        <Button color="blue" onClick={handleGenerateFeed} disabled={loading}>
-          {loading ? "Generating Feed..." : "Generate Feed"}
+        <Button color="blue" onClick={handleGenerateFeed}>
+          {feedSetting ? "Update Feed" : "Generate Feed"}
         </Button>
       </DialogFooter>
     </Dialog>

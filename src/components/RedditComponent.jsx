@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { db, auth,app } from "../firebase";
-import { collection, getDocs, limit, orderBy, query, setDoc, doc, getDoc } from "firebase/firestore";
-import { getAuth,onAuthStateChanged } from "firebase/auth";
+import { db, auth } from "../firebase";
+import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc } from "firebase/firestore";
+import { onAuthStateChanged, getAuth } from "firebase/auth";
 import CreateFeedPopup from "../components/CreateFeedPopup";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -13,8 +13,8 @@ import { useAppContext } from "@/contexts/AppContext";
 
 
 const RedditComponent = () => {
-  const { redditDataFetch, setRedditDataFetch } = useAppContext();
-  const [redditData, setRedditData] = useState([]);;
+  const { redditDataFetch, setRedditDataFetch, feedSetting, setFeedSetting } = useAppContext();
+  const [redditData, setRedditData] = useState([]);
   const [loaderInitial, setLoaderInitial] = useState(true);
   const [subreddits, setSubreddits] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -100,10 +100,23 @@ const RedditComponent = () => {
     const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
     const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
     const querySnapshot = await getDocs(q);
+    const latestAnalysisRef = doc(userRedditsRef, "latest_analysis");
 
+    const docSnap = await getDoc(latestAnalysisRef);
+    if (!docSnap.exists()) {
+      // If the document doesn't exist, create it
+      await setDoc(latestAnalysisRef, {
+        subreddits: cleanedTopics,
+      });
+    } else {
+      // If the document exists, update it
+      
+    }
+    setFeedSetting(true);
     if (!querySnapshot.empty) {
       const docData = querySnapshot.docs[0].data();
       setSubreddits(docData.subreddits || []);
+
       const response = await axios.post("https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process", {
         subreddits: docData.subreddits,
         userId,
@@ -125,7 +138,7 @@ const RedditComponent = () => {
 
       await fetchLatestRedditData();
     } else {
-      const response = await axios.post("/api/reddit", {
+      const response = await axios.post("https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process", {
         subreddits: cleanedTopics,
         userId,
       },
@@ -318,13 +331,6 @@ const RedditComponent = () => {
       <RedditMasonryLayout filteredRedditData={filteredData} />
     </div>
   );
-};
-
-const formatTitle = (title) => {
-  return title
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
 };
 
 export default RedditComponent;

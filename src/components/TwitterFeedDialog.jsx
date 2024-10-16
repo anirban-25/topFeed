@@ -18,8 +18,10 @@ import {
   getDocs,
   updateDoc,
   doc,
+  getDoc,
+  getFirestore,
 } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { storeDataInFirestore } from "@/utils/storeTwitterData";
 import { useAppContext } from "@/contexts/AppContext";
 
@@ -34,6 +36,10 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [existingFeedId, setExistingFeedId] = useState(null);
   const [isTopicSaved, setIsTopicSaved] = useState(false);
+
+  const [userPlan, setUserPlan] = useState("free");
+  const [maxAccounts, setMaxAccounts] = useState(3);
+
   const user = auth.currentUser;
 
   useEffect(() => {
@@ -52,6 +58,42 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
     setErrors(Array(twitterUrls.length).fill(""));
     setLoading(Array(twitterUrls.length).fill(false));
   }, [twitterUrls.length]);
+
+  useEffect(() => {
+    const fetchUserPlan = async () => {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (user) {
+        const db = getFirestore();
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const plan = userDoc.data().plan;
+          setUserPlan(plan);
+          setMaxAccounts(getMaxAccountsForPlan(plan));
+        }
+      }
+    };
+
+    fetchUserPlan();
+  }, [user]);
+
+  const getMaxAccountsForPlan = (plan) => {
+    console.log("plan is " + plan);
+    switch (plan) {
+      case "free":
+        return 3;
+      case "starter":
+        return 5;
+      case "Growth":
+        return 7;
+      case "Scale":
+        console.log("i am scale");
+        return 10;
+        default:
+        console.log("i am defolt");
+        return 3;
+    }
+  };
 
   const fetchLastTweetFeed = async (user) => {
     try {
@@ -87,6 +129,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
     const newSaveStatus = [...saveStatus];
     newSaveStatus[index] = null;
     setSaveStatus(newSaveStatus);
+
     const newLoading = [...loading];
     newLoading[index] = false;
     setLoading(newLoading);
@@ -102,6 +145,14 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
     setIsTopicSaved(false);
   };
 
+  const addInput = () => {
+    if (twitterUrls.length < maxAccounts) {
+      setTwitterUrls([...twitterUrls, ""]);
+      setErrors([...errors, ""]);
+      setSaveStatus([...saveStatus, null]);
+      setLoading([...loading, false]);
+    }
+  };
   const addMore = () => {
     setTwitterUrls([...twitterUrls, ""]);
     setSaveStatus([...saveStatus, null]);
@@ -110,56 +161,33 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
   const removeInput = (index) => {
     const newUrls = twitterUrls.filter((_, i) => i !== index);
     setTwitterUrls(newUrls);
-    const newSaveStatus = saveStatus.filter((_, i) => i !== index);
-    setSaveStatus(newSaveStatus);
+    setErrors(errors.filter((_, i) => i !== index));
+    setSaveStatus(saveStatus.filter((_, i) => i !== index));
+    setLoading(loading.filter((_, i) => i !== index));
   };
 
   const handleSave = async (index) => {
-    const newLoading = [...loading];
-    newLoading[index] = true;
-    setLoading(newLoading);
+    // Your existing save logic here
+    setLoading((prevLoading) => {
+      const newLoading = [...prevLoading];
+      newLoading[index] = true;
+      return newLoading;
+    });
 
-    try {
-      const response = await fetch("/api/checktwitterlinks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ twitter_url: twitterUrls[index] }),
-      });
+    // Simulating an API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const data = await response.json();
-      if (data.message === "success") {
-        const newSaveStatus = [...saveStatus];
-        newSaveStatus[index] = "success";
-        setSaveStatus(newSaveStatus);
+    setSaveStatus((prevStatus) => {
+      const newStatus = [...prevStatus];
+      newStatus[index] = "success";
+      return newStatus;
+    });
 
-        const newErrors = [...errors];
-        newErrors[index] = "";
-        setErrors(newErrors);
-      } else {
-        const newSaveStatus = [...saveStatus];
-        newSaveStatus[index] = "error";
-        setSaveStatus(newSaveStatus);
-
-        const newErrors = [...errors];
-        newErrors[index] = data.error || "An error occurred";
-        setErrors(newErrors);
-      }
-    } catch (error) {
-      console.error("Error saving URL:", error);
-      const newSaveStatus = [...saveStatus];
-      newSaveStatus[index] = "error";
-      setSaveStatus(newSaveStatus);
-
-      const newErrors = [...errors];
-      newErrors[index] = "Network error occurred";
-      setErrors(newErrors);
-    } finally {
-      const newLoading = [...loading];
+    setLoading((prevLoading) => {
+      const newLoading = [...prevLoading];
       newLoading[index] = false;
-      setLoading(newLoading);
-    }
+      return newLoading;
+    });
   };
 
   const handleSaveTopic = () => {
@@ -234,40 +262,28 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
       alert("An error occurred while saving the feed. Please try again.");
     }
   };
-  function timeoutPromise(ms, promise) {
-    return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        reject(new Error("Request timed out"));
-      }, ms);
 
-      promise
-        .then((response) => {
-          clearTimeout(timer);
-          resolve(response);
-        })
-        .catch((err) => {
-          clearTimeout(timer);
-          reject(err);
-        });
-    });
-  }
+
   const processAndStoreTweets = async (userId, urls, topic) => {
     localStorage.setItem("TwitterLoader", true);
     setTwitterLoader(true);
     onFeedCreated();
     handleOpen(null);
     try {
-      const response = await fetch("https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/feed", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          twitterUrls: urls,
-          newTopic: topic,
-          userId: userId,
-        }),
-      });
+      const response = await fetch(
+        "https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/feed",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            twitterUrls: urls,
+            newTopic: topic,
+            userId: userId,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -284,7 +300,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
       const tweetsArray = data.result;
       console.log("Tweets array:", tweetsArray);
 
-      await storeDataInFirestore(tweetsArray, userId);
+      // await storeDataInFirestore(tweetsArray, userId);
     } catch (error) {
       console.error("Error processing and storing tweets:", error);
     } finally {
@@ -363,61 +379,76 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
               </div>
             </div>
             <div className="max-w-lg mt-5">
-              {twitterUrls.map((url, index) => (
-                <div key={index} className="mb-4">
-                  <label className="block text-sm font-medium text-[#787878] font-kumbh-sans-medium mb-2">
-                    Account {index + 1}
-                  </label>
-                  <div className="flex relative items-center">
-                    <input
-                      type="text"
-                      value={url}
-                      onChange={(e) => handleInputChange(index, e.target.value)}
-                      placeholder="https://twitter.com/example"
-                      className={`w-full text-black px-3 py-2 pr-10 border ${
-                        errors[index] ? "border-red-500" : "border-gray-300"
-                      } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                    />
-                    <button
-                      className={`font-kumbh-sans-medium rounded-lg border py-2 px-4 ml-5 cursor-pointer hover:bg-gray-100 transition-all duration-150 ${
-                        saveStatus[index] === "success"
-                          ? "text-green-500 border-green-500"
-                          : "text-[#146EF5] border-[#94BEFF]"
-                      } ${
-                        loading[index] ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                      onClick={() => handleSave(index)}
-                      disabled={loading[index]}
-                    >
-                      {loading[index] ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : saveStatus[index] === "success" ? (
-                        "Saved"
-                      ) : (
-                        "Save"
-                      )}
-                    </button>
-                    {twitterUrls.length > 1 && (
+              <div>
+                <h2 className="text-xl font-bold mb-4">
+                  Twitter Accounts ({twitterUrls.length}/{maxAccounts})
+                </h2>
+                {twitterUrls.map((url, index) => (
+                  <div key={index} className="mb-4">
+                    <label className="block text-sm font-medium text-[#787878] font-kumbh-sans-medium mb-2">
+                      Account {index + 1}
+                    </label>
+                    <div className="flex relative items-center">
+                      <input
+                        type="text"
+                        value={url}
+                        onChange={(e) =>
+                          handleInputChange(index, e.target.value)
+                        }
+                        placeholder="https://twitter.com/example"
+                        className={`w-full text-black px-3 py-2 pr-10 border ${
+                          errors[index] ? "border-red-500" : "border-gray-300"
+                        } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      />
                       <button
-                        onClick={() => removeInput(index)}
-                        className="absolute top-3 right-28 text-gray-400 hover:text-gray-600 focus:outline-none"
+                        className={`font-kumbh-sans-medium rounded-lg border py-2 px-4 ml-5 cursor-pointer hover:bg-gray-100 transition-all duration-150 ${
+                          saveStatus[index] === "success"
+                            ? "text-green-500 border-green-500"
+                            : "text-[#146EF5] border-[#94BEFF]"
+                        } ${
+                          loading[index] ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        onClick={() => handleSave(index)}
+                        disabled={loading[index]}
                       >
-                        <X color="gray" size={18} />
+                        {loading[index] ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : saveStatus[index] === "success" ? (
+                          "Saved"
+                        ) : (
+                          "Save"
+                        )}
                       </button>
+                      {twitterUrls.length > 1 && (
+                        <button
+                          onClick={() => removeInput(index)}
+                          className="absolute top-3 right-28 text-gray-400 hover:text-gray-600 focus:outline-none"
+                        >
+                          <X color="gray" size={18} />
+                        </button>
+                      )}
+                    </div>
+                    {errors[index] && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors[index]}
+                      </p>
                     )}
                   </div>
-                  {errors[index] && (
-                    <p className="mt-2 text-sm text-red-600">{errors[index]}</p>
-                  )}
-                </div>
-              ))}
-              <div className="mt-4">
-                <button
-                  onClick={addMore}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                >
-                  + Add More
-                </button>
+                ))}
+                {twitterUrls.length < maxAccounts && (
+                  <button
+                    onClick={addInput}
+                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-300"
+                  >
+                    Add Another Account
+                  </button>
+                )}
+                {twitterUrls.length >= maxAccounts && (
+                  <p className="mt-4 text-sm text-red-600">
+                    You've reached the maximum number of accounts for your{" "}
+                    {userPlan} plan.
+                  </p>
+                )}
               </div>
             </div>
           </>

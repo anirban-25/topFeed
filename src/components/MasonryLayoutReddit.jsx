@@ -19,12 +19,6 @@ const RedditMasonryLayout = ({ filteredRedditData }) => {
           key={index}
           className="border border-gray-500 border-dotted rounded-lg overflow-hidden mb-4"
         >
-          <div
-            className={`text-white font-kumbh-sans-bold py-2 px-4 flex items-center justify-between`}
-          >
-            <span>Relevancy: {item.relevancy}</span>
-            {/* Add any icons or indicators for Reddit data here */}
-          </div>
           <div className="p-4">
             {item.heading && (
               <h2 className="font-kumbh-sans-bold text-xl font-bold mb-4">
