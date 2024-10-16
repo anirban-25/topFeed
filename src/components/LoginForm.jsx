@@ -24,17 +24,17 @@ const LoginForm = () => {
   const updateUserPlan = async (userId) => {
     try {
       const userDocRef = doc(db, "users", userId);
-
+    
       const userDoc = await getDoc(userDocRef);
-
+    
       if (userDoc.exists()) {
         const userData = userDoc.data();
-
+    
         if (userData.plan) {
           console.log("User already has a plan. No update needed.");
           return;
         }
-
+    
         await setDoc(
           userDocRef,
           {
@@ -44,10 +44,14 @@ const LoginForm = () => {
         );
         console.log("User plan updated successfully to free");
       } else {
-        console.log("User document does not exist");
+        // Create a new document if it doesn't exist
+        await setDoc(userDocRef, {
+          plan: "free"
+        });
+        console.log("New user document created with free plan");
       }
     } catch (error) {
-      console.error("Error updating user plan:", error);
+      console.error("Error updating or creating user plan:", error);
     }
   };
   const handleSendSignInLink = async (event) => {

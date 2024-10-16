@@ -3,8 +3,17 @@ import React, { useEffect, useState } from "react";
 import CreateFeedPopup from "../components/CreateFeedPopup";
 import UserMenu from "../components/UserMenu";
 import { db, auth } from "@/firebase";
-import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
-import axios from "axios";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import {
   Drawer,
   Button,
@@ -15,8 +24,10 @@ import { MdOutlineSettings } from "react-icons/md";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useAppContext } from "@/contexts/AppContext";
 import Link from "next/link";
+
 const DashboardHeader = () => {
-  const { redditDataFetch, setRedditDataFetch } = useAppContext();
+  const { redditDataFetch, setRedditDataFetch, feedSetting, setFeedSetting } =
+    useAppContext();
   const [open, setOpen] = useState(false);
   const [redditDataExists, setRedditDataExists] = useState(false);
   const [user] = useAuthState(auth);
@@ -31,6 +42,16 @@ const DashboardHeader = () => {
   useEffect(() => {
     checkRedditData();
   }, [redditDataFetch]);
+
+  useEffect(() => {
+    console.log(feedSetting);
+    if (feedSetting) {
+      setRedditDataExists(true);
+    } else {
+      setRedditDataExists(false);
+    }
+  }, [feedSetting]);
+
   const checkRedditData = async () => {
     if (!user) return;
 
@@ -38,8 +59,10 @@ const DashboardHeader = () => {
       const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
       const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
       const querySnapshot = await getDocs(q);
-
+      const latestAnalysisRef = doc(userRedditsRef, "latest_analysis");
+      console.log(latestAnalysisRef);
       setRedditDataExists(!querySnapshot.empty);
+      setFeedSetting(!querySnapshot.empty);
     } catch (error) {
       console.error("Error checking Reddit data:", error);
     }
@@ -50,20 +73,41 @@ const DashboardHeader = () => {
       if (!user) throw new Error("User is not authenticated.");
 
       const userId = user.uid;
+      const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
+      const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
+      // const querySnapshot = await getDocs(q);
+      const latestAnalysisRef = doc(userRedditsRef, "latest_analysis");
 
-      // Send the POST request to the API
-      const response = await fetch("https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const docSnap = await getDoc(latestAnalysisRef);
+      if (!docSnap.exists()) {
+        // If the document doesn't exist, create it
+        await setDoc(latestAnalysisRef, {
           subreddits: cleanedTopics,
-          userId
-        }),
-      });
+        });
+      } else {
+        // If the document exists, update it
+        await updateDoc(latestAnalysisRef, {
+          subreddits: cleanedTopics,
+        });
+      }
+      setFeedSetting(true);
+      // Send the POST request to the API
+      const response = await fetch(
+        "https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            subreddits: cleanedTopics,
+            userId,
+          }),
+        }
+      );
 
-      if (response.status !== 200) throw new Error("Failed to fetch data from server");
+      if (response.status !== 200)
+        throw new Error("Failed to fetch data from server");
 
       console.log("Received response from API:", response.data);
 
@@ -73,10 +117,12 @@ const DashboardHeader = () => {
       console.error("Error during feed generation:", error);
     }
   };
-  
 
   useEffect(() => {
-    if (user) checkRedditData();
+    if (user) {
+      console.log("User already");
+      checkRedditData();
+    }
   }, [user]);
 
   return (
@@ -88,9 +134,7 @@ const DashboardHeader = () => {
         >
           Reddit
         </button>
-        <div className="ml-2 hidden md:flex">
-          My Reddit Feed
-        </div>
+        <div className="ml-2 hidden md:flex">My Reddit Feed</div>
         <Drawer
           open={openSidePanel}
           onClose={closeDrawer}
@@ -99,25 +143,17 @@ const DashboardHeader = () => {
           <div className="space-y-10  border-[#4c448a] border-l-[10px] ">
             <div className=" bg-transparent text-center py-8 rounded-r-full text-black font-kumbh-sans-medium "></div>
             <div className=" bg-[#4c448a] text-center py-3 rounded-r-full border-l-transparent border-4 border-white ring-white text-white font-kumbh-sans-regular ">
-            <Link href="/dashboard/reddit" >
-                Reddit
-                </Link>
-              </div>
+              <Link href="/dashboard/reddit">Reddit</Link>
+            </div>
             <div className=" bg-[#4c448a] text-center py-3 rounded-r-full text-white font-kumbh-sans-regular ">
-            <Link href="/dashboard/twitter">
-                Twitter
-                </Link>
-              </div>
+              <Link href="/dashboard/twitter">Twitter</Link>
+            </div>
             <div className=" bg-[#4c448a] text-center py-3 rounded-r-full text-white font-kumbh-sans-regular ">
-            <Link href="/dashboard/notification">
-                Notification
-                </Link>
-              </div>
+              <Link href="/dashboard/notification">Notification</Link>
+            </div>
             <div className=" bg-[#4c448a] text-center py-3 rounded-r-full text-white font-kumbh-sans-regular ">
-            <Link href="/dashboard/support">
-                Support
-                </Link>
-              </div>
+              <Link href="/dashboard/support">Support</Link>
+            </div>
           </div>
         </Drawer>
       </h1>
