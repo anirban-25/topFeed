@@ -1,10 +1,16 @@
 import React from "react";
 import { FaStar } from "react-icons/fa6";
 import { LuRocket } from "react-icons/lu";
-const PricingTier = ({ name, price, yearlyPrice, popular, features, lemonSqueezyMonthlyUrl, lemonSqueezyYearlyUrl, clicked   }) => {
+import { useRouter } from "next/navigation";
+const PricingTier = ({ name, price, yearlyPrice, popular, features, lemonSqueezyMonthlyUrl, lemonSqueezyYearlyUrl, clicked, user   }) => {
+  const router = useRouter();
   const handleCheckout = () => {
+    if (!user) {
+      router.push("/login");  // Redirect to login if user is not logged in
+    } else {
     const checkoutUrl = clicked ? lemonSqueezyYearlyUrl : lemonSqueezyMonthlyUrl;
     window.location.href = checkoutUrl; 
+    }
   };
   const monthlyEquivalent = clicked ? (yearlyPrice / 12) : price;
   return (

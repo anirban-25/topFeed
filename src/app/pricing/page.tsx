@@ -7,11 +7,12 @@ import Footer from "@/components/Footer";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { app } from "@/firebase";
 import { Switch } from 'antd';
-import { useRouter } from "next/navigation";
+
 
 const Page = () => {
+  
   const [user, setUser] = useState<User | null>(null);  // Type User | null
-  const router = useRouter();
+  
   const auth = getAuth(app);
 
   const [clicked, setClicked] = useState(true);
@@ -21,15 +22,11 @@ const Page = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);  // Set the Firebase user when logged in
-      } else {
-        router.push("/login");  // Redirect to login if no user is found
-      }
+      setUser(user);
     });
 
     return () => unsubscribe();
-  }, [auth, router]);
+  }, [auth]);
 
   // Use user?.uid and user?.email to safely access these properties
   const userId = user?.uid;
@@ -157,6 +154,7 @@ const Page = () => {
                 lemonSqueezyMonthlyUrl={tier.lemonSqueezyMonthlyUrl}
                 lemonSqueezyYearlyUrl={tier.lemonSqueezyYearlyUrl}
                 clicked={clicked}
+                user={user}
               />
             ))}
           </div>
