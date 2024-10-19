@@ -445,7 +445,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
                 )}
                 {twitterUrls.length >= maxAccounts && (
                   <p className="mt-4 text-sm text-red-600">
-                    You've reached the maximum number of accounts for your{" "}
+                    You&apos;ve reached the maximum number of accounts for your{" "}
                     {userPlan} plan.
                   </p>
                 )}
