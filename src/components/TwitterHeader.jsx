@@ -96,7 +96,7 @@ const TwitterHeader = () => {
       </h1>
       <div className="flex items-center p-3">
         <button
-          className={`flex items-center px-4 py-2 text-md rounded-xl border transition-all duration-200 mr-6 ${
+          className={`flex items-center  px-4 py-2 text-md rounded-xl border transition-all duration-200 mr-6 ${
             feedCreated
               ? "bg-white text-black hover:bg-gray-200 border-gray-300"
               : "bg-[#146EF5] text-white hover:bg-blue-800 border-transparent"
@@ -106,7 +106,7 @@ const TwitterHeader = () => {
           {feedCreated ? (
             <>
               <MdOutlineSettings
-                className="mr-2 text-xl"
+                className="mr-2  text-xl"
                 onClick={() => handleOpen("lg")}
               />{" "}
               Feed Settings

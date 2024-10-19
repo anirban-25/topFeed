@@ -131,7 +131,7 @@ const TwitterComponent = () => {
         "user_tweets"
       );
       const userTweetsQuery = query(userTweetsCollectionRef, // Order by timestamp in descending order
-      limit(150));
+      limit(50));
       const querySnapshot = await getDocs(userTweetsQuery);
 
       const tweetsData = querySnapshot.docs.map((doc) => ({

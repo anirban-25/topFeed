@@ -49,14 +49,10 @@ const RedditComponent = () => {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          
+
           setPlan(userData.plan || "free");
-         
+
           //console.log("plan", userData.plan);
-
-
-          
-
         } else {
           console.error("No user document found in Firestore");
         }
@@ -109,7 +105,7 @@ const RedditComponent = () => {
       Growth: 50,
       Scale: 80,
     };
-    
+
     if (isRefreshCount >= planLimits[userPlan]) {
       alert(`You have reached the refresh limit for your ${userPlan} plan.`);
       setLoading(false);
@@ -182,7 +178,6 @@ const RedditComponent = () => {
 
       await fetchLatestRedditData();
     }
-    
   };
 
   useEffect(() => {
@@ -216,12 +211,10 @@ const RedditComponent = () => {
           Growth: 50,
           Scale: 80,
         };
-        
-        setRemainingRefreshes(plan ? (planLimits[plan] - isRefreshCount) : 0);
 
+        setRemainingRefreshes(plan ? planLimits[plan] - isRefreshCount : 0);
 
-        console.log("sfnskfns",remainingRefreshes);
-        
+        console.log("sfnskfns", remainingRefreshes);
 
         setRedditData(analysisData);
       } else {
@@ -348,7 +341,7 @@ const RedditComponent = () => {
 
   return (
     <div className="font-kumbh-sans-Medium px-3 py-8 md:p-8">
-      <div className=" w-full flex justify-items-center md:justify-end mb-6">
+      <div className=" w-full flex justify-items-center md:justify-end mb-6 items-center gap-x-4 ">
         <div className="relative flex items-center">
           <IoSearch className="absolute left-3 text-gray-500" />
           <input
@@ -363,26 +356,25 @@ const RedditComponent = () => {
           className="bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg ml-4"
           onClick={() => handleRefresh(null)}
         >
-          <div className="hidden md:block">Update Instant Refresh</div>
-          <div className="md:hidden">Refresh</div>
+          <div className="hidden md:block font-kumbh-sans-medium">Update Instant Refresh</div>
+          <div className="md:hidden font-kumbh-sans-medium">Refresh</div>
         </button>
 
-        
         <div className="relative inline-block">
-  <button
-    className="text-gray-500 hover:text-blue-500"
-    onMouseEnter={() => setHovered(true)}
-    onMouseLeave={() => setHovered(false)}
-  >
-    <AiOutlineInfoCircle size={24} />
-  </button>
-  {hovered && (
-    <div className="absolute bg-gray-800 text-white text-sm rounded p-2 shadow-lg top-0 left-0 z-10 whitespace-nowrap transform -translate-x-full -translate-y-full">
-      {remainingRefreshes} refreshes left
-    </div>
-  )}
-</div>
-    </div>
+          <button
+            className="text-gray-500 hover:text-blue-500"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+          >
+            <AiOutlineInfoCircle size={24} />
+          </button>
+          {hovered && (
+            <div className="absolute bg-gray-800 text-white text-sm rounded p-2 shadow-lg top-0 left-5 z-10 whitespace-nowrap transform -translate-x-full -translate-y-full font-kumbh-sans-medium">
+              {remainingRefreshes} refreshes left
+            </div>
+          )}
+        </div>
+      </div>
 
       <RedditMasonryLayout filteredRedditData={filteredData} />
     </div>
