@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { db, auth } from "@/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import ServiceBlock from './ServiceBlock';
 import { storeNotificationData } from "@/utils/storeNotification";
 
@@ -11,16 +11,22 @@ const BotsAndAlerts = () => {
   const [telegramConnected, setTelegramConnected] = useState(false);
   const [telegramAccount, setTelegramAccount] = useState("");
   const [telegramid, setTelegramid] = useState("");
+  const [slackConnected, setSlackConnected] = useState(false);
+  const [slackAccount, setSlackAccount] = useState("");
+  const [slackUserId, setSlackUserId] = useState("");
   const [twitterConnected, setTwitterConnected] = useState(false);
   const [redditConnected, setRedditConnected] = useState(false);
-  const [isActive, setIsActive] = useState(true); // Switch state is on by default
+  const [isActive, setIsActive] = useState(true); 
   const [notificationData, setNotificationData] = useState({
     istelegram: false,
     telegramAccount: "",
-    telegramUserId:"",
+    telegramUserId: "",
     isActive: true, 
     twitter: false,
     reddit: false,
+    isslack: false,
+    slackAccount: "",
+    slackUserId: "",
   });
 
   useEffect(() => {
@@ -33,6 +39,9 @@ const BotsAndAlerts = () => {
           setTelegramConnected(data.istelegram);
           setTelegramAccount(data.telegramAccount ? `@${data.telegramAccount}` : "");
           setTelegramid(data.telegramUserId);
+          setSlackConnected(data.isslack);
+          setSlackAccount(data.slackAccount);
+          setSlackUserId(data.slackUserId);
           setTwitterConnected(data.twitter);
           setRedditConnected(data.reddit);
           setIsActive(data.isActive);
@@ -61,7 +70,6 @@ const BotsAndAlerts = () => {
       setIsActive(true);
       setNotificationData(updatedNotificationData);
 
-      // Store the notification data immediately after login
       if (user) {
         storeNotificationData(user.uid, updatedNotificationData);
         console.log("Telegram connected:", authUser);
@@ -77,14 +85,58 @@ const BotsAndAlerts = () => {
       istelegram: false,
       telegramAccount: "",
       telegramUserId: "",
-
       isActive: false,
     };
 
     setTelegramConnected(false);
     setTelegramAccount("");
-    setTelegramid(""),
+    setTelegramid("");
     setIsActive(false);
+    setNotificationData(updatedNotificationData);
+
+    if (user) {
+      storeNotificationData(user.uid, updatedNotificationData);
+    }
+  };
+
+  const handleSlackConnect = () => {
+    const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=7916518040914.7902056902599&scope=channels:read,chat:write,chat:write.public,groups:read,im:read,mpim:read&redirect_uri=https://topfeed.ai/dashboard/notifications`;
+    window.location.href = slackAuthUrl; // Redirect to Slack OAuth
+  };
+
+  const handleSlackAuth = (code) => {
+    // Here you would typically make a request to your backend to exchange the code for tokens
+    // Assuming you will handle this part later, for now, just log the code
+    console.log("Slack auth code received:", code);
+    
+    // After getting the access token, store the Slack account details
+    const updatedNotificationData = {
+      ...notificationData,
+      isslack: true,
+      slackAccount: "User's Slack Account", // Replace this with actual account name
+      slackUserId: "User's Slack User ID", // Replace this with actual user ID
+    };
+    setSlackConnected(true);
+    setSlackAccount("User's Slack Account"); // Replace with actual value
+    setSlackUserId("User's Slack User ID"); // Replace with actual value
+    setNotificationData(updatedNotificationData);
+
+    if (user) {
+      storeNotificationData(user.uid, updatedNotificationData);
+    }
+  };
+
+  const handleDisconnectSlack = () => {
+    const updatedNotificationData = {
+      ...notificationData,
+      isslack: false,
+      slackAccount: "",
+      slackUserId: "",
+    };
+
+    setSlackConnected(false);
+    setSlackAccount("");
+    setSlackUserId("");
     setNotificationData(updatedNotificationData);
 
     if (user) {
@@ -107,6 +159,7 @@ const BotsAndAlerts = () => {
       storeNotificationData(user.uid, updatedNotificationData);
     }
   };
+
   const handleToggleTwitter = () => {
     const newTwitterConnected = !twitterConnected;
     setTwitterConnected(newTwitterConnected);
@@ -122,7 +175,6 @@ const BotsAndAlerts = () => {
     }
   };
 
-  // Handle Reddit Toggle
   const handleToggleReddit = () => {
     const newRedditConnected = !redditConnected;
     setRedditConnected(newRedditConnected);
@@ -149,6 +201,18 @@ const BotsAndAlerts = () => {
             accountName={telegramAccount}
             onConnect={handleTelegramAuth}
             onDisconnect={handleDisconnectTelegram}
+            isActive={isActive}
+            onToggleSwitch={handleToggleSwitch}
+            handleToggleTwitter={handleToggleTwitter}
+            handleToggleReddit={handleToggleReddit}
+          />
+          <ServiceBlock
+            icon={<img src="/images/slack.svg" alt="Slack" className="h-10 w-10" />}
+            title="Slack"
+            connected={slackConnected}
+            accountName={slackAccount}
+            onConnect={handleSlackConnect} 
+            onDisconnect={handleDisconnectSlack}
             isActive={isActive}
             onToggleSwitch={handleToggleSwitch}
             handleToggleTwitter={handleToggleTwitter}
