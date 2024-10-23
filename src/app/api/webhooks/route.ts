@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     } else {
       // Otherwise, update with the current subscription plan
       await setDoc(doc(db, 'users', userId), {
-        plan: plan || 'free', 
+        plan: plan , 
         customer_id: customer_id || '',
         subscription_id: subscription_id || '',
       }, { merge: true });

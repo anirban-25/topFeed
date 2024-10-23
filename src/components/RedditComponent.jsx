@@ -50,7 +50,7 @@ const RedditComponent = () => {
         if (userDoc.exists()) {
           const userData = userDoc.data();
 
-          setPlan(userData.plan || "free");
+          setPlan(userData.plan);
 
           //console.log("plan", userData.plan);
         } else {
