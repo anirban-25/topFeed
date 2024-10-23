@@ -810,6 +810,11 @@ const ManageSubscription = () => {
                       }}
                       className="div"
                     ></motion.div>
+
+                    <div className="absolute w-full -bottom-0 h-72 md:h-full z-10">
+                      <World data={sampleArcs} globeConfig={globeConfig} />
+                    </div>
+
                     <div className="absolute w-full bottom-0 inset-x-0 h-32 bg-gradient-to-b pointer-events-none select-none from-transparent  to-[#0b0b0b] z-40" />
                   </div>
                 </div>
@@ -823,8 +828,3 @@ const ManageSubscription = () => {
 };
 
 export default ManageSubscription;
-/*
-<div className="absolute w-full -bottom-0 h-72 md:h-full z-10">
-                      <World data={sampleArcs} globeConfig={globeConfig} />
-                    </div>
-                     */
