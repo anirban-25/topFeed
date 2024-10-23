@@ -51,7 +51,11 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
+
+  useEffect(() => {
+    fetchLastTweetFeed(user);
+  }, [user, twitterLoader]);
 
   useEffect(() => {
     setSaveStatus(Array(twitterUrls.length).fill(null));
@@ -89,7 +93,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
       case "Scale":
         console.log("i am scale");
         return 10;
-        default:
+      default:
         console.log("i am defolt");
         return 3;
     }
@@ -152,10 +156,6 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
       setSaveStatus([...saveStatus, null]);
       setLoading([...loading, false]);
     }
-  };
-  const addMore = () => {
-    setTwitterUrls([...twitterUrls, ""]);
-    setSaveStatus([...saveStatus, null]);
   };
 
   const removeInput = (index) => {
@@ -233,7 +233,6 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
         console.error("No user is logged in.");
         return;
       }
-
       if (existingFeedId) {
         await updateDoc(
           doc(db, "users", user.uid, "tweet_feed", existingFeedId),
@@ -244,7 +243,15 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
           }
         );
         console.log("Document updated with ID: ", existingFeedId);
+
+        handleOpen(null);
       } else {
+        const twitterLoader = localStorage.getItem("twitterLoader");
+
+        // If it exists and is not 'true', set it to 'true'
+        if (twitterLoader !== "true") {
+          localStorage.setItem("twitterLoader", "true");
+        }
         const docRef = await addDoc(
           collection(db, "users", user.uid, "tweet_feed"),
           {
@@ -255,14 +262,15 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
         );
         console.log("New document written with ID: ", docRef.id);
         setExistingFeedId(docRef.id);
+        await processAndStoreTweets(user.uid, twitterUrls, newTopic);
       }
-      await processAndStoreTweets(user.uid, twitterUrls, newTopic);
     } catch (error) {
       console.error("Error:", error);
       alert("An error occurred while saving the feed. Please try again.");
     }
   };
 
+  
 
   const processAndStoreTweets = async (userId, urls, topic) => {
     localStorage.setItem("TwitterLoader", true);

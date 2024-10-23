@@ -142,17 +142,20 @@ const DashboardHeader = () => {
         >
           <div className="space-y-10  border-[#4c448a] border-l-[10px] ">
             <div className=" bg-transparent text-center py-8 rounded-r-full text-black font-kumbh-sans-medium "></div>
-            <div className=" bg-[#4c448a] text-center py-3 rounded-r-full border-l-transparent border-4 border-white ring-white text-white font-kumbh-sans-regular ">
+            <div className=" bg-[#4c448a] text-center py-3 rounded-r-full text-white  border-l-transparent border-4 border-white font-kumbh-sans-regular ">
               <Link href="/dashboard/reddit">Reddit</Link>
             </div>
             <div className=" bg-[#4c448a] text-center py-3 rounded-r-full text-white font-kumbh-sans-regular ">
               <Link href="/dashboard/twitter">Twitter</Link>
             </div>
             <div className=" bg-[#4c448a] text-center py-3 rounded-r-full text-white font-kumbh-sans-regular ">
-              <Link href="/dashboard/notification">Notification</Link>
+              <Link href="/dashboard/notifications">Notification</Link>
             </div>
             <div className=" bg-[#4c448a] text-center py-3 rounded-r-full text-white font-kumbh-sans-regular ">
-              <Link href="/dashboard/support">Support</Link>
+              <Link href="/dashboard/manage-subscription">Subscriptions</Link>
+            </div>
+            <div className=" bg-[#4c448a] text-center py-3 rounded-r-full text-white font-kumbh-sans-regular ">
+              <Link href="/pricing">Pricing</Link>
             </div>
           </div>
         </Drawer>

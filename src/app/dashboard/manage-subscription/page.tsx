@@ -13,7 +13,7 @@ const page = () => {
             </div>
             
             
-            <div className="min-h-screen flex-grow bg-white md:ml-64 w-[calc(100%-16rem)]">
+            <div className=" min-h-screen md:ml-64 w-full md:w-[calc(100%-16rem)]">
                 
                 <ManageSubscription />
 

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getAuth, isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const HandleEmailLink = () => {
   const router = useRouter();

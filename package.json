@@ -23,6 +23,8 @@
     "@mui/icons-material": "^5.15.19",
     "@mui/material": "^5.15.19",
     "@mui/x-data-grid": "^7.17.0",
+    "@react-three/drei": "^9.114.6",
+    "@react-three/fiber": "^8.17.10",
     "@smithy/node-http-handler": "^3.2.0",
     "@tsparticles/engine": "^3.3.0",
     "@tsparticles/react": "^3.0.0",
@@ -80,6 +82,8 @@
     "styled-components": "^6.1.11",
     "swr": "1.1.2",
     "tailwind-merge": "^2.2.1",
+    "three": "^0.169.0",
+    "three-globe": "^2.33.0",
     "unfetch": "^5.0.0",
     "use-react-countries": "^2.0.1"
   },
