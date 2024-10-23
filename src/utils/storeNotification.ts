@@ -5,6 +5,9 @@ type NotificationData = {
   istelegram: boolean;
   telegramUserId: string,
   telegramAccount: string;
+  isslack: boolean; 
+  slackAccount: string; 
+  slackUserId: string; 
   isActive: boolean;
   twitter: boolean;
   reddit: boolean;
@@ -20,7 +23,7 @@ export async function storeNotificationData(user: string, notificationData: Noti
 
   try {
     console.log(`Storing notification data for user ${user}`);
-    await setDoc(notificationDocRef, notificationData, { merge: true }); 
+    await setDoc(notificationDocRef, notificationData, { merge: true });
 
     console.log("Notification data stored successfully for user: ", user);
     return notificationDocRef;

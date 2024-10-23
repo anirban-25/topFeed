@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { Switch } from "@headlessui/react";
 import TelegramLoginButton from "./TelegramLoginButton";
-import NotificationDialog from "@/components/NotificationDialog"
+import NotificationDialog from "@/components/NotificationDialog";
+
 const ServiceBlock = ({
   icon,
   title,
@@ -26,14 +27,20 @@ const ServiceBlock = ({
   const handleTelegramConnect = () => setShowTelegramLogin(true);
 
   const handleDisconnect = () => {
-    
+
     onDisconnect();
-    handleOpen(null)
+    handleOpen(null);
     setShowSettings(false);
-
-
-    
   };
+
+  const handleConnect = () => {
+    if (title === "Slack") {
+      onConnect(); 
+    } else {
+      setShowTelegramLogin(true); 
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (settingsRef.current && !settingsRef.current.contains(event.target)) {
@@ -83,24 +90,19 @@ const ServiceBlock = ({
                 className="h-7 w-7 hover:rotate-90 duration-200 hover:scale-105 "
               />
             </button>
-            
+
           </>
+        
         ) : (
-          <>
-            {showTelegramLogin ? (
-              <TelegramLoginButton onAuth={onConnect} />
-            ) : (
-              <button
-                onClick={handleTelegramConnect}
-                className="px-4 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
-              >
-                + Connect
-              </button>
-            )}
-          </>
+          <button
+            onClick={handleConnect}
+            className="px-4 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
+          >
+            + Connect
+          </button>
         )}
       </div>
-      <NotificationDialog size={size} handleOpen={handleOpen} handleDisconnect={handleDisconnect}/>
+      <NotificationDialog size={size} handleOpen={handleOpen} handleDisconnect={handleDisconnect} />
     </div>
   );
 };
