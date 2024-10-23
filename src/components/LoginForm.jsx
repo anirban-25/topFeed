@@ -38,7 +38,7 @@ const LoginForm = () => {
         await setDoc(
           userDocRef,
           {
-            plan: "freee",
+            plan: "free",
           }, 
           { merge: true }
         );
@@ -46,7 +46,7 @@ const LoginForm = () => {
       } else {
         // Create a new document if it doesn't exist
         await setDoc(userDocRef, {
-          plan: "frese"
+          plan: "free"
         });
         console.log("New user document created with free plan");
       }

@@ -29,7 +29,7 @@ const SidePanel = () => {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          setPlan(userData.plan || "free" ); // Set plan from Firestore, default to 'FREE' if not found
+          setPlan(userData.plan ); // Set plan from Firestore, default to 'FREE' if not found
         } else {
           console.error("No user document found in Firestore");
         }
