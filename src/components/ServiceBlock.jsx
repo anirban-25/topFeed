@@ -24,21 +24,19 @@ const ServiceBlock = ({
   const [size, setSize] = useState(null);
 
   const handleOpen = (value) => setSize(value);
-  const handleTelegramConnect = () => setShowTelegramLogin(true);
+
+  const handleConnect = () => {
+    if (title === "Telegram") {
+      setShowTelegramLogin(true);
+    } else {
+      onConnect();
+    }
+  };
 
   const handleDisconnect = () => {
-
     onDisconnect();
     handleOpen(null);
     setShowSettings(false);
-  };
-
-  const handleConnect = () => {
-    if (title === "Slack") {
-      onConnect(); 
-    } else {
-      setShowTelegramLogin(true); 
-    }
   };
 
   useEffect(() => {
@@ -87,19 +85,23 @@ const ServiceBlock = ({
               <img
                 src="/images/settings.svg"
                 alt="settings"
-                className="h-7 w-7 hover:rotate-90 duration-200 hover:scale-105 "
+                className="h-7 w-7 hover:rotate-90 duration-200 hover:scale-105"
               />
             </button>
-
           </>
-        
         ) : (
-          <button
-            onClick={handleConnect}
-            className="px-4 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
-          >
-            + Connect
-          </button>
+          <>
+            {showTelegramLogin && title === "Telegram" ? (
+              <TelegramLoginButton onAuth={onConnect} />
+            ) : (
+              <button
+                onClick={handleConnect}
+                className="px-4 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
+              >
+                + Connect
+              </button>
+            )}
+          </>
         )}
       </div>
       <NotificationDialog size={size} handleOpen={handleOpen} handleDisconnect={handleDisconnect} />
