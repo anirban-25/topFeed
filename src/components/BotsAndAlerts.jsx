@@ -5,6 +5,7 @@ import { db, auth } from "@/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import ServiceBlock from './ServiceBlock';
 import { storeNotificationData } from "@/utils/storeNotification";
+import { useRouter } from 'next/navigation';
 
 const BotsAndAlerts = () => {
   const [user] = useAuthState(auth);
@@ -28,6 +29,14 @@ const BotsAndAlerts = () => {
     slackAccount: "",
     slackUserId: "",
   });
+  const router = useRouter();
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("code");
+    if (code) {
+      handleSlackAuth(code); // Exchange the code for a token
+    }
+  }, [router.query]);
+
 
   useEffect(() => {
     if (user) {
@@ -101,30 +110,35 @@ const BotsAndAlerts = () => {
 
   const handleSlackConnect = () => {
     const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=7916518040914.7902056902599&scope=channels:read,chat:write,chat:write.public,groups:read,im:read,mpim:read&redirect_uri=https://topfeed.ai/dashboard/notifications`;
-    window.location.href = slackAuthUrl; // Redirect to Slack OAuth
+    window.location.href = slackAuthUrl; 
   };
 
-  const handleSlackAuth = (code) => {
-    // Here you would typically make a request to your backend to exchange the code for tokens
-    // Assuming you will handle this part later, for now, just log the code
-    console.log("Slack auth code received:", code);
-    
-    // After getting the access token, store the Slack account details
-    const updatedNotificationData = {
-      ...notificationData,
-      isslack: true,
-      slackAccount: "User's Slack Account", // Replace this with actual account name
-      slackUserId: "User's Slack User ID", // Replace this with actual user ID
-    };
-    setSlackConnected(true);
-    setSlackAccount("User's Slack Account"); // Replace with actual value
-    setSlackUserId("User's Slack User ID"); // Replace with actual value
-    setNotificationData(updatedNotificationData);
-
-    if (user) {
-      storeNotificationData(user.uid, updatedNotificationData);
+  const handleSlackAuth = async (code) => {
+    try {
+      const response = await fetch("/api/slack", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await response.json();
+      
+      if (data.ok) {
+        const { user, team } = data;
+        const slackData = {
+          isslack: true,
+          slackAccount: user.name,
+          slackUserId: user.id,
+        };
+        setSlackConnected(true);
+        setSlackAccount(user.name);
+        setSlackUserId(user.id);
+        storeNotificationData(user.uid, slackData);
+      }
+    } catch (error) {
+      console.error("Slack authorization failed:", error);
     }
   };
+  
 
   const handleDisconnectSlack = () => {
     const updatedNotificationData = {
