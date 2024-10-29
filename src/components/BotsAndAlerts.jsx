@@ -121,17 +121,17 @@ const BotsAndAlerts = () => {
         body: JSON.stringify({ code }),
       });
       const data = await response.json();
-      
+  
       if (data.ok) {
-        const { user, team } = data;
+        const { team, authed_user } = data;
         const slackData = {
           isslack: true,
-          slackAccount: user.name,
-          slackUserId: user.id,
+          slackAccount: team?.name || "",  // Store the team name here
+          slackUserId: authed_user?.id,
         };
         setSlackConnected(true);
-        setSlackAccount(user.name);
-        setSlackUserId(user.id);
+        setSlackAccount(team?.name || "");  // Display team name
+        setSlackUserId(authed_user?.id);
         storeNotificationData(user.uid, slackData);
       }
     } catch (error) {
