@@ -126,12 +126,12 @@ const BotsAndAlerts = () => {
         const { user, team } = data;
         const slackData = {
           isslack: true,
-          slackAccount: user.name,
-          slackUserId: user.id,
+          slackAccount: team.name,
+          slackUserId: team.id,
         };
         setSlackConnected(true);
-        setSlackAccount(user.name);
-        setSlackUserId(user.id);
+        setSlackAccount(team.name);
+        setSlackUserId(team.id);
         storeNotificationData(user.uid, slackData);
       }
     } catch (error) {
