@@ -5,9 +5,10 @@ import fetch from 'node-fetch';
 
 export async function POST(req: Request) {
   try {
-    const { code } = await req.json();
+    const { code, uuid } = await req.json();
     console.log("Authorization code received:", code);
-    if (!code) {
+    console.log("User UUID received:", uuid);
+    if (!code || !uuid ) {
       return NextResponse.json({ error: 'Authorization code is missing' }, { status: 400 });
     }
 
@@ -32,7 +33,7 @@ export async function POST(req: Request) {
     const userId = tokenData.authed_user?.id;
     const teamName = tokenData.team?.name || '';  // Using team name as slackAccount
 
-    const userDocRef = doc(db, 'notifications', userId);
+    const userDocRef = doc(db, 'notifications', uuid);
     await setDoc(userDocRef, {
       isslack: true,
       slackAccount: teamName,  // Save team name instead of username
