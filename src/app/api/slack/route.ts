@@ -36,9 +36,9 @@ export async function POST(req: Request) {
     }
 
     const { authed_user } = tokenData;
-    const accessToken = authed_user.access_token;
-    const userId = authed_user.id;
-    const userName = authed_user.name;
+    const accessToken = tokenData.access_token || tokenData.authed_user?.access_token;
+    const userId = tokenData.authed_user?.id;
+    const userName = tokenData.authed_user?.name || tokenData.user?.name;
     console.log("Authed user details:", { userId, userName, accessToken });
 
     // Save user data to Firestore
