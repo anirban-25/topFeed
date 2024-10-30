@@ -31,11 +31,13 @@ const BotsAndAlerts = () => {
   });
   const router = useRouter();
   useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get("code");
-    if (code) {
-      handleSlackAuth(code); // Exchange the code for a token
+    if(user){
+      const code = new URLSearchParams(window.location.search).get("code");
+      if (code) {
+        handleSlackAuth(code); // Exchange the code for a token
+      }
     }
-  }, [router.query]);
+  }, [router.query, user]);
 
 
   useEffect(() => {
@@ -112,7 +114,7 @@ const BotsAndAlerts = () => {
     const slackAuthUrl = `https://slack.com/oauth/v2/authorize?client_id=7916518040914.7902056902599&scope=channels:read,chat:write,chat:write.public,groups:read,im:read,mpim:read&redirect_uri=https://topfeed.ai/dashboard/notifications`;
     window.location.href = slackAuthUrl; 
   };
-
+  
   const handleSlackAuth = async (code) => {
     if (!user) {
       console.error("User is not authenticated");
