@@ -114,6 +114,10 @@ const BotsAndAlerts = () => {
   };
 
   const handleSlackAuth = async (code) => {
+    if (!user) {
+      console.error("User is not authenticated");
+      return;
+    }
     try {
       const response = await fetch("/api/slack", {
         method: "POST",
