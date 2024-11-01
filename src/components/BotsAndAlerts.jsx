@@ -18,6 +18,8 @@ const BotsAndAlerts = () => {
   const [twitterConnected, setTwitterConnected] = useState(false);
   const [redditConnected, setRedditConnected] = useState(false);
   const [isActive, setIsActive] = useState(true); 
+  const [channels, setChannels] = useState([]);
+  const [selectedChannels, setSelectedChannels] = useState([]);
   const [notificationData, setNotificationData] = useState({
     istelegram: false,
     telegramAccount: "",
@@ -53,6 +55,8 @@ const BotsAndAlerts = () => {
           setSlackConnected(data.isslack);
           setSlackAccount(data.slackAccount);
           setSlackUserId(data.slackUserId);
+          setChannels(data.channels || []);
+          setSelectedChannels(data.selectedChannels || []);
           setTwitterConnected(data.twitter);
           setRedditConnected(data.reddit);
           setIsActive(data.isActive);
@@ -129,7 +133,7 @@ const BotsAndAlerts = () => {
       const data = await response.json();
   
       if (data.ok) {
-        const { team, authed_user } = data;
+        const { team, authed_user,channels } = data;
         const slackData = {
           isslack: true,
           slackAccount: team?.name || "",  // Store the team name here
@@ -138,10 +142,20 @@ const BotsAndAlerts = () => {
         setSlackConnected(true);
         setSlackAccount(team?.name || "");  // Display team name
         setSlackUserId(authed_user?.id);
+        setChannels(channels);
         storeNotificationData(user.uid, slackData);
       }
     } catch (error) {
       console.error("Slack authorization failed:", error);
+    }
+  };
+  const handleChannelSelection = (channelId) => {
+    const updatedSelectedChannels = selectedChannels.includes(channelId)
+      ? selectedChannels.filter(id => id !== channelId)
+      : [...selectedChannels, channelId];
+    setSelectedChannels(updatedSelectedChannels);
+    if (user) {
+      storeNotificationData(user.uid, { selectedChannels: updatedSelectedChannels });
     }
   };
   

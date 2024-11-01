@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { Switch } from "@headlessui/react";
 import TelegramLoginButton from "./TelegramLoginButton";
 import NotificationDialog from "@/components/NotificationDialog";
+import { useRouter } from "next/navigation";
 
 const ServiceBlock = ({
   icon,
@@ -19,7 +20,7 @@ const ServiceBlock = ({
 }) => {
   const [showTelegramLogin, setShowTelegramLogin] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-
+  const router = useRouter();
   const settingsRef = useRef(null);
   const [size, setSize] = useState(null);
 
@@ -30,6 +31,9 @@ const ServiceBlock = ({
       setShowTelegramLogin(true);
     } else {
       onConnect();
+      if (title === "Slack") {
+        router.push("/dashboard/notifications");
+      }
     }
   };
 
@@ -104,7 +108,11 @@ const ServiceBlock = ({
           </>
         )}
       </div>
-      <NotificationDialog size={size} handleOpen={handleOpen} handleDisconnect={handleDisconnect} />
+      <NotificationDialog
+        size={size}
+        handleOpen={handleOpen}
+        handleDisconnect={handleDisconnect}
+      />
     </div>
   );
 };
