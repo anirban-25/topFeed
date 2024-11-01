@@ -31,35 +31,17 @@ export async function POST(req: Request) {
 
     const accessToken = tokenData.access_token || tokenData.authed_user?.access_token;
     const userId = tokenData.authed_user?.id;
-    const teamName = tokenData.team?.name || ''; 
+    const teamName = tokenData.team?.name || '';  // Using team name as slackAccount
 
-    // Step 2: Fetch channels using `conversations.list`
-    const channelResponse = await fetch('https://slack.com/api/conversations.list', {
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${accessToken}` },
-    });
-
-    const channelData = await channelResponse.json();
-    console.log("Slack channels data:", channelData);
-    if (!channelData.ok) {
-      return NextResponse.json({ error: 'Failed to fetch channels', details: channelData }, { status: 400 });
-    }
-
-    const channels = channelData.channels.map((channel: any) => ({
-      id: channel.id,
-      name: channel.name,
-    }));
-
-    // Step 3: Save data to Firestore
     const userDocRef = doc(db, 'notifications', uuid);
     await setDoc(userDocRef, {
       isslack: true,
-      slackAccount: teamName,
+      slackAccount: teamName,  // Save team name instead of username
       slackUserId: userId,
-      channels,  
+      accessToken,
     }, { merge: true });
 
-    return NextResponse.json({ message: 'Slack user connected, channels retrieved and data stored successfully', accessToken, channels });
+    return NextResponse.json({ message: 'Slack user connected and data stored successfully', accessToken });
   } catch (error) {
     return NextResponse.json({ error: 'Internal Server Error', details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
