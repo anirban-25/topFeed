@@ -18,6 +18,7 @@ const BotsAndAlerts = () => {
   const [twitterConnected, setTwitterConnected] = useState(false);
   const [redditConnected, setRedditConnected] = useState(false);
   const [isActive, setIsActive] = useState(true); 
+  const [isActiveSlack, setIsActiveSlack] = useState(true); 
   const [channels, setChannels] = useState([]);
   const [selectedChannels, setSelectedChannels] = useState([]);
   const [notificationData, setNotificationData] = useState({
@@ -25,6 +26,7 @@ const BotsAndAlerts = () => {
     telegramAccount: "",
     telegramUserId: "",
     isActive: true, 
+    isActiveSlack: true,
     twitter: false,
     reddit: false,
     isslack: false,
@@ -60,6 +62,7 @@ const BotsAndAlerts = () => {
           setTwitterConnected(data.twitter);
           setRedditConnected(data.reddit);
           setIsActive(data.isActive);
+          setIsActiveSlack(data.isActiveSlack);
           setNotificationData(data);
         }
       }).catch(error => {
@@ -138,15 +141,18 @@ const BotsAndAlerts = () => {
           isslack: true,
           slackAccount: team?.name || "",  // Store the team name here
           slackUserId: authed_user?.id,
+          channels,
         };
         setSlackConnected(true);
         setSlackAccount(team?.name || "");  // Display team name
         setSlackUserId(authed_user?.id);
         setChannels(channels);
-        storeNotificationData(user.uid, slackData);
+        await storeNotificationData(user.uid, slackData);
+        router.push("/dashboard/notifications");
       }
     } catch (error) {
       console.error("Slack authorization failed:", error);
+      
     }
   };
   const handleChannelSelection = (channelId) => {
@@ -171,6 +177,22 @@ const BotsAndAlerts = () => {
     setSlackConnected(false);
     setSlackAccount("");
     setSlackUserId("");
+    setNotificationData(updatedNotificationData);
+
+    if (user) {
+      storeNotificationData(user.uid, updatedNotificationData);
+    }
+  };
+
+  const handleToggleSwitchSlack = () => {
+    const newIsActiveSlack = !isActiveSlack;
+    setIsActiveSlack(newIsActive);
+
+    const updatedNotificationData = {
+      ...notificationData,
+      isActiveSlack: newIsActiveSlack,
+    };
+
     setNotificationData(updatedNotificationData);
 
     if (user) {
@@ -247,8 +269,8 @@ const BotsAndAlerts = () => {
             accountName={slackAccount}
             onConnect={handleSlackConnect} 
             onDisconnect={handleDisconnectSlack}
-            isActive={isActive}
-            onToggleSwitch={handleToggleSwitch}
+            isActive={isActiveSlack}
+            onToggleSwitch={handleToggleSwitchSlack}
             handleToggleTwitter={handleToggleTwitter}
             handleToggleReddit={handleToggleReddit}
           />
