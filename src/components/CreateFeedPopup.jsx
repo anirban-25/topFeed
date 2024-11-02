@@ -14,6 +14,7 @@ import axios from "axios";
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   limit,
   orderBy,
@@ -36,25 +37,36 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
   const fetchLastUpdatedSubreddits = async () => {
     try {
       if (user) {
-        const userRedditsRef = collection(
+        // Directly reference the 'latest_analysis' document in the 'user_reddits' collection
+        const latestAnalysisRef = doc(
           db,
           "users",
           user.uid,
-          "user_reddits"
+          "user_reddits",
+          "latest_analysis"
         );
-        const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
-        const querySnapshot = await getDocs(q);
-        console.log(querySnapshot);
-
-        if (!querySnapshot.empty) {
-          const docData = querySnapshot.docs[0].data();
-          console.log(docData.subreddits);
-          console.log("hey");
-          setTopics(docData.subreddits || []);
-        }
+  
+        const retryFetch = async (retries = 5) => {
+          const docSnapshot = await getDoc(latestAnalysisRef);
+  
+          if (docSnapshot.exists()) {
+            const docData = docSnapshot.data();
+            console.log(docData.subreddits);
+            console.log("hey");
+            setTopics(docData.subreddits || []);
+          } else if (retries > 0) {
+            console.log(`Retrying... (${5 - retries + 1})`);
+            await new Promise((resolve) => setTimeout(resolve, 2000)); // wait 2 seconds
+            await retryFetch(retries - 1);
+          } else {
+            console.log("No data found in 'latest_analysis' after 10 seconds");
+          }
+        };
+  
+        await retryFetch();
       }
     } catch (error) {
-      console.error("Error fetching last updated subreddits:", error);
+      console.error("Error fetching subreddits from 'latest_analysis':", error);
     }
   };
   useEffect(() => {

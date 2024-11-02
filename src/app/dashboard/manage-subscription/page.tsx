@@ -2,6 +2,7 @@ import React from "react";
 import SidePanel from '@/components/SidePanel';
 import ManageSubscription from '@/pricingComponents/ManageSubscription';
 import UserMenu from "@/components/UserMenu";
+import { useAppContext } from "@/contexts/AppContext";
 
 const page = () => {
     return (

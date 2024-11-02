@@ -129,6 +129,7 @@ const RedditComponent = () => {
     } else {
       // If the document exists, update it
     }
+    console.log("setting feed setting to true");
     setFeedSetting(true);
     if (!querySnapshot.empty) {
       const docData = querySnapshot.docs[0].data();
@@ -170,7 +171,7 @@ const RedditComponent = () => {
       );
 
       if (response.status !== 200) {
-        setLoading(false);
+        // setLoading(false);
         throw new Error("Failed to fetch data from server");
       }
 
@@ -262,13 +263,14 @@ const RedditComponent = () => {
       )
     : [];
 
-  useEffect(() => {
-    if (redditDataFetch) {
-      setLoading(redditDataFetch);
-    } else {
-      fetchLatestRedditData();
-    }
-  }, [redditDataFetch]);
+  // useEffect(() => {
+  //   if (redditDataFetch) {
+  //     setLoading(redditDataFetch);
+  //   } else {
+  //     fetchLatestRedditData();
+  //   }
+  // }, [redditDataFetch]);
+
 
   if (loaderInitial) {
     return (
@@ -349,14 +351,14 @@ const RedditComponent = () => {
             placeholder="Search in feed..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 border border-[#CECECE] rounded-lg px-4 py-2"
+            className="pl-10 border border-[#CECECE] text-sm rounded-lg px-4 py-2"
           />
         </div>
         <button
           className="bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg ml-4"
           onClick={() => handleRefresh(null)}
         >
-          <div className="hidden md:block font-kumbh-sans-medium">Update Instant Refresh</div>
+          <div className="hidden text-sm md:block font-kumbh-sans-medium">Update Instant Refresh</div>
           <div className="md:hidden font-kumbh-sans-medium">Refresh</div>
         </button>
 

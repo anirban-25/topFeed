@@ -9,38 +9,53 @@ import { IoNotifications } from "react-icons/io5";
 import { HiOutlineSupport } from "react-icons/hi";
 import { usePathname } from "next/navigation";
 import { IoPricetagsSharp } from "react-icons/io5";
-import { setDoc, doc, getDoc } from 'firebase/firestore';
-import { getAuth, onAuthStateChanged} from "firebase/auth";
-import { db,app } from '@/firebase';
+import { setDoc, doc, getDoc } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { db, app } from "@/firebase";
+import { useAppContext } from "@/contexts/AppContext";
 
 const SidePanel = () => {
   const [user, setUser] = useState(null);
   const [plan, setPlan] = useState(null);
   const router = useRouter();
   const auth = getAuth(app);
-  
+
+  const { planChange, setPlanChange } = useAppContext();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUser(user);  // Set the Firebase user when logged in
-        
+        setUser(user); // Set the Firebase user when logged in
 
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          setPlan(userData.plan ); // Set plan from Firestore, default to 'FREE' if not found
+          setPlan(userData.plan); // Set plan from Firestore, default to 'FREE' if not found
         } else {
           console.error("No user document found in Firestore");
         }
       } else {
-        router.push("/login");  // Redirect to login if no user is found
+        router.push("/login"); // Redirect to login if no user is found
       }
     });
 
     return () => unsubscribe();
   }, [auth, router]);
 
+  useEffect(
+    () => async () => {
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setPlan(userData.plan); // Set plan from Firestore, default to 'FREE' if not found
+        } else {
+          console.error("No user document found in Firestore");
+        }
+      }
+    },
+    [user, planChange]
+  );
 
   const pathname = usePathname();
   return (
@@ -137,8 +152,12 @@ const SidePanel = () => {
       <div className="font-kumbh-sans-medium mt-auto mb-9 items-center">
         <div className=" space-x-2 bg-[#2A2A2A] p-3 rounded-md w-3/2 ml-3 mr-3 ">
           <div className="font-kumbh-sans-medium flex items-center justify-between ml-3 mb-5">
-            <span className="text-[#8D8D8D] text-sm whitespace-nowrap">Current Plan</span>
-            <span className="font-kumbh-sans-semibold text-white uppercase whitespace-nowrap">{plan}</span>
+            <span className="text-[#8D8D8D] text-sm whitespace-nowrap">
+              Current Plan
+            </span>
+            <span className="font-kumbh-sans-semibold text-white uppercase whitespace-nowrap">
+              {plan}
+            </span>
           </div>
 
           {plan === "free" ? (
@@ -150,7 +169,7 @@ const SidePanel = () => {
             </Link>
           ) : (
             <Link
-              href="/dashboard/manage-subscription" 
+              href="/dashboard/manage-subscription"
               className="flex items-center justify-center px-4 py-2 bg-[#146EF5] text-white rounded-lg hover:bg-blue-900 transition-all duration-200 mr-6"
             >
               Manage Subscription
