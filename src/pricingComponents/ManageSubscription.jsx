@@ -17,8 +17,12 @@ import {
   DialogBody,
   DialogFooter,
 } from "@material-tailwind/react";
+import { useAppContext } from "@/contexts/AppContext";
 
 const ManageSubscription = () => {
+  
+  const { planChange, setPlanChange } =
+  useAppContext();
   const [subscriptionDetails, setSubscriptionDetails] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -538,11 +542,12 @@ const ManageSubscription = () => {
         throw new Error("Failed to cancel the subscription");
       }
 
-      alert("Subscription cancelled successfully.");
+      router.push("/dashboard/reddit");
       setSubscriptionDetails((prev) => ({
         ...prev,
-        attributes: { ...prev.attributes, status: "cancelled" },
+        attributes: { ...prev.attributes, status: "cancelled", product_name: "free" },
       }));
+      setPlanChange(true);
     } catch (error) {
       setError(error.message);
     } finally {
