@@ -167,27 +167,43 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
   };
 
   const handleSave = async (index) => {
-    // Your existing save logic here
     setLoading((prevLoading) => {
       const newLoading = [...prevLoading];
       newLoading[index] = true;
       return newLoading;
     });
 
-    // Simulating an API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch("/api/checktwitterlinks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          twitter_url: twitterUrls[index],
+        }),
+      });
 
-    setSaveStatus((prevStatus) => {
-      const newStatus = [...prevStatus];
-      newStatus[index] = "success";
-      return newStatus;
-    });
+      const data = await response.json();
 
-    setLoading((prevLoading) => {
-      const newLoading = [...prevLoading];
-      newLoading[index] = false;
-      return newLoading;
-    });
+      setSaveStatus((prevStatus) => {
+        const newStatus = [...prevStatus];
+        newStatus[index] = data.status === 200 ? "success" : "error";
+        return newStatus;
+      });
+    } catch (error) {
+      setSaveStatus((prevStatus) => {
+        const newStatus = [...prevStatus];
+        newStatus[index] = "error";
+        return newStatus;
+      });
+    } finally {
+      setLoading((prevLoading) => {
+        const newLoading = [...prevLoading];
+        newLoading[index] = false;
+        return newLoading;
+      });
+    }
   };
 
   const handleSaveTopic = () => {
@@ -269,8 +285,6 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
       alert("An error occurred while saving the feed. Please try again.");
     }
   };
-
-  
 
   const processAndStoreTweets = async (userId, urls, topic) => {
     localStorage.setItem("TwitterLoader", true);
@@ -426,7 +440,9 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
                         ) : (
                           "Save"
                         )}
-                      </button>
+                        </button>
+                        
+
                       {twitterUrls.length > 1 && (
                         <button
                           onClick={() => removeInput(index)}
@@ -436,9 +452,9 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
                         </button>
                       )}
                     </div>
-                    {errors[index] && (
+                    {saveStatus[index] === "error" && (
                       <p className="mt-2 text-sm text-red-600">
-                        {errors[index]}
+                        Error proccessing the link
                       </p>
                     )}
                   </div>
