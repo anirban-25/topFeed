@@ -135,12 +135,12 @@ const BotsAndAlerts = () => {
       });
       const data = await response.json();
       console.log(data);
-      if(data.messgae === "Slack user connected, channels retrieved and data stored successfully"){
+      if(data.message === "Slack user connected, channels retrieved and data stored successfully"){
         console.log("data is ok");
       }else{
         console.log("data is not ok");
       }
-      if (data.ok) {
+      if (data.message === "Slack user connected, channels retrieved and data stored successfully") {
         const { team, authed_user,channels } = data;
         const slackData = {
           isslack: true,
