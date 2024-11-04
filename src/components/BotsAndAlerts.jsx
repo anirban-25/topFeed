@@ -186,7 +186,7 @@ const BotsAndAlerts = () => {
 
   const handleToggleSwitchSlack = () => {
     const newIsActiveSlack = !isActiveSlack;
-    setIsActiveSlack(newIsActive);
+    setIsActiveSlack(newIsActiveSlack);
 
     const updatedNotificationData = {
       ...notificationData,
@@ -199,7 +199,7 @@ const BotsAndAlerts = () => {
       storeNotificationData(user.uid, updatedNotificationData);
     }
   };
-
+  //teleg
   const handleToggleSwitch = () => {
     const newIsActive = !isActive;
     setIsActive(newIsActive);
