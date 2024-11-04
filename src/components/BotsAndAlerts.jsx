@@ -137,6 +137,8 @@ const BotsAndAlerts = () => {
       console.log(data);
       if(data.ok){
         console.log("data is ok");
+      }else{
+        console.log("data is not ok");
       }
       if (data.ok) {
         const { team, authed_user,channels } = data;
