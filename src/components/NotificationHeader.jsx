@@ -20,7 +20,7 @@ const TwitterHeader = () => {
           >
             Notification
           </button>
-          <div className="hidden md:flex ml-2">My Twitter Feed</div>
+          <div className="hidden md:flex ml-2">My Notifications</div>
           <Drawer
             open={openSidePanel}
             onClose={closeDrawer}
@@ -47,7 +47,7 @@ const TwitterHeader = () => {
           </Drawer>
         </h1>
       </div>
-      <h1 className="font-kumbh-sans-Bold text-xl text-[#8D8D8D] font-semibold ml-2">
+      <h1 className="flex md:hidden font-kumbh-sans-Bold text-xl text-[#8D8D8D] font-semibold ml-2">
         My Notifications
       </h1>
 
