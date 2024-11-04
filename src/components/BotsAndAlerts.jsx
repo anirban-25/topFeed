@@ -147,8 +147,8 @@ const BotsAndAlerts = () => {
         setSlackAccount(team?.name || "");  // Display team name
         setSlackUserId(authed_user?.id);
         setChannels(channels);
-        await storeNotificationData(user.uid, slackData);
-        router.push("/dashboard/notifications");
+        storeNotificationData(user.uid, slackData);
+        // router.push("/dashboard/notifications");
       }
     } catch (error) {
       console.error("Slack authorization failed:", error);
