@@ -134,7 +134,10 @@ const BotsAndAlerts = () => {
         body: JSON.stringify({ code, uuid: user.uid }),
       });
       const data = await response.json();
-  
+      console.log(data);
+      if(data.ok){
+        console.log("data is ok");
+      }
       if (data.ok) {
         const { team, authed_user,channels } = data;
         const slackData = {
