@@ -46,9 +46,9 @@ const Page = () => {
         "Basic Analytics",
       ],
       lemonSqueezyMonthlyUrl:
-        `https://topfeed.lemonsqueezy.com/buy/8413ab3b-25e5-4d3b-8a0e-8cdee7987c75?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
+        `https://topfeed.lemonsqueezy.com/buy/7dd2f8a0-34a3-4dab-ab3d-ca5de3c8dd20?media=0&discount=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
       lemonSqueezyYearlyUrl:
-        `https://topfeed.lemonsqueezy.com/buy/454ef42c-8b02-4af4-96bc-35997e088994?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
+        `https://topfeed.lemonsqueezy.com/buy/66d7da57-953d-437f-85b9-2e55a6722075?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
     },
     {
       name: "Growth",
@@ -64,9 +64,9 @@ const Page = () => {
         "Priority Support",
       ],
       lemonSqueezyMonthlyUrl:
-        `https://topfeed.lemonsqueezy.com/buy/c9908381-4dac-4539-ae62-d6eadf10bddf?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
+        `https://topfeed.lemonsqueezy.com/buy/a54ebde8-f028-45c2-a293-26714a5b7019?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
       lemonSqueezyYearlyUrl:
-        `https://topfeed.lemonsqueezy.com/buy/74c9438d-2424-4e0e-920e-f29c5912852b?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
+        `https://topfeed.lemonsqueezy.com/buy/2c1bc123-9fe6-47f3-95ea-c9bafe7a25a3?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
     },
     {
       name: "Scale",
@@ -82,9 +82,9 @@ const Page = () => {
         "Comprehensive Analytics",
       ],
       lemonSqueezyMonthlyUrl:
-        `https://topfeed.lemonsqueezy.com/buy/e434c319-7b78-4449-8a5c-2514cc1832a6?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
+        `https://topfeed.lemonsqueezy.com/buy/ba505bd4-e8c9-4d01-8216-044c15646e99?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
       lemonSqueezyYearlyUrl:
-        `https://topfeed.lemonsqueezy.com/buy/5e76b568-a6df-4404-af3d-da5137f029aa?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
+        `https://topfeed.lemonsqueezy.com/buy/2fe0fd80-da90-4d99-b2a7-d534f47c2954?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
     },
   ];
 
