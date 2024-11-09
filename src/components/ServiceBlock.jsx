@@ -45,7 +45,9 @@ const ServiceBlock = ({
 
   useEffect(()=>{
     console.log("connected changed");
+    console.log(connected);
   }, [connected])
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (settingsRef.current && !settingsRef.current.contains(event.target)) {

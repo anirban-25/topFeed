@@ -134,8 +134,13 @@ const BotsAndAlerts = () => {
         body: JSON.stringify({ code, uuid: user.uid }),
       });
       const data = await response.json();
-  
-      if (data.ok) {
+      console.log(data);
+      if(data.message === "Slack user connected, channels retrieved and data stored successfully"){
+        console.log("data is ok");
+      }else{
+        console.log("data is not ok");
+      }
+      if (data.message === "Slack user connected, channels retrieved and data stored successfully") {
         const { team, authed_user,channels } = data;
         const slackData = {
           isslack: true,
@@ -147,8 +152,8 @@ const BotsAndAlerts = () => {
         setSlackAccount(team?.name || "");  // Display team name
         setSlackUserId(authed_user?.id);
         setChannels(channels);
-        await storeNotificationData(user.uid, slackData);
-        router.push("/dashboard/notifications");
+        storeNotificationData(user.uid, slackData);
+        // router.push("/dashboard/notifications");
       }
     } catch (error) {
       console.error("Slack authorization failed:", error);
