@@ -55,7 +55,7 @@ const BotsAndAlerts = () => {
           setTelegramAccount(data.telegramAccount ? `@${data.telegramAccount}` : "");
           setTelegramid(data.telegramUserId);
           setSlackConnected(data.isslack);
-          setSlackAccount(data.slackAccount);
+          setSlackAccount(data.slackAccount ? `@${data.slackAccount}` : "");
           setSlackUserId(data.slackUserId);
           setChannels(data.channels || []);
           setSelectedChannels(data.selectedChannels || []);
