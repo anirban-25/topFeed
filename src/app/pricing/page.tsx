@@ -46,9 +46,9 @@ const Page = () => {
         "Basic Analytics",
       ],
       lemonSqueezyMonthlyUrl:
-        `https://topfeed.lemonsqueezy.com/buy/7dd2f8a0-34a3-4dab-ab3d-ca5de3c8dd20?media=0&discount=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
+        `https://topfeed.lemonsqueezy.com/buy/a54ebde8-f028-45c2-a293-26714a5b7019?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
       lemonSqueezyYearlyUrl:
-        `https://topfeed.lemonsqueezy.com/buy/66d7da57-953d-437f-85b9-2e55a6722075?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
+        `https://topfeed.lemonsqueezy.com/buy/2c1bc123-9fe6-47f3-95ea-c9bafe7a25a3?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
     },
     {
       name: "Growth",
@@ -64,9 +64,9 @@ const Page = () => {
         "Priority Support",
       ],
       lemonSqueezyMonthlyUrl:
-        `https://topfeed.lemonsqueezy.com/buy/a54ebde8-f028-45c2-a293-26714a5b7019?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
+        `https://topfeed.lemonsqueezy.com/buy/7dd2f8a0-34a3-4dab-ab3d-ca5de3c8dd20?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
       lemonSqueezyYearlyUrl:
-        `https://topfeed.lemonsqueezy.com/buy/2c1bc123-9fe6-47f3-95ea-c9bafe7a25a3?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
+        `https://topfeed.lemonsqueezy.com/buy/66d7da57-953d-437f-85b9-2e55a6722075?media=0&discount=0&checkout[custom][user_id]=${userId}&checkout[email]=${userEmail}`,
     },
     {
       name: "Scale",
