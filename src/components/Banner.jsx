@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -5,7 +6,7 @@ import React from "react";
 const Banner = () => {
   return (
     <div className="mb-10 flex justify-center md:px-20">
-      <div className="bg-[#292929] rounded-2xl relative w-full h-[20rem] overflow-hidden -z-10  items-center top-0 mx-auto">
+      <div className="bg-[#292929] rounded-2xl relative w-full h-[20rem] overflow-hidden z-10  items-center top-0 mx-auto">
         <Image
           src="/images/bg-pattern.svg"
           height={100}
@@ -32,7 +33,7 @@ const Banner = () => {
           src="/images/banner.png"
           height={500}
           width={600}
-          className=" w-[300px] md:w-[600px] -z-10 absolute right-0 bottom-0"
+          className=" w-[300px] md:w-[600px] z-20 absolute right-0 bottom-0"
         />
         <Image
           src="/images/circle.png"
@@ -53,7 +54,7 @@ const Banner = () => {
             let TopFeed take care of the rest!
           </div>
           <div>
-            <Link href="/pricing">
+            <Link href="/pricing" className=" absolute z-40" >
               <button className="bg-[#146EF5] px-2 p-1 mt-10 rounded-md font-semibold">
                 Start your free trial
               </button>
