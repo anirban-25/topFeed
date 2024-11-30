@@ -286,8 +286,19 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
     }
   };
 
+
+
   const processAndStoreTweets = async (userId, urls, topic) => {
     localStorage.setItem("TwitterLoader", true);
+    const userDocRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+      // Update the "redditLoading" field to true
+      await updateDoc(userDocRef, {
+        twitterLoading: true,
+      });
+    }
     setTwitterLoader(true);
     onFeedCreated();
     handleOpen(null);

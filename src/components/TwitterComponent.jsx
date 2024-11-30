@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { db, auth } from "../firebase";
-import { collection, query, getDocs, orderBy, limit } from "firebase/firestore";
+import { collection, query, getDocs, orderBy, limit, getDoc, doc, onSnapshot } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Script from "next/script";
 import { RefreshCw, ChevronDown } from "lucide-react";
@@ -170,6 +170,59 @@ const TwitterComponent = () => {
       lineSpinner.register();
     });
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    // Create a reference to the user's document
+    const userDocRef = doc(db, "users", user.uid);
+
+    // Set up the real-time listener
+    const unsubscribe = onSnapshot(
+      userDocRef,
+      (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+
+          // Check if redditLoading is false
+          if (data.twitterLoading === false) {
+            setTwitterLoader(false); 
+            fetchUserTweets();
+          }
+        }
+      },
+      (error) => {
+        console.error("Error listening to document:", error);
+      }
+    );
+    // Cleanup: unsubscribe when component unmounts
+    return () => unsubscribe();
+  }, [user]);
+
+  useEffect(() => {
+    // Create an async function inside useEffect
+    const checkLoadingStatus = async () => {
+      if (!user) return;
+
+      try {
+        const userDocRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(userDocRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.twitterLoading === true) {
+            setTwitterLoader(true);
+          } else {
+            await fetchUserTweets();
+            setTwitterLoader(false);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking loading status:", error);
+      }
+    };
+
+    checkLoadingStatus();
+  }, [user]);
 
   useEffect(() => {
     if (tweets.length > 0 && window.twttr) {

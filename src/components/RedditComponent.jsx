@@ -10,6 +10,7 @@ import {
   getDoc,
   getDocs,
   limit,
+  onSnapshot,
   orderBy,
   query,
   setDoc,
@@ -24,12 +25,11 @@ import RedditMasonryLayout from "./MasonryLayoutReddit";
 import { useAppContext } from "@/contexts/AppContext";
 
 const RedditComponent = () => {
-  const { redditDataFetch, setRedditDataFetch, feedSetting, setFeedSetting } =
+  const { redditDataFetch, setRedditDataFetch, feedSetting, setFeedSetting, redditLoading, setRedditLoading } =
     useAppContext();
   const [redditData, setRedditData] = useState([]);
   const [loaderInitial, setLoaderInitial] = useState(true);
   const [subreddits, setSubreddits] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
@@ -85,12 +85,49 @@ const RedditComponent = () => {
     }
   };
 
+  useEffect(() => {
+    if (!user) return;
+    // Create a reference to the user's document
+    const userDocRef = doc(db, "users", user.uid);
+
+    // Set up the real-time listener
+    const unsubscribe = onSnapshot(
+      userDocRef,
+      (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+
+          // Check if redditLoading is false
+          if (data.redditLoading === false) {
+            setRedditLoading(false);
+            fetchLatestRedditData();
+          }
+        }
+      },
+      (error) => {
+        console.error("Error listening to document:", error);
+      }
+    );
+    // Cleanup: unsubscribe when component unmounts
+    return () => unsubscribe();
+  }, [user]);
+
   const handleRefresh = async (cleanedTopics) => {
-    setLoading(true);
+    setRedditLoading(true);
 
     const user = auth.currentUser;
+    const userDocRef = doc(db, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+      // Update the "redditLoading" field to true
+      await updateDoc(userDocRef, {
+        redditLoading: true,
+      });
+    }
+
     if (!user) {
-      setLoading(false);
+      setRedditLoading(false);
       throw new Error("User is not authenticated.");
     }
 
@@ -108,7 +145,7 @@ const RedditComponent = () => {
 
     if (isRefreshCount >= planLimits[userPlan]) {
       alert(`You have reached the refresh limit for your ${userPlan} plan.`);
-      setLoading(false);
+      setRedditLoading(false);
       return;
     }
 
@@ -137,6 +174,7 @@ const RedditComponent = () => {
 
       const response = await axios.post(
         "https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process",
+
         {
           subreddits: docData.subreddits,
           userId,
@@ -151,7 +189,7 @@ const RedditComponent = () => {
       );
 
       if (response.status !== 200) {
-        setLoading(false);
+        setRedditLoading(false);
         throw new Error("Failed to fetch data from server");
       }
 
@@ -171,7 +209,7 @@ const RedditComponent = () => {
       );
 
       if (response.status !== 200) {
-        // setLoading(false);
+        // setRedditLoading(false);
         throw new Error("Failed to fetch data from server");
       }
 
@@ -181,17 +219,9 @@ const RedditComponent = () => {
     }
   };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   const fetchLatestRedditData = async () => {
-    setLoading(true);
-    if (!user || !plan) return;
+    setRedditLoading(true);
+    if (!user) return;
     try {
       console.log("Fetching data for user:", user.uid);
       const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
@@ -226,16 +256,36 @@ const RedditComponent = () => {
       console.error("Error fetching Reddit data:", err);
       setError(err.message);
     } finally {
-      setLoaderInitial(false);
-      setLoading(false);
+      setRedditLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user && plan) {
-      fetchLatestRedditData();
-    }
-  }, [user, plan]);
+    // Create an async function inside useEffect
+    const checkLoadingStatus = async () => {
+      if (!user || !plan) return;
+
+      try {
+        const userDocRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(userDocRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.redditLoading === true) {
+            setLoaderInitial(false);
+            setRedditLoading(true);
+          } else {
+            await fetchLatestRedditData();
+            setLoaderInitial(false);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking loading status:", error);
+      }
+    };
+
+    checkLoadingStatus();
+  }, [user, plan]); // Dependencies stay the same
 
   useEffect(() => {
     import("ldrs").then(({ cardio }) => {
@@ -265,12 +315,11 @@ const RedditComponent = () => {
 
   // useEffect(() => {
   //   if (redditDataFetch) {
-  //     setLoading(redditDataFetch);
+  //     setRedditLoading(redditDataFetch);
   //   } else {
   //     fetchLatestRedditData();
   //   }
   // }, [redditDataFetch]);
-
 
   if (loaderInitial) {
     return (
@@ -284,7 +333,7 @@ const RedditComponent = () => {
       </div>
     );
   }
-  if (loading) {
+  if (redditLoading) {
     return (
       <div className="flex items-center justify-center min-h-[90%]">
         <div className=" text-center">
@@ -358,7 +407,9 @@ const RedditComponent = () => {
           className="bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg ml-4"
           onClick={() => handleRefresh(null)}
         >
-          <div className="hidden text-sm md:block font-kumbh-sans-medium">Update Instant Refresh</div>
+          <div className="hidden text-sm md:block font-kumbh-sans-medium">
+            Update Instant Refresh
+          </div>
           <div className="md:hidden font-kumbh-sans-medium">Refresh</div>
         </button>
 

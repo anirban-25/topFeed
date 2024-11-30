@@ -26,7 +26,7 @@ import { useAppContext } from "@/contexts/AppContext";
 import Link from "next/link";
 
 const DashboardHeader = () => {
-  const { redditDataFetch, setRedditDataFetch, feedSetting, setFeedSetting } =
+  const { redditDataFetch, setRedditDataFetch, feedSetting, setFeedSetting , redditLoading, setRedditLoading} =
     useAppContext();
   const [open, setOpen] = useState(false);
   const [redditDataExists, setRedditDataExists] = useState(false);
@@ -70,12 +70,24 @@ const DashboardHeader = () => {
 
   const handleSubmit = async (cleanedTopics) => {
     try {
+      setRedditLoading(true);
+
       if (!user) throw new Error("User is not authenticated.");
 
       const userId = user.uid;
       const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
       const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
       // const querySnapshot = await getDocs(q);
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+  
+      if (userDoc.exists()) {
+        // Update the "redditLoading" field to true
+        await updateDoc(userDocRef, {
+          redditLoading: true,
+        });
+      }
+  
       const latestAnalysisRef = doc(userRedditsRef, "latest_analysis");
 
       const docSnap = await getDoc(latestAnalysisRef);
