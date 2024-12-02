@@ -99,7 +99,6 @@ const RedditComponent = () => {
 
           // Check if redditLoading is false
           if (data.redditLoading === false) {
-            setRedditLoading(false);
             fetchLatestRedditData();
           }
         }
