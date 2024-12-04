@@ -160,11 +160,13 @@ const RedditComponent = () => {
 
     const docSnap = await getDoc(latestAnalysisRef);
     if (!docSnap.exists()) {
+      console.log("hi")
       // If the document doesn't exist, create it
       await setDoc(latestAnalysisRef, {
         subreddits: cleanedTopics,
       });
     } else {
+      console.log("not hi")
       // If the document exists, update it
     }
     console.log("setting feed setting to true");
