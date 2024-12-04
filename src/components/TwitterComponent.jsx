@@ -309,18 +309,37 @@ const TwitterComponent = () => {
       </div>
     );
   }
+  
+  const handleReset = async () => {
+    try {
+      // Update redditLoading status
+      const userDocRef = doc(db, "users", user.uid);
+      await updateDoc(userDocRef, {
+        twitterLoading: false
+      });
+    } catch (error) {
+      console.error("Error resetting loader:", error);
+    }
+  };
 
   if (loaderTwitter) {
     return (
-      <div className="flex items-center justify-center min-h-[90%]">
-        <div className=" text-center">
-          <div>
-            <l-cardio size="80" stroke="4" speed="2" color="black"></l-cardio>{" "}
-          </div>
-          <div>Give us 2 minutes to prepare your feed</div>
-        </div>
-        {/* Loader content */}
+      <div className="flex flex-col items-center justify-center min-h-[90%]">
+      <div className="mb-8 text-center">
+        <button 
+          onClick={handleReset}
+          className="text-blue-600 hover:text-blue-800 underline text-sm font-kumbh-sans-medium"
+        >
+          Stuck in the loader for more than 3-4 mins? Click here to reset
+        </button>
       </div>
+      <div className="text-center">
+        <div>
+          <l-cardio size="80" stroke="4" speed="2" color="black"></l-cardio>
+        </div>
+        <div>We are generating your feed!</div>
+      </div>
+    </div>
     );
   }
 

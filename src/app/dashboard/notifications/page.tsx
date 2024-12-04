@@ -15,7 +15,6 @@ const page = () => {
             <div className="min h-screen flex-grow bg-[#F7F9FB] md:ml-64 w-[calc(100%-16rem)]">
                 <NotificationHeader />
                 <BotsAndAlerts />
-                    
             </div>
         </div>
     );
