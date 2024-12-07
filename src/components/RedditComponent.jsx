@@ -25,8 +25,14 @@ import RedditMasonryLayout from "./MasonryLayoutReddit";
 import { useAppContext } from "@/contexts/AppContext";
 
 const RedditComponent = () => {
-  const { redditDataFetch, setRedditDataFetch, feedSetting, setFeedSetting, redditLoading, setRedditLoading } =
-    useAppContext();
+  const {
+    redditDataFetch,
+    setRedditDataFetch,
+    feedSetting,
+    setFeedSetting,
+    redditLoading,
+    setRedditLoading,
+  } = useAppContext();
   const [redditData, setRedditData] = useState([]);
   const [loaderInitial, setLoaderInitial] = useState(true);
   const [subreddits, setSubreddits] = useState(null);
@@ -111,8 +117,6 @@ const RedditComponent = () => {
     return () => unsubscribe();
   }, [user]);
 
-
-  
   const handleRefresh = async (cleanedTopics) => {
     setRedditLoading(true);
 
@@ -160,13 +164,13 @@ const RedditComponent = () => {
 
     const docSnap = await getDoc(latestAnalysisRef);
     if (!docSnap.exists()) {
-      console.log("hi")
+      console.log("hi");
       // If the document doesn't exist, create it
       await setDoc(latestAnalysisRef, {
         subreddits: cleanedTopics,
       });
     } else {
-      console.log("not hi")
+      console.log("not hi");
       // If the document exists, update it
     }
     console.log("setting feed setting to true");
@@ -245,10 +249,23 @@ const RedditComponent = () => {
           Growth: 50,
           Scale: 80,
         };
+        let tempPlan = undefined;
+        if (plan) {
+          tempPlan = plan
+          console.log(plan);
+        } else {
+          console.log("no plan");
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
 
-        setRemainingRefreshes(plan ? planLimits[plan] - isRefreshCount : 0);
+            setPlan(userData.plan);
+            tempPlan = userData.plan;
+          }
+        }
+        setRemainingRefreshes(tempPlan ? planLimits[tempPlan] - isRefreshCount : 0);
 
-        console.log("sfnskfns", remainingRefreshes);
+        console.log("sfnskfns", isRefreshCount);
 
         setRedditData(analysisData);
       } else {
@@ -326,26 +343,9 @@ const RedditComponent = () => {
 
   const handleReset = async () => {
     try {
-      // Get the latest reddit document
-      const userRedditsRef = collection(db, "users", user.uid, "user_reddits");
-      const q = query(userRedditsRef, orderBy("timestamp", "desc"), limit(1));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        const docRef = querySnapshot.docs[0].ref;
-        const docData = querySnapshot.docs[0].data();
-        
-        // Update isRefresh count
-        const newRefreshCount = (docData.isRefresh || 0) - 1;
-        await updateDoc(docRef, {
-          isRefresh: Math.max(0, newRefreshCount) // Ensure it doesn't go below 0
-        });
-      }
-
-      // Update redditLoading status
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, {
-        redditLoading: false
+        redditLoading: false,
       });
     } catch (error) {
       console.error("Error resetting loader:", error);
@@ -367,21 +367,21 @@ const RedditComponent = () => {
   if (redditLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[90%]">
-      <div className="mb-8 text-center">
-        <button 
-          onClick={handleReset}
-          className="text-blue-600 hover:text-blue-800 underline text-sm font-kumbh-sans-medium"
-        >
-          Stuck in the loader for more than 3-4 mins? Click here to reset
-        </button>
-      </div>
-      <div className="text-center">
-        <div>
-          <l-cardio size="80" stroke="4" speed="2" color="black"></l-cardio>
+        <div className="mb-8 text-center">
+          <button
+            onClick={handleReset}
+            className="text-blue-600 hover:text-blue-800 underline text-sm font-kumbh-sans-medium"
+          >
+            Stuck in the loader for more than 3-4 mins? Click here to reset
+          </button>
         </div>
-        <div>We are generating your feed!</div>
+        <div className="text-center">
+          <div>
+            <l-cardio size="80" stroke="4" speed="2" color="black"></l-cardio>
+          </div>
+          <div>We are generating your feed!</div>
+        </div>
       </div>
-    </div>
     );
   }
 
@@ -430,42 +430,42 @@ const RedditComponent = () => {
 
   return (
     <div className="font-kumbh-sans-Medium px-3 py-8 md:p-8">
-        <div className=" w-full flex justify-items-center md:justify-end mb-6 items-center gap-x-4 ">
-          <div className="relative flex items-center">
-            <IoSearch className="absolute left-3 text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search in feed..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 border border-[#CECECE] text-sm rounded-lg px-4 py-2"
-            />
-          </div>
-          <button
-            className="bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg ml-4"
-            onClick={() => handleRefresh(null)}
-          >
-            <div className="hidden text-sm md:block font-kumbh-sans-medium">
-              Update Instant Refresh
-            </div>
-            <div className="md:hidden font-kumbh-sans-medium">Refresh</div>
-          </button>
-
-          <div className="relative inline-block">
-            <button
-              className="text-gray-500 hover:text-blue-500"
-              onMouseEnter={() => setHovered(true)}
-              onMouseLeave={() => setHovered(false)}
-            >
-              <AiOutlineInfoCircle size={24} />
-            </button>
-            {hovered && (
-              <div className="absolute bg-gray-800 text-white text-sm rounded p-2 shadow-lg top-0 left-5 z-10 whitespace-nowrap transform -translate-x-full -translate-y-full font-kumbh-sans-medium">
-                {remainingRefreshes} refreshes left
-              </div>
-            )}
-          </div>
+      <div className=" w-full flex justify-items-center md:justify-end mb-6 items-center gap-x-4 ">
+        <div className="relative flex items-center">
+          <IoSearch className="absolute left-3 text-gray-500" />
+          <input
+            type="text"
+            placeholder="Search in feed..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 border border-[#CECECE] text-sm rounded-lg px-4 py-2"
+          />
         </div>
+        <button
+          className="bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg ml-4"
+          onClick={() => handleRefresh(null)}
+        >
+          <div className="hidden text-sm md:block font-kumbh-sans-medium">
+            Update Instant Refresh
+          </div>
+          <div className="md:hidden font-kumbh-sans-medium">Refresh</div>
+        </button>
+
+        <div className="relative inline-block">
+          <button
+            className="text-gray-500 hover:text-blue-500"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+          >
+            <AiOutlineInfoCircle size={24} />
+          </button>
+          {hovered && (
+            <div className="absolute bg-gray-800 text-white text-sm rounded p-2 shadow-lg top-0 left-5 z-10 whitespace-nowrap transform -translate-x-full -translate-y-full font-kumbh-sans-medium">
+              {remainingRefreshes} refreshes left
+            </div>
+          )}
+        </div>
+      </div>
 
       <RedditMasonryLayout filteredRedditData={filteredData} />
     </div>

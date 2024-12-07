@@ -1,7 +1,16 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { db, auth } from "../firebase";
-import { collection, query, getDocs, orderBy, limit, getDoc, doc, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  query,
+  getDocs,
+  orderBy,
+  limit,
+  getDoc,
+  doc,
+  onSnapshot,
+} from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Script from "next/script";
 import { RefreshCw, ChevronDown } from "lucide-react";
@@ -130,8 +139,10 @@ const TwitterComponent = () => {
         user.uid,
         "user_tweets"
       );
-      const userTweetsQuery = query(userTweetsCollectionRef, // Order by timestamp in descending order
-      limit(50));
+      const userTweetsQuery = query(
+        userTweetsCollectionRef, // Order by timestamp in descending order
+        limit(50)
+      );
       const querySnapshot = await getDocs(userTweetsQuery);
 
       const tweetsData = querySnapshot.docs.map((doc) => ({
@@ -142,18 +153,31 @@ const TwitterComponent = () => {
       setTweets(tweetsData);
       setFilteredTweets(tweetsData);
 
-      const uniqueAuthors = [
-        ...new Set(tweetsData.map((tweet) => tweet.authors[0].name)),
-      ];
-      setAuthors(uniqueAuthors);
-
-      const initialSelectedAuthors = Object.fromEntries(
-        uniqueAuthors.map((author) => [author, true])
+      const tweetFeedCollection = collection(
+        db,
+        "users",
+        user.uid,
+        "tweet_feed"
       );
-      setSelectedAuthors((prev) => {
-        prevSelectedAuthorsRef.current = initialSelectedAuthors; // Initialize previous authors on first load
-        return initialSelectedAuthors;
-      });
+      const tweetFeedSnapshot = await getDocs(tweetFeedCollection);
+
+      if (!tweetFeedSnapshot.empty) {
+        const tweetFeedDoc = tweetFeedSnapshot.docs[0];
+        const twitterUrls = tweetFeedDoc.data().twitterUrls || [];
+
+        const handles = twitterUrls.map((url) => {
+          const username = url.split("/").pop();
+          return `@${username}`;
+        });
+
+        const newSelectedAuthors = Object.fromEntries(
+          handles.map((handle) => [handle, true])
+        );
+
+        setAuthors(handles);
+        setSelectedAuthors(newSelectedAuthors);
+        prevSelectedAuthorsRef.current = newSelectedAuthors;
+      }
     } catch (error) {
       console.error("Error fetching user tweets:", error);
     } finally {
@@ -185,7 +209,7 @@ const TwitterComponent = () => {
 
           // Check if redditLoading is false
           if (data.twitterLoading === false) {
-            setTwitterLoader(false); 
+            setTwitterLoader(false);
             fetchUserTweets();
           }
         }
@@ -309,13 +333,13 @@ const TwitterComponent = () => {
       </div>
     );
   }
-  
+
   const handleReset = async () => {
     try {
       // Update redditLoading status
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, {
-        twitterLoading: false
+        twitterLoading: false,
       });
     } catch (error) {
       console.error("Error resetting loader:", error);
@@ -325,21 +349,21 @@ const TwitterComponent = () => {
   if (loaderTwitter) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[90%]">
-      <div className="mb-8 text-center">
-        <button 
-          onClick={handleReset}
-          className="text-blue-600 hover:text-blue-800 underline text-sm font-kumbh-sans-medium"
-        >
-          Stuck in the loader for more than 3-4 mins? Click here to reset
-        </button>
-      </div>
-      <div className="text-center">
-        <div>
-          <l-cardio size="80" stroke="4" speed="2" color="black"></l-cardio>
+        <div className="mb-8 text-center">
+          <button
+            onClick={handleReset}
+            className="text-blue-600 hover:text-blue-800 underline text-sm font-kumbh-sans-medium"
+          >
+            Stuck in the loader for more than 3-4 mins? Click here to reset
+          </button>
         </div>
-        <div>We are generating your feed!</div>
+        <div className="text-center">
+          <div>
+            <l-cardio size="80" stroke="4" speed="2" color="black"></l-cardio>
+          </div>
+          <div>We are generating your feed!</div>
+        </div>
       </div>
-    </div>
     );
   }
 

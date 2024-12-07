@@ -28,6 +28,10 @@ import { useAppContext } from "@/contexts/AppContext";
 const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
   const { twitterLoader, setTwitterLoader } = useAppContext();
   const [newTopic, setNewTopic] = useState("");
+  
+  const [tags, setTags] = useState([]);
+  
+  const [inputValue, setInputValue] = useState("");
   const [twitterUrls, setTwitterUrls] = useState([""]);
   const [errors, setErrors] = useState([]);
   const [saveStatus, setSaveStatus] = useState([]);
@@ -58,12 +62,6 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
   }, [user, twitterLoader]);
 
   useEffect(() => {
-    setSaveStatus(Array(twitterUrls.length).fill(null));
-    setErrors(Array(twitterUrls.length).fill(""));
-    setLoading(Array(twitterUrls.length).fill(false));
-  }, [twitterUrls.length]);
-
-  useEffect(() => {
     const fetchUserPlan = async () => {
       const auth = getAuth();
       const user = auth.currentUser;
@@ -81,6 +79,46 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
     fetchUserPlan();
   }, [user]);
 
+  const getMaxTagsForPlan = (plan) => {
+    switch (plan) {
+      case "free":
+      case "starter":
+        return 3;
+      case "Growth":
+      case "Scale":
+        return 5;
+      default:
+        return 3;
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && inputValue.trim()) {
+      e.preventDefault();
+      const maxTags = getMaxTagsForPlan(userPlan);
+      if (tags.length < maxTags) {
+        if (!tags.includes(inputValue.trim())) {
+          setTags([...tags, inputValue.trim()]);
+          setInputValue("");
+          setIsTopicSaved(false);
+        }
+      }
+    }
+  };
+
+  const removeTag = (tagToRemove) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+    setIsTopicSaved(false);
+  };
+
+  const handleSaveTopic = () => {
+    if (tags.length > 0) {
+      setIsTopicSaved(true);
+      setTopicError("");
+    } else {
+      setTopicError("Please add at least one tag before saving.");
+    }
+  };
   const getMaxAccountsForPlan = (plan) => {
     console.log("plan is " + plan);
     switch (plan) {
@@ -101,10 +139,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
 
   const fetchLastTweetFeed = async (user) => {
     try {
-      if (!user) {
-        console.error("No user is logged in.");
-        return;
-      }
+      if (!user) return;
 
       const tweetFeedRef = collection(db, "users", user.uid, "tweet_feed");
       const q = query(tweetFeedRef, orderBy("createdAt", "desc"), limit(1));
@@ -113,18 +148,16 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
       if (!querySnapshot.empty) {
         const lastFeed = querySnapshot.docs[0].data();
         const lastFeedId = querySnapshot.docs[0].id;
-        setNewTopic(lastFeed.topic || "");
+        setTags(lastFeed.tags || []);
         setTwitterUrls(lastFeed.twitterUrls || [""]);
         setExistingFeedId(lastFeedId);
         setIsTopicSaved(true);
         setSaveStatus(Array(lastFeed.twitterUrls.length).fill("success"));
-        console.log(lastFeed.twitterUrls, lastFeed.topic);
       }
     } catch (error) {
       console.error("Error fetching last tweet feed:", error);
     }
   };
-
   const handleInputChange = (index, value) => {
     const newUrls = [...twitterUrls];
     newUrls[index] = value;
@@ -143,12 +176,6 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
     setErrors(newErrors);
   };
 
-  const handleTopicChange = (value) => {
-    setNewTopic(value);
-    setTopicError("");
-    setIsTopicSaved(false);
-  };
-
   const addInput = () => {
     if (twitterUrls.length < maxAccounts) {
       setTwitterUrls([...twitterUrls, ""]);
@@ -159,11 +186,20 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
   };
 
   const removeInput = (index) => {
-    const newUrls = twitterUrls.filter((_, i) => i !== index);
+    const newUrls = [...twitterUrls];
+    const newSaveStatus = [...saveStatus];
+    const newLoading = [...loading];
+    const newErrors = [...errors];
+
+    newUrls.splice(index, 1);
+    newSaveStatus.splice(index, 1);
+    newLoading.splice(index, 1);
+    newErrors.splice(index, 1);
+
     setTwitterUrls(newUrls);
-    setErrors(errors.filter((_, i) => i !== index));
-    setSaveStatus(saveStatus.filter((_, i) => i !== index));
-    setLoading(loading.filter((_, i) => i !== index));
+    setSaveStatus(newSaveStatus);
+    setLoading(newLoading);
+    setErrors(newErrors);
   };
 
   const handleSave = async (index) => {
@@ -205,22 +241,18 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
       });
     }
   };
-
-  const handleSaveTopic = () => {
-    if (newTopic.trim()) {
-      setIsTopicSaved(true);
-      setTopicError("");
-    } else {
-      setTopicError("Please enter a topic before saving.");
-    }
+  const handleTopicChange = (value) => {
+    setNewTopic(value);
+    setTopicError("");
+    setIsTopicSaved(false);
   };
 
   const handleSubmit = async () => {
     setTopicError("");
     setErrors(Array(twitterUrls.length).fill(""));
 
-    if (!newTopic.trim() || !isTopicSaved) {
-      setTopicError("Please enter and save a topic for the feed.");
+    if (tags.length === 0 || !isTopicSaved) {
+      setTopicError("Please add and save at least one tag.");
       return;
     }
 
@@ -229,64 +261,48 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
       return;
     }
 
-    const emptyUrlIndex = twitterUrls.findIndex((url) => !url.trim());
-    if (emptyUrlIndex !== -1) {
-      const newErrors = [...errors];
-      newErrors[emptyUrlIndex] =
-        "Please enter a Twitter URL or remove this field.";
-      setErrors(newErrors);
-      return;
-    }
-
     const allUrlsSaved = saveStatus.every((status) => status === "success");
     if (!allUrlsSaved) {
       alert("Please save all Twitter accounts before saving the feed.");
       return;
     }
-
     try {
       if (!user) {
         console.error("No user is logged in.");
         return;
       }
+
+      // Convert tags array to comma-separated string for API
+      const topicString = tags.join(", ");
+
       if (existingFeedId) {
         await updateDoc(
           doc(db, "users", user.uid, "tweet_feed", existingFeedId),
           {
-            topic: newTopic,
+            tags: tags,
             twitterUrls: twitterUrls,
             updatedAt: new Date(),
           }
         );
-        console.log("Document updated with ID: ", existingFeedId);
-
-        handleOpen(null);
       } else {
-        const twitterLoader = localStorage.getItem("twitterLoader");
-
-        // If it exists and is not 'true', set it to 'true'
-        if (twitterLoader !== "true") {
-          localStorage.setItem("twitterLoader", "true");
-        }
         const docRef = await addDoc(
           collection(db, "users", user.uid, "tweet_feed"),
           {
-            topic: newTopic,
+            tags: tags,
             twitterUrls: twitterUrls,
             createdAt: new Date(),
           }
         );
-        console.log("New document written with ID: ", docRef.id);
         setExistingFeedId(docRef.id);
-        await processAndStoreTweets(user.uid, twitterUrls, newTopic);
+        await processAndStoreTweets(user.uid, twitterUrls, topicString);
       }
+
+      handleOpen(null);
     } catch (error) {
       console.error("Error:", error);
       alert("An error occurred while saving the feed. Please try again.");
     }
   };
-
-
 
   const processAndStoreTweets = async (userId, urls, topic) => {
     localStorage.setItem("TwitterLoader", true);
@@ -361,22 +377,42 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
           <>
             <div className="mb-4">
               <p className="font-kumbh-sans-medium text-base text-[#0B0B0B]">
-                Enter Topic
+                Enter Topics
               </p>
               <p className="font-kumbh-sans-medium text-sm text-[#828282]">
-                Try to be very specific for the best results
+                Press Enter after each topic (Max {getMaxTagsForPlan(userPlan)}{" "}
+                tags)
               </p>
 
-              <div className="mt-4 relative">
+              <div className="mt-4">
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {tags.map((tag, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center bg-gray-100 rounded-full px-3 py-1"
+                    >
+                      <span className="mr-1">{tag}</span>
+                      <button
+                        onClick={() => removeTag(tag)}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
                 <div className="flex space-x-3">
                   <input
                     type="text"
-                    value={newTopic}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     className={`border w-[50%] rounded-lg p-2 shadow-md font-kumbh-sans-medium text-gray-800 ${
                       topicError ? "border-red-500" : "border-[#CECECE]"
                     }`}
-                    onChange={(e) => handleTopicChange(e.target.value)}
-                    placeholder="Type here"
+                    placeholder="Type and press Enter"
+                    disabled={tags.length >= getMaxTagsForPlan(userPlan)}
                   />
 
                   <Button
@@ -388,7 +424,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
                     }`}
                     onClick={handleSaveTopic}
                   >
-                    {isTopicSaved ? "Topic Saved" : "Save Topic"}
+                    {isTopicSaved ? "Topics Saved" : "Save Topics"}
                   </Button>
                 </div>
                 {topicError && (
@@ -451,8 +487,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
                         ) : (
                           "Save"
                         )}
-                        </button>
-                        
+                      </button>
 
                       {twitterUrls.length > 1 && (
                         <button
