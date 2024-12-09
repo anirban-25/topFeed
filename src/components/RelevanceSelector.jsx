@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ChevronDown, Check } from "lucide-react";
 
-const RelevanceSelector = ({ tweets, onRelevanceChange }) => {
+const RelevanceSelector = ({ tweets, onRelevanceChange, setLoading }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedRelevance, setSelectedRelevance] = useState([
     { label: "High Relevancy", value: "high", selected: true },
     { label: "Medium Relevancy", value: "medium", selected: true },
     { label: "Low Relevancy", value: "low", selected: true },
   ]);
+  const [tempSelectedRelevance, setTempSelectedRelevance] = useState(selectedRelevance);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -27,23 +28,28 @@ const RelevanceSelector = ({ tweets, onRelevanceChange }) => {
   const toggleDropdown = () => setIsOpen(!isOpen);
 
   const toggleRelevance = (index) => {
-    const updatedRelevance = selectedRelevance.map((item, i) =>
-      i === index ? { ...item, selected: !item.selected } : item
+    setTempSelectedRelevance(prev => 
+      prev.map((item, i) => i === index ? { ...item, selected: !item.selected } : item)
     );
-    setSelectedRelevance(updatedRelevance);
+  };
+
+  const handleSubmit = () => {
+    setLoading(true);
+    setSelectedRelevance(tempSelectedRelevance);
     onRelevanceChange(
-      updatedRelevance.filter((item) => item.selected).map((item) => item.value)
+      tempSelectedRelevance
+        .filter((item) => item.selected)
+        .map((item) => item.value)
     );
+    setIsOpen(false);
+    setTimeout(() => setLoading(false), 500);
   };
 
   const getRelevanceCount = (relevance) => {
-    return tweets.filter((tweet) => tweet.relevancy.toLowerCase() === relevance)
-      .length;
+    return tweets.filter((tweet) => tweet.relevancy.toLowerCase() === relevance).length;
   };
 
-  const selectedCount = selectedRelevance.filter(
-    (item) => item.selected
-  ).length;
+  const selectedCount = selectedRelevance.filter((item) => item.selected).length;
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -77,7 +83,7 @@ const RelevanceSelector = ({ tweets, onRelevanceChange }) => {
             aria-orientation="vertical"
             aria-labelledby="options-menu"
           >
-            {selectedRelevance.map((item, index) => (
+            {tempSelectedRelevance.map((item, index) => (
               <div
                 key={item.label}
                 className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
@@ -98,6 +104,14 @@ const RelevanceSelector = ({ tweets, onRelevanceChange }) => {
                 </span>
               </div>
             ))}
+            <div className="px-4 py-2 border-t">
+              <button
+                onClick={handleSubmit}
+                className="w-full py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              >
+                Apply Filters
+              </button>
+            </div>
           </div>
         </div>
       )}

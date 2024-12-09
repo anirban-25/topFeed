@@ -1,71 +1,99 @@
-import React, { useState } from "react";
-import { Search } from "lucide-react";
+import React, { useEffect, useState } from "react";
+
 const AuthorSelectionDropdown = ({
   authors,
   selectedAuthors,
   onToggleAuthor,
   onClose,
-  onClearFilters,
+  onSelectAll,
+  onClearAll,
+  setLoading,
+  onSubmit
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  console.log(typeof(authors));
-  console.log(authors)
-  const filteredAuthors = authors.filter((author) =>
-    author.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const [tempSelectedAuthors, setTempSelectedAuthors] = useState(selectedAuthors);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".author-dropdown")) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose]);
+
+  const handleToggle = (author) => {
+    setTempSelectedAuthors(prev => ({
+      ...prev,
+      [author]: !prev[author]
+    }));
+  };
+
+  const handleSubmit = () => {
+    setLoading(true);
+    onToggleAuthor(tempSelectedAuthors);
+    onClose();
+  };
+
+  const handleSelectAll = () => {
+    const allSelected = Object.fromEntries(
+      authors.map(author => [author, true])
+    );
+    setTempSelectedAuthors(allSelected);
+  };
+
+  const handleClearAll = () => {
+    const allCleared = Object.fromEntries(
+      authors.map(author => [author, false])
+    );
+    setTempSelectedAuthors(allCleared);
+  };
 
   return (
-    <div className="absolute left-40 top-10 z-10 mt-2 w-72 bg-white rounded-md border-gray-300 border shadow-lg">
-      <div className="p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">Twitter Accounts</h2>
+    <div className="author-dropdown mt-1 top-full z-50 w-64 bg-white border border-gray-200 rounded-lg shadow-lg">
+      <div className="p-3 border-b">
+        <div className="flex justify-between mb-2">
           <button
-            className="text-sm text-blue-500 hover:underline"
-            onClick={onClearFilters}
+            onClick={handleClearAll}
+            className="text-sm text-red-600 hover:text-red-800"
           >
             Clear All
           </button>
-        </div>
-        <div className="relative mb-4">
-          <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-            size={18}
-          />
-          <input
-            type="text"
-            placeholder="Search here"
-            className="w-full pl-10 pr-4 py-2 border rounded-md"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="max-h-60 overflow-y-auto">
-          {filteredAuthors.map((author) => (
-            <div key={author} className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                id={author}
-                checked={selectedAuthors[author]}
-                onChange={() => onToggleAuthor(author)}
-                className="mr-2"
-              />
-              <label htmlFor={author} className="flex-grow">
-                {author}
-              </label>
-            </div>
-          ))}
+          <button
+            onClick={handleSelectAll}
+            className="text-sm text-blue-600 hover:text-blue-800"
+          >
+            Select All
+          </button>
         </div>
       </div>
-      <div className="p-4">
+      <div className="max-h-60 overflow-y-auto">
+        {authors.map((author) => (
+          <label
+            key={author}
+            className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
+          >
+            <input
+              type="checkbox"
+              checked={tempSelectedAuthors[author] || false}
+              onChange={() => handleToggle(author)}
+              className="mr-3"
+            />
+            <span className="text-sm">{author}</span>
+          </label>
+        ))}
+      </div>
+      <div className="p-3 border-t">
         <button
-          className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors"
-          onClick={onClose}
+          onClick={handleSubmit}
+          className="w-full py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
         >
-          Close
+          Apply Filters
         </button>
       </div>
     </div>
   );
 };
 
-export default AuthorSelectionDropdown;
+export default AuthorSelectionDropdown
