@@ -20,38 +20,32 @@ const HandleEmailLink = () => {
           try {
             const result = await signInWithEmailLink(auth, email, window.location.href);
             window.localStorage.removeItem("emailForSignIn");
-            
-            // Update user's plan in Firestore
-            const updateUserPlan = async (userId) => {
-              try {
-                // Get the user document reference
-                const userDocRef = doc(db, "users", userId);
-            
-                // Get the current user data
-                const userDoc = await getDoc(userDocRef);
-            
-                if (userDoc.exists()) {
-                  const userData = userDoc.data();
-            
-                  if (userData.plan) {
-                    console.log("User already has a plan. No update needed.");
-                    return;
+            const user = auth.currentUser;if (user) {
+              // Update user's plan in Firestore
+              const updateUserPlan = async (userId) => {
+                try {
+                  const userDocRef = doc(db, "users", userId);
+                  const userDoc = await getDoc(userDocRef);
+
+                  if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    if (!userData.plan) {
+                      await setDoc(userDocRef, { plan: "free" }, { merge: true });
+                      console.log("User plan updated successfully to free");
+                    } else {
+                      console.log("User already has a plan. No update needed.");
+                    }
+                  } else {
+                    await setDoc(userDocRef, { plan: "free" });
+                    console.log("New user document created with free plan");
                   }
-                  await setDoc(
-                    userDocRef,
-                    {
-                      plan: "free",
-                    },
-                    { merge: true }
-                  );
-                  console.log("User plan updated successfully to free");
-                } else {
-                  console.log("User document does not exist");
+                } catch (err) {
+                  console.error("Error updating user plan:", err);
                 }
-              } catch (error) {
-                console.error("Error updating user plan:", error);
-              }
-            };
+              };
+
+              await updateUserPlan(user.uid);
+            }
 
             router.push("/dashboard/reddit");
           } catch (error) {
