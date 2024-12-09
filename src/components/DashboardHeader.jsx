@@ -102,7 +102,6 @@ const DashboardHeader = () => {
           subreddits: cleanedTopics,
         });
       }
-      setFeedSetting(true);
       // Send the POST request to the API
       const response = await fetch(
         "https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process",
@@ -117,7 +116,8 @@ const DashboardHeader = () => {
           }),
         }
       );
-
+      
+      setFeedSetting(true);
       if (response.status !== 200)
         throw new Error("Failed to fetch data from server");
 
