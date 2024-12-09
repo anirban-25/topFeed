@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { getAuth, isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const HandleEmailLink = () => {
   const router = useRouter();
@@ -11,7 +11,6 @@ const HandleEmailLink = () => {
 
   useEffect(() => {
     const handleEmailLink = async () => {
-      const auth = getAuth();
       if (isSignInWithEmailLink(auth, window.location.href)) {
         let email = window.localStorage.getItem("emailForSignIn");
         if (!email) {
@@ -21,55 +20,49 @@ const HandleEmailLink = () => {
           try {
             const result = await signInWithEmailLink(auth, email, window.location.href);
             window.localStorage.removeItem("emailForSignIn");
-
-            if (result.user) {
+            const user = auth.currentUser;if (user) {
               // Update user's plan in Firestore
-              const userDocRef = doc(db, "users", result.user.uid);
-              const userDoc = await getDoc(userDocRef);
+              const updateUserPlan = async (userId) => {
+                try {
+                  const userDocRef = doc(db, "users", userId);
+                  const userDoc = await getDoc(userDocRef);
 
-              if (userDoc.exists()) {
-                const userData = userDoc.data();
-                if (!userData.plan) {
-                  await setDoc(
-                    userDocRef,
-                    { plan: "free" },
-                    { merge: true }
-                  );
-                  console.log("User plan updated successfully to free.");
-                } else {
-                  console.log("User already has a plan. No update needed.");
+                  if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    if (!userData.plan) {
+                      await setDoc(userDocRef, { plan: "free" }, { merge: true });
+                      console.log("User plan updated successfully to free");
+                    } else {
+                      console.log("User already has a plan. No update needed.");
+                    }
+                  } else {
+                    await setDoc(userDocRef, { plan: "free" });
+                    console.log("New user document created with free plan");
+                  }
+                } catch (err) {
+                  console.error("Error updating user plan:", err);
                 }
-              } else {
-                // Create a new user document if it doesn't exist
-                await setDoc(userDocRef, { plan: "free" });
-                console.log("New user document created with free plan.");
-              }
+              };
+
+              await updateUserPlan(user.uid);
             }
 
-            // Redirect to dashboard
             router.push("/dashboard/reddit");
           } catch (error) {
             console.error("Error signing in with email link:", error);
-            setError("Failed to sign in. Please try again.");
+            setError("Failed to sign in. Please try again or contact support.");
           }
         }
       } else {
-        setError("Invalid or expired sign-in link. Please request a new one.");
+        setError("Invalid sign-in link. Please request a new one.");
       }
     };
 
     handleEmailLink();
   }, [router]);
 
-  return (
-    <div className="text-center mt-4">
-      {error ? (
-        <p className="text-red-500">{error}</p>
-      ) : (
-        <p>Processing your sign-in...</p>
-      )}
-    </div>
-  );
+
+  return <div className="text-center mt-4">Processing your sign-in...</div>;
 };
 
 export default HandleEmailLink;
