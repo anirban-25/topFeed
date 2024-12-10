@@ -251,7 +251,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
     setTopicError("");
     setErrors(Array(twitterUrls.length).fill(""));
 
-    if (tags.length === 0 || !isTopicSaved) {
+    if (tags.length === 0) {
       setTopicError("Please add and save at least one tag.");
       return;
     }
@@ -415,17 +415,6 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
                     disabled={tags.length >= getMaxTagsForPlan(userPlan)}
                   />
 
-                  <Button
-                    color="white"
-                    className={`border ${
-                      isTopicSaved
-                        ? "border-green-500 text-green-500"
-                        : "border-[#CECECE]"
-                    }`}
-                    onClick={handleSaveTopic}
-                  >
-                    {isTopicSaved ? "Topics Saved" : "Save Topics"}
-                  </Button>
                 </div>
                 {topicError && (
                   <p className="mt-2 text-sm text-red-600">{topicError}</p>
@@ -533,7 +522,7 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
         </button>
         <button
           className={`cursor-pointer border px-4 py-1 rounded-md font-kumbh-sans-semibold ${
-            isTopicSaved &&
+             
             twitterUrls.every((url) => url.trim() !== "") &&
             saveStatus.every((status) => status === "success")
               ? "bg-[#146EF5] text-white border-[#146EF5] hover:bg-[#0E5AD7]"
@@ -541,7 +530,6 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
           }`}
           onClick={handleSubmit}
           disabled={
-            !isTopicSaved ||
             twitterUrls.some((url) => url.trim() === "") ||
             !saveStatus.every((status) => status === "success")
           }
