@@ -87,6 +87,8 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
       case "Growth":
       case "Scale":
         return 5;
+      case "Test":
+        return 99;
       default:
         return 3;
     }
