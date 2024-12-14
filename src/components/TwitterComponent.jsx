@@ -31,6 +31,9 @@ import MasonryLayout from "./MasonryLayout";
 const TwitterComponent = () => {
   const router = useRouter();
   const { twitterLoader, setTwitterLoader } = useAppContext();
+  const [displayedTweetsCount, setDisplayedTweetsCount] = useState(50);
+  const [hasMoreTweets, setHasMoreTweets] = useState(true);
+  const [allTweets, setAllTweets] = useState([]);
   const [loaderTwitter, setLoaderTwitter] = useState(false);
   const [user] = useAuthState(auth);
   const [tweets, setTweets] = useState([]);
@@ -110,7 +113,7 @@ const TwitterComponent = () => {
         user.uid,
         "user_tweets"
       );
-      const userTweetsQuery = query(userTweetsCollectionRef, limit(50));
+      const userTweetsQuery = query(userTweetsCollectionRef);
       const querySnapshot = await getDocs(userTweetsQuery);
 
       const tweetsData = querySnapshot.docs.map((doc) => ({
@@ -118,14 +121,23 @@ const TwitterComponent = () => {
         ...doc.data(),
       }));
 
-      setTweets(tweetsData);
+      setAllTweets(tweetsData);
+      setTweets(tweetsData.slice(0, displayedTweetsCount));
+      setHasMoreTweets(tweetsData.length > displayedTweetsCount);
     } catch (error) {
       console.error("Error fetching user tweets:", error);
     } finally {
       setLoading(false);
       setLoaderTwitter(twitterLoader);
     }
-  }, [user, twitterLoader]);
+  }, [user, twitterLoader, displayedTweetsCount]);
+
+  const handleShowMore = useCallback(() => {
+    const nextCount = displayedTweetsCount + 50;
+    setDisplayedTweetsCount(nextCount);
+    setTweets(allTweets.slice(0, nextCount));
+    setHasMoreTweets(allTweets.length > nextCount);
+  }, [displayedTweetsCount, allTweets]);
 
   useEffect(() => {
     initializeAuthors();
@@ -394,6 +406,16 @@ const toggleAuthor = useCallback((newSelectedAuthors) => {
               handleImageLoad={handleImageLoad}
               handleImageError={handleImageError}
             />
+            {hasMoreTweets && (
+              <div className="flex justify-center my-8">
+                <button
+                  onClick={handleShowMore}
+                  className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none"
+                >
+                  Show More
+                </button>
+              </div>
+            )}
           </div>
         )}
         <TwitterFeedDialog
