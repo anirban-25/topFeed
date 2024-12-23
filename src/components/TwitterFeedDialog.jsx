@@ -113,14 +113,14 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
     setIsTopicSaved(false);
   };
 
-  const handleSaveTopic = () => {
-    if (tags.length > 0) {
-      setIsTopicSaved(true);
-      setTopicError("");
-    } else {
-      setTopicError("Please add at least one tag before saving.");
-    }
-  };
+  // const handleSaveTopic = () => {
+  //   if (tags.length > 0) {
+  //     setIsTopicSaved(true);
+  //     setTopicError("");
+  //   } else {
+  //     setTopicError("Please add at least one tag before saving.");
+  //   }
+  // };
   const getMaxAccountsForPlan = (plan) => {
     console.log("plan is " + plan);
     switch (plan) {
