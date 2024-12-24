@@ -16,7 +16,6 @@ const ServiceBlock = ({
   twitterConnected,
   redditConnected,
   handleToggleTwitter,
-  handleToggleReddit,
 }) => {
   const [showTelegramLogin, setShowTelegramLogin] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
