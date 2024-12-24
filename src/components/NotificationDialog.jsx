@@ -1,4 +1,4 @@
-import { useState, useEffect, createElement } from "react";
+import { useState, useEffect, createElement, useRef } from "react";
 import {
   Dialog,
   DialogHeader,
@@ -32,7 +32,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
   const [loadingGroups, setLoadingGroups] = useState(false);
   const [user, setUser] = useState(null);
   const auth = getAuth(app);
-
+  const hasFetched = useRef(false);
 
 
   
@@ -50,24 +50,38 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         console.error("error from telegram API:", telegramData);
         return [];
       }
+
+      const updates = telegramData.result.filter(
+        (update) =>
+          update.my_chat_member &&
+          update.my_chat_member.from &&
+          update.my_chat_member.from.id === telegramUserId
+      );
   
-      const filteredGroups = telegramData.result
-        .filter(
-          (update) =>
-            update.my_chat_member && 
-            update.my_chat_member.from &&
-            update.my_chat_member.from.id === telegramUserId 
-        )
-        .map((update) => ({
-          id: update.my_chat_member.chat.id,
-          name: update.my_chat_member.chat.title,
-        }));
+      const groupStatusMap = updates.reduce((result, update) => {
+        const chatId = update.my_chat_member.chat.id;
+        const chatTitle = update.my_chat_member.chat.title;
+        const chatStatus = update.my_chat_member.new_chat_member.status;
   
-      if (filteredGroups.length === 0) {
-        console.warn("No groups found for the Telegram user ID:", telegramUserId);
-      }
+        // Store the latest status for each group
+        if (!result[chatId]) {
+          result[chatId] = { id: chatId, name: chatTitle, status: chatStatus };
+        } else {
+          // Update the status if it's "left"
+          if (chatStatus === "left") {
+            result[chatId].status = "left";
+          }
+        }
   
-      console.log("Fetched Groups:", filteredGroups);
+        return result;
+      }, {});
+  
+      // Exclude groups with status "left"
+      const filteredGroups = Object.values(groupStatusMap).filter(
+        (group) => group.status === "member"
+      );
+  
+      console.log("Filtered Groups:", filteredGroups);
       return filteredGroups;
     } catch (error) {
       console.error("Error fetching Telegram groups:", error);
@@ -76,10 +90,11 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
   };
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
+      if (user && !hasFetched.current) {
+        hasFetched.current = true;
         setUser(user);
+
         try {
-         
           const notificationsDoc = doc(db, "notifications", user.uid);
           const docSnap = await getDoc(notificationsDoc);
 
@@ -89,10 +104,10 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
 
             if (telegramUserId) {
               console.log("Telegram User ID:", telegramUserId);
-              setLoadingGroups(true); 
+              setLoadingGroups(true);
               const fetchedGroups = await fetchGroups(telegramUserId);
-              setGroups(fetchedGroups); 
-              setLoadingGroups(false); 
+              setGroups(fetchedGroups);
+              setLoadingGroups(false);
             } else {
               console.warn("No Telegram User ID found for the user.");
             }
@@ -102,42 +117,11 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         } catch (error) {
           console.error("Error fetching Telegram User ID:", error);
         }
-      } else {
-        setUser(null); 
       }
     });
 
     return () => unsubscribe();
   }, [auth]);
-
-  
-
-  useEffect(() => {
-    const loadGroups = async () => {
-      if (user) {
-        try {
-          const fetchedGroups = await fetchGroups(user);
-          if (fetchedGroups.length > 0) {
-            setGroups(fetchedGroups);
-            console.log("Groups State After Fetch:", fetchedGroups);
-            
-          }
-        } catch (error) {
-          console.error("Error in loadGroups:", error);
-        }
-      }
-    };
-  
-    loadGroups();
-  }, [user]);
-
-  useEffect(() => {
-    const loadGroups = async () => {
-      const fetchedGroups = await fetchGroups();
-      setGroups(fetchedGroups || []);
-    };
-    loadGroups();
-  }, []);
 
   const handleNotificationLevelChange = (level) => {
     setSelectedNotificationLevels((prev) =>
@@ -150,7 +134,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       const newPrefs = prev.includes(pref)
         ? prev.filter((p) => p !== pref)
         : [...prev, pref];
-        
+
       // If group was just added, show telegram config
       if (pref === "group") {
         setShowGroupDropdown(!prev.includes("group")); 
