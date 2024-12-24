@@ -3,7 +3,7 @@ import { doc, setDoc } from 'firebase/firestore';
 
 type NotificationData = {
   istelegram: boolean;
-  telegramUserId: Array<number>;
+  telegramUserId: string;
   telegramAccount: string;
   isslack: boolean; 
   slackAccount: string; 

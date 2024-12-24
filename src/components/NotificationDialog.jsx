@@ -16,6 +16,11 @@ import {
 } from "@material-tailwind/react";
 import { IoIosArrowDropdown,IoIosCloseCircle } from "react-icons/io";
 import { FaXTwitter } from "react-icons/fa6";
+import { db, app} from '@/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { useAuthState } from "react-firebase-hooks/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+
 
 const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
   const [selectedNotificationLevels, setSelectedNotificationLevels] = useState([]);
@@ -24,14 +29,107 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
   const [showTelegramConfig, setShowTelegramConfig] = useState(false);
   const [currentView, setCurrentView] = useState("main"); // "main" or "telegram"
   const [groups, setGroups] = useState([]);
+  const [loadingGroups, setLoadingGroups] = useState(false);
+  const [user, setUser] = useState(null);
+  const auth = getAuth(app);
 
-  const fetchGroups = async () => {
-    return [
-      { id: 1, name: "ghosh" },
-      { id: 2, name: "test" },
-      { id: 3, name: "ghosh2" },
-    ];
+
+
+  
+  const fetchGroups = async (telegramUserId) => {
+    try {
+      console.log("fetching telegram updates...");
+      const response = await fetch(
+        `https://api.telegram.org/bot${process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN}/getUpdates`
+      );
+  
+      const telegramData = await response.json();
+      console.log("telegram API response:", telegramData);
+  
+      if (!telegramData.ok) {
+        console.error("error from telegram API:", telegramData);
+        return [];
+      }
+  
+      const filteredGroups = telegramData.result
+        .filter(
+          (update) =>
+            update.my_chat_member && 
+            update.my_chat_member.from &&
+            update.my_chat_member.from.id === telegramUserId 
+        )
+        .map((update) => ({
+          id: update.my_chat_member.chat.id,
+          name: update.my_chat_member.chat.title,
+        }));
+  
+      if (filteredGroups.length === 0) {
+        console.warn("No groups found for the Telegram user ID:", telegramUserId);
+      }
+  
+      console.log("Fetched Groups:", filteredGroups);
+      return filteredGroups;
+    } catch (error) {
+      console.error("Error fetching Telegram groups:", error);
+      return [];
+    }
   };
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUser(user);
+        try {
+         
+          const notificationsDoc = doc(db, "notifications", user.uid);
+          const docSnap = await getDoc(notificationsDoc);
+
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            const telegramUserId = data?.telegramUserId;
+
+            if (telegramUserId) {
+              console.log("Telegram User ID:", telegramUserId);
+              setLoadingGroups(true); 
+              const fetchedGroups = await fetchGroups(telegramUserId);
+              setGroups(fetchedGroups); 
+              setLoadingGroups(false); 
+            } else {
+              console.warn("No Telegram User ID found for the user.");
+            }
+          } else {
+            console.warn("No notifications document found in Firestore.");
+          }
+        } catch (error) {
+          console.error("Error fetching Telegram User ID:", error);
+        }
+      } else {
+        setUser(null); 
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth]);
+
+  
+
+  useEffect(() => {
+    const loadGroups = async () => {
+      if (user) {
+        try {
+          const fetchedGroups = await fetchGroups(user);
+          if (fetchedGroups.length > 0) {
+            setGroups(fetchedGroups);
+            console.log("Groups State After Fetch:", fetchedGroups);
+            
+          }
+        } catch (error) {
+          console.error("Error in loadGroups:", error);
+        }
+      }
+    };
+  
+    loadGroups();
+  }, [user]);
 
   useEffect(() => {
     const loadGroups = async () => {
@@ -52,7 +150,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       const newPrefs = prev.includes(pref)
         ? prev.filter((p) => p !== pref)
         : [...prev, pref];
-
+        
       // If group was just added, show telegram config
       if (pref === "group") {
         setShowGroupDropdown(!prev.includes("group")); 
@@ -60,6 +158,9 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       return newPrefs;
     });
   };
+  useEffect(() => {
+    console.log("Groups State:", groups);
+  }, [groups]);
 
   const mainView = (
     <>
@@ -105,7 +206,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                   <h3 className="text-lg font-semibold mb-4 text-gray-900">
                     Select Notification Levels:
                   </h3>
-                  <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:gap-6 space-y-4 sm:space-y-0">
                     {["high", "medium", "low"].map((level) => (
                       <div key={level} className="flex items-center gap-3">
                         <input
@@ -166,6 +267,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                       Add Bot to Group
                     </Button>
                   ) : (
+                    
                    
                     <div className="bg-gray-100 p-4 rounded-lg shadow-md w-full">
                       <label

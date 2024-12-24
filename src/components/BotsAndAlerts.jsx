@@ -11,7 +11,7 @@ const BotsAndAlerts = () => {
   const [user] = useAuthState(auth);
   const [telegramConnected, setTelegramConnected] = useState(false);
   const [telegramAccount, setTelegramAccount] = useState("");
-  const [telegramid, setTelegramid] = useState([]);
+  const [telegramid, setTelegramid] = useState("");
   const [slackConnected, setSlackConnected] = useState(false);
   const [slackAccount, setSlackAccount] = useState("");
   const [slackUserId, setSlackUserId] = useState("");
@@ -24,7 +24,8 @@ const BotsAndAlerts = () => {
   const [notificationData, setNotificationData] = useState({
     istelegram: false,
     telegramAccount: "",
-    telegramUserId: [],
+    telegramUserId: "",
+    
     isActive: true, 
     isActiveSlack: true,
     twitter: false,
@@ -76,7 +77,7 @@ const BotsAndAlerts = () => {
       const updatedNotificationData = {
         istelegram: true,
         telegramAccount: authUser.username,
-        telegramUserId: [authUser.id],
+        telegramUserId: authUser.id,
         isActive: true, 
         twitter: notificationData.twitter,
         reddit: notificationData.reddit,
@@ -102,7 +103,7 @@ const BotsAndAlerts = () => {
       ...notificationData,
       istelegram: false,
       telegramAccount: "",
-      telegramUserId: [],
+      telegramUserId: "",
       isActive: false,
     };
 
