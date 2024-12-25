@@ -4,6 +4,7 @@ import { doc, setDoc } from 'firebase/firestore';
 type NotificationData = {
   istelegram: boolean;
   telegramUserId: number;
+  sendTo: Array<number>;
   telegramAccount: string;
   isslack: boolean; 
   slackAccount: string; 

@@ -25,7 +25,7 @@ const BotsAndAlerts = () => {
     istelegram: false,
     telegramAccount: "",
     telegramUserId: "",
-    
+    sendTo: [],
     isActive: true, 
     isActiveSlack: true,
     twitter: false,
@@ -55,6 +55,7 @@ const BotsAndAlerts = () => {
           setTelegramConnected(data.istelegram);
           setTelegramAccount(data.telegramAccount ? `@${data.telegramAccount}` : "");
           setTelegramid(data.telegramUserId);
+        
           setSlackConnected(data.isslack);
           setSlackAccount(data.slackAccount ? `@${data.slackAccount}` : "");
           setSlackUserId(data.slackUserId);
@@ -78,6 +79,7 @@ const BotsAndAlerts = () => {
         istelegram: true,
         telegramAccount: authUser.username,
         telegramUserId: authUser.id,
+        sendTo: [authUser.id],
         isActive: true, 
         twitter: notificationData.twitter,
         reddit: notificationData.reddit,
@@ -104,6 +106,7 @@ const BotsAndAlerts = () => {
       istelegram: false,
       telegramAccount: "",
       telegramUserId: "",
+      sendTo: [],
       isActive: false,
     };
 
