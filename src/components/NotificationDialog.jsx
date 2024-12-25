@@ -14,28 +14,59 @@ import {
   Tab,
   TabPanel,
 } from "@material-tailwind/react";
-import { IoIosArrowDropdown,IoIosCloseCircle } from "react-icons/io";
+import { IoIosArrowDropdown, IoIosCloseCircle } from "react-icons/io";
 import { FaXTwitter } from "react-icons/fa6";
-import { db, app} from '@/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { db, app } from '@/firebase';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useAuthState } from "react-firebase-hooks/auth";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-
 
 const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
   const [selectedNotificationLevels, setSelectedNotificationLevels] = useState([]);
   const [alertPreference, setAlertPreference] = useState([]);
   const [showGroupDropdown, setShowGroupDropdown] = useState(false);
-  const [showTelegramConfig, setShowTelegramConfig] = useState(false);
-  const [currentView, setCurrentView] = useState("main"); // "main" or "telegram"
+  const [currentView, setCurrentView] = useState("main");
   const [groups, setGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(false);
   const [user, setUser] = useState(null);
+  const [selectedGroupId, setSelectedGroupId] = useState("");
+  const [existingSendTo, setExistingSendTo] = useState([]);
+  const [existingGroupName, setExistingGroupName] = useState("");
   const auth = getAuth(app);
   const hasFetched = useRef(false);
 
+  const handleSubmit = async () => {
+    if (user) {
+      try {
+        const notificationsRef = doc(db, "notifications", user.uid);
+        
+        // Find the selected group details
+        const selectedGroup = groups.find(group => group.id.toString() === selectedGroupId.toString());
+        
+        // Only add the group ID if it's not already in sendTo
+        const updatedSendTo = existingSendTo.includes(selectedGroupId) 
+          ? existingSendTo 
+          : [...existingSendTo, selectedGroupId];
 
-  
+        const updateData = {
+          notificationLevels: selectedNotificationLevels,
+          sendTo: updatedSendTo,
+        };
+
+        // Only add group_name if a group is selected
+        if (selectedGroup?.name) {
+          updateData.group_name = selectedGroup.name;
+        }
+
+        await updateDoc(notificationsRef, updateData);
+        console.log("Notification settings updated successfully");
+      } catch (error) {
+        console.error("Error updating notification settings:", error);
+      }
+    }
+    handleOpen(null);
+  };
+
   const fetchGroups = async (telegramUserId) => {
     try {
       console.log("fetching telegram updates...");
@@ -63,11 +94,9 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         const chatTitle = update.my_chat_member.chat.title;
         const chatStatus = update.my_chat_member.new_chat_member.status;
   
-        // Store the latest status for each group
         if (!result[chatId]) {
           result[chatId] = { id: chatId, name: chatTitle, status: chatStatus };
         } else {
-          // Update the status if it's "left"
           if (chatStatus === "left") {
             result[chatId].status = "left";
           }
@@ -76,7 +105,6 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         return result;
       }, {});
   
-      // Exclude groups with status "left"
       const filteredGroups = Object.values(groupStatusMap).filter(
         (group) => group.status === "member"
       );
@@ -88,6 +116,23 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       return [];
     }
   };
+
+  const fetchNotificationSettings = async (userId) => {
+    try {
+      const notificationsDoc = doc(db, "notifications", userId);
+      const docSnap = await getDoc(notificationsDoc);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setSelectedNotificationLevels(data.notificationLevels || []);
+        setExistingSendTo(data.sendTo || []);
+        setAlertPreference(data.alertPreference || []);
+      }
+    } catch (error) {
+      console.error("Error fetching notification settings:", error);
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user && !hasFetched.current) {
@@ -101,6 +146,14 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
             const telegramUserId = data?.telegramUserId;
+            setExistingSendTo(data?.sendTo || []);
+            setExistingGroupName(data?.group_name || "");
+            
+            // If we have a group_name, pre-select the group in alert preferences
+            if (data?.group_name) {
+              setAlertPreference(prev => prev.includes("group") ? prev : [...prev, "group"]);
+              setShowGroupDropdown(true);
+            }
 
             if (telegramUserId) {
               console.log("Telegram User ID:", telegramUserId);
@@ -123,6 +176,12 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
     return () => unsubscribe();
   }, [auth]);
 
+  useEffect(() => {
+    if (user?.uid) {
+      fetchNotificationSettings(user.uid);
+    }
+  }, [user]);
+
   const handleNotificationLevelChange = (level) => {
     setSelectedNotificationLevels((prev) =>
       prev.includes(level) ? prev.filter((l) => l !== level) : [...prev, level]
@@ -135,16 +194,12 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         ? prev.filter((p) => p !== pref)
         : [...prev, pref];
 
-      // If group was just added, show telegram config
       if (pref === "group") {
         setShowGroupDropdown(!prev.includes("group")); 
       }
       return newPrefs;
     });
   };
-  useEffect(() => {
-    console.log("Groups State:", groups);
-  }, [groups]);
 
   const mainView = (
     <>
@@ -213,80 +268,91 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                     Where do you want to get alerts?
                   </h3>
                   <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="group"
-                      checked={alertPreference.includes("group")}
-                      onChange={() => handleAlertPreferenceChange("group")}
-                      className="w-4 h-4 rounded text-blue-500 border-gray-300 focus:ring-blue-500"
-                    />
-                    <label htmlFor="group" className="text-gray-700 cursor-pointer">
-                      Group
-                    </label>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="onlyme"
-                      checked={alertPreference.includes("onlyme")}
-                      onChange={() => handleAlertPreferenceChange("onlyme")}
-                      className="w-4 h-4 rounded text-blue-500 border-gray-300 focus:ring-blue-500"
-                    />
-                    <label htmlFor="onlyme" className="text-gray-700 cursor-pointer">
-                      Only Me
-                    </label>
-                  </div>
-                </div>
-                {showGroupDropdown &&
-                  (groups.length === 0 ? (
-        
-                    <Button
-                      variant="gradient"
-                      color="blue"
-                      className="mt-4"
-                      onClick={() => setCurrentView("telegram")}
-                    >
-                      Add Bot to Group
-                    </Button>
-                  ) : (
-                    
-                   
-                    <div className="bg-gray-100 p-4 rounded-lg shadow-md w-full">
-                      <label
-                        htmlFor="selectGroup"
-                        className="block mb-2 text-gray-700 text-sm"
-                      >
-                        Select a Group:
-                      </label>
-                      <div className="relative">
-                        <select
-                          id="selectGroup"
-                          className="block w-full rounded-lg border-gray-300 p-2 appearance-none"
-                          onChange={(e) => {
-                            if (e.target.value === "addBot") {
-                              setCurrentView("telegram");
-                            }
-                          }}
-                        >
-                          {groups.map((group) => (
-                            <option key={group.id} value={group.id}>
-                              {group.name}
-                            </option>
-                          ))}
-                          <option value="addBot" className="text-blue-600 font-medium">
-                            + Add Bot to Group
-                          </option>
-                        </select>
-                        <span className="absolute top-3 right-3 pointer-events-none text-gray-600 text-xl">
-                          <IoIosArrowDropdown />
-                        </span>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="group"
+                          checked={alertPreference.includes("group")}
+                          onChange={() => handleAlertPreferenceChange("group")}
+                          className="w-4 h-4 rounded text-blue-500 border-gray-300 focus:ring-blue-500"
+                        />
+                        <label htmlFor="group" className="text-gray-700 cursor-pointer">
+                          Group
+                        </label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="onlyme"
+                          checked={alertPreference.includes("onlyme")}
+                          onChange={() => handleAlertPreferenceChange("onlyme")}
+                          className="w-4 h-4 rounded text-blue-500 border-gray-300 focus:ring-blue-500"
+                        />
+                        <label htmlFor="onlyme" className="text-gray-700 cursor-pointer">
+                          Only Me
+                        </label>
                       </div>
                     </div>
-                  ))}
-
-
+                    {showGroupDropdown &&
+                      (groups.length === 0 ? (
+                        <Button
+                          variant="gradient"
+                          color="blue"
+                          className="mt-4"
+                          onClick={() => setCurrentView("telegram")}
+                        >
+                          Add Bot to Group
+                        </Button>
+                      ) : (
+                        <div className="bg-gray-100 p-4 rounded-lg shadow-md w-full">
+                          <label
+                            htmlFor="selectGroup"
+                            className="block mb-2 text-gray-700 text-sm"
+                          >
+                            Select a Group:
+                          </label>
+                          <div className="relative">
+                            <select
+                              id="selectGroup"
+                              className="block w-full rounded-lg border-gray-300 p-2 appearance-none"
+                              onChange={(e) => {
+                                if (e.target.value === "addBot") {
+                                  setCurrentView("telegram");
+                                } else {
+                                  setSelectedGroupId(e.target.value);
+                                }
+                              }}
+                              value={selectedGroupId}
+                            >
+                              <option value="">Select a group</option>
+                              {groups.map((group) => {
+                                const isSelected = group.name === existingGroupName;
+                                // If this group matches the existing group_name, pre-select it
+                                if (isSelected && !selectedGroupId) {
+                                  setSelectedGroupId(group.id.toString());
+                                }
+                                return (
+                                  <option 
+                                    key={group.id} 
+                                    value={group.id}
+                                    className={isSelected ? "font-bold text-blue-600" : ""}
+                                    style={isSelected ? {backgroundColor: '#EBF8FF'} : {}}
+                                  >
+                                    {group.name} {isSelected ? '(Current)' : ''}
+                                  </option>
+                                );
+                              })}
+                              <option value="addBot" className="text-blue-600 font-medium">
+                                + Add Bot to Group
+                              </option>
+                            </select>
+                            <span className="absolute top-3 right-3 pointer-events-none text-gray-600 text-xl">
+                              <IoIosArrowDropdown />
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                   </div>
                 </div>
               </div>
@@ -306,7 +372,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         <Button
           variant="gradient"
           color="blue"
-          onClick={() => handleOpen(null)}
+          onClick={handleSubmit}
           disabled={alertPreference.length === 0}
         >
           Save Changes
@@ -335,20 +401,8 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         </Typography>
 
         <div className="space-y-6">
-        <div className="flex items-start gap-4">
-            <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">1</div>
-            <div>
-              <Typography className="font-medium mb-2">Open the group you wish to add the Favtut bot</Typography>
-              <Card className="w-full bg-gray-50">
-                <CardBody className="p-2">
-                  <img src="/api/placeholder/300/100" alt="Step 1" className="rounded-lg" />
-                </CardBody>
-              </Card>
-            </div>
-          </div>
-
           <div className="flex items-start gap-4">
-            <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">2</div>
+            <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">1</div>
             <div>
               <Typography className="font-medium mb-2">Edit the group and go to add new members</Typography>
               <Card className="w-full bg-gray-50">
