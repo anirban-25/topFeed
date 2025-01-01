@@ -16,6 +16,7 @@ import {
 } from "@material-tailwind/react";
 import { IoIosArrowDropdown, IoIosCloseCircle } from "react-icons/io";
 import { FaXTwitter } from "react-icons/fa6";
+import { HiMiniClipboardDocumentList } from "react-icons/hi2";
 import { db, app } from '@/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -392,41 +393,98 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
           color="gray"
           onClick={() => setCurrentView("main")}
         >
-          <IoIosCloseCircle className="text-2xl text-gray-700"/>
+          <IoIosCloseCircle className="text-2xl text-gray-700" />
         </Button>
       </DialogHeader>
-      <DialogBody divider className="space-y-6">
-        <Typography className="text-gray-700">
-          Please follow the steps below to add Favtut bot to your Telegram Group
-        </Typography>
-
-        <div className="space-y-6">
-          <div className="flex items-start gap-4">
-            <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">1</div>
-            <div>
-              <Typography className="font-medium mb-2">Edit the group and go to add new members</Typography>
-              <Card className="w-full bg-gray-50">
-                <CardBody className="p-2">
-                  <img src="/api/placeholder/300/100" alt="Step 2" className="rounded-lg" />
-                </CardBody>
-              </Card>
+      <div className="overflow-y-auto max-h-[70vh] px-4">
+        <DialogBody divider className="space-y-6">
+          <Typography className="text-gray-700">
+            Please follow the steps below to add the TopFeed bot to your Telegram Group
+          </Typography>
+  
+          <div className="space-y-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">
+                1
+              </div>
+              <div>
+                <Typography className="font-medium mb-2">
+                  Open the group you wish to add the TopFeed bot.
+                </Typography>
+                <Card className="bg-gray-50">
+                  <CardBody className="p-2">
+                    <img
+                      src="/images/tel1.jpg"
+                      alt="Step 1"
+                      className="rounded-lg"
+                    />
+                  </CardBody>
+                </Card>
+              </div>
+            </div>
+  
+            <div className="flex items-start gap-4">
+              <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">
+                2
+              </div>
+              <div>
+                <Typography className="font-medium mb-2">
+                  Edit the group and go to add new members.
+                </Typography>
+                <Card className="w-full bg-gray-50">
+                  <CardBody className="p-2">
+                    <img
+                      src="/images/tel5.jpg"
+                      alt="Step 2"
+                      className="rounded-lg"
+                    />
+                  </CardBody>
+                </Card>
+              </div>
+            </div>
+  
+            <div className="flex items-start gap-4">
+              <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">
+                3
+              </div>
+              <div>
+                <Typography className="font-medium mb-2">
+                  In the search bar, find the bot with the username
+                  
+                  
+                    <div className="flex text-gray-800 font-mono text-sm">
+                    
+                      <button
+                      className="px-3 py-2 items-center bg-gray-100 border border-gray-300 rounded-md text-blue-500 hover:text-blue-700"
+                      onClick={() => navigator.clipboard.writeText("@TopFeedAI_bot")}
+                      >
+                      <span className="inline-flex items-center gap-2">
+                        <HiMiniClipboardDocumentList />
+                    
+                        @TopFeedAI_bot
+                      </span>
+                      </button>
+                    
+                    </div>
+                    
+                  
+                
+                </Typography>
+                <Card className="w-full bg-gray-50">
+                  <CardBody className="p-2">
+                    <img
+                      src="/images/tel6.jpg"
+                      alt="Step 3"
+                      className="rounded-lg"
+                    />
+                  </CardBody>
+                </Card>
+              </div>
             </div>
           </div>
-
-          <div className="flex items-start gap-4">
-            <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">3</div>
-            <div>
-              <Typography className="font-medium mb-2">Search for @favtut_bot</Typography>
-              <Card className="w-full bg-gray-50">
-                <CardBody className="p-2">
-                  <img src="/api/placeholder/300/100" alt="Step 3" className="rounded-lg" />
-                </CardBody>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </DialogBody>
-      <DialogFooter>
+        </DialogBody>
+      </div>
+      <DialogFooter className="flex justify-end">
         <button
           variant="gradient"
           className="bg-blue-400 px-3 py-1 rounded-md text-white font-kumbh-sans-medium"
@@ -437,7 +495,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       </DialogFooter>
     </>
   );
-
+  
   return (
     <Dialog
       open={["xs", "sm", "md", "lg", "xl", "xxl"].includes(size)}
