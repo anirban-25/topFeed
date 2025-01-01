@@ -25,7 +25,7 @@ const BotsAndAlerts = () => {
     istelegram: false,
     telegramAccount: "",
     telegramUserId: "",
-    sendTo: [],
+    sendTo: true,
     isActive: true, 
     isActiveSlack: true,
     twitter: false,
@@ -79,7 +79,7 @@ const BotsAndAlerts = () => {
         istelegram: true,
         telegramAccount: authUser.username,
         telegramUserId: authUser.id,
-        sendTo: [authUser.id],
+        sendTo: true,
         isActive: true, 
         twitter: notificationData.twitter,
         reddit: notificationData.reddit,
@@ -106,7 +106,7 @@ const BotsAndAlerts = () => {
       istelegram: false,
       telegramAccount: "",
       telegramUserId: "",
-      sendTo: [],
+      sendTo: false,
       isActive: false,
     };
 

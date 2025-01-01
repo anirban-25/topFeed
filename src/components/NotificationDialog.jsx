@@ -36,8 +36,9 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
   const [loadingGroups, setLoadingGroups] = useState(false);
   const [user, setUser] = useState(null);
   const [selectedGroupId, setSelectedGroupId] = useState("");
-  const [existingSendTo, setExistingSendTo] = useState([]);
+  const [sendTo, setSendTo] = useState(false);
   const [existingGroupName, setExistingGroupName] = useState("");
+  const [copied, setCopied] = useState(false);
   const auth = getAuth(app);
   const hasFetched = useRef(false);
 
@@ -75,6 +76,11 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       }
     }
   };
+  const handleCopy = () => {
+    navigator.clipboard.writeText("@TopFeedAI_bot");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000); 
+  };
   const handleSubmit = async () => {
     if (user) {
       try {
@@ -108,6 +114,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
             ...existingData,
             groups: updatedGroups,
             selectedNotificationLevels,
+            sendTo: sendTo,
           };
   
           // Update Firestore
@@ -170,6 +177,11 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       );
 
       console.log("Filtered Groups:", filteredGroups);
+      if (filteredGroups.length > 0) {
+        setGroups(filteredGroups);
+        setAlertPreference((prev) => [...new Set([...prev, "group"])]);
+      }
+      
       return filteredGroups;
     } catch (error) {
       console.error("Error fetching Telegram groups:", error);
@@ -186,8 +198,15 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         const data = docSnap.data();
         setExistingData(data); // Add this line
         setSelectedNotificationLevels(data.notificationLevels || []);
-        setExistingSendTo(data.sendTo || []);
+        setSendTo(data.sendTo);
         setAlertPreference(data.alertPreference || []);
+        if (data?.groups?.length > 0) {
+          setAlertPreference((prev) => [...new Set([...prev, "group"])]);
+          setShowGroupDropdown(true); 
+        }
+        if (data?.sendTo === true) {
+          setAlertPreference((prev) => [...new Set([...prev, "onlyme"])]); 
+        }
       }
     } catch (error) {
       console.error("Error fetching notification settings:", error);
@@ -207,13 +226,13 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
             const telegramUserId = data?.telegramUserId;
-            setExistingSendTo(data?.sendTo || []);
+            setSendTo(data?.sendTo );
             setExistingGroupName(data?.group_name || "");
             setExistingData(data);
             setTelegramAccountName(data?.telegramAccount || "");
   
             // Check if sendTo exists and set "onlyme" checkbox
-            if (data?.sendTo?.length > 0) {
+            if (data?.sendTo=== true) {
               setAlertPreference(prev => prev.includes("onlyme") ? prev : [...prev, "onlyme"]);
             }
   
@@ -255,16 +274,18 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
   };
 
   const handleAlertPreferenceChange = (pref) => {
-    setAlertPreference((prev) => {
-      const newPrefs = prev.includes(pref)
-        ? prev.filter((p) => p !== pref)
-        : [...prev, pref];
-
-      if (pref === "group") {
-        setShowGroupDropdown(!prev.includes("group"));
-      }
-      return newPrefs;
-    });
+    setAlertPreference((prev) =>
+      prev.includes(pref)
+        ? prev.filter((p) => p !== pref) 
+        : [...prev, pref] 
+    );
+  
+    if (pref === "group") {
+      setShowGroupDropdown((prev) => !prev); 
+    }
+    if (pref === "onlyme") {
+      setSendTo((prev) => !prev); 
+    }
   };
 
   const mainView = (
@@ -442,7 +463,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                               }}
                               value={selectedGroupId}
                             >
-                              <option value="">Select a group</option>
+                              
                               {groups.map((group) => {
                                 const isSelected =
                                   group.name === existingGroupName;
@@ -527,7 +548,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       <div className="overflow-y-auto max-h-[70vh] px-4">
         <DialogBody divider className="space-y-6">
           <Typography className="text-gray-700">
-            Please follow the steps below to add the TopFeed bot to your Telegram Group
+            Please follow the steps below to add the TopFeed bot to your Telegram Group:
           </Typography>
   
           <div className="space-y-6">
@@ -539,7 +560,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                 <Typography className="font-medium mb-2">
                   Open the group you wish to add the TopFeed bot.
                 </Typography>
-                <Card className="bg-gray-50">
+                <Card className="bg-gray-50 max-w-sm">
                   <CardBody className="p-2">
                     <img
                       src="/images/tel1.jpg"
@@ -559,7 +580,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                 <Typography className="font-medium mb-2">
                   Edit the group and go to add new members.
                 </Typography>
-                <Card className="w-full bg-gray-50">
+                <Card className="w-full bg-gray-50 max-w-sm">
                   <CardBody className="p-2">
                     <img
                       src="/images/tel5.jpg"
@@ -582,14 +603,14 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                   
                     <div className="flex text-gray-800 font-mono text-sm">
                     
-                      <button
-                      className="px-3 py-2 items-center bg-gray-100 border border-gray-300 rounded-md text-blue-500 hover:text-blue-700"
-                      onClick={() => navigator.clipboard.writeText("@TopFeedAI_bot")}
-                      >
+                    <button
+                      className={`px-3 py-2 items-center border rounded-md 
+                        ${copied ? "bg-green-200 text-green-800" : "bg-gray-300 text-blue-500 hover:text-blue-700"}`}
+                      onClick={handleCopy}
+                    >
                       <span className="inline-flex items-center gap-2">
                         <HiMiniClipboardDocumentList />
-                    
-                        @TopFeedAI_bot
+                        {copied ? "Copied to Clipboard!" : "@TopFeedAI_bot"}
                       </span>
                       </button>
                     
@@ -598,7 +619,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                   
                 
                 </Typography>
-                <Card className="w-full bg-gray-50">
+                <Card className="w-full bg-gray-50 max-w-sm">
                   <CardBody className="p-2">
                     <img
                       src="/images/tel6.jpg"
@@ -616,7 +637,15 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         <button
           variant="gradient"
           className="bg-blue-400 px-3 py-1 rounded-md text-white font-kumbh-sans-medium"
-          onClick={() => setCurrentView("main")}
+          onClick={async () => {
+            if (user && existingData?.telegramUserId) {
+              setLoadingGroups(true); 
+              const fetchedGroups = await fetchGroups(existingData.telegramUserId);
+              setGroups(fetchedGroups);
+              setLoadingGroups(false);
+            } 
+            setCurrentView("main");
+        }}
         >
           Confirm and Verify
         </button>
