@@ -198,7 +198,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         const data = docSnap.data();
         setExistingData(data); // Add this line
         setSelectedNotificationLevels(data.notificationLevels || []);
-        setSendTo(data.sendTo);
+        setSendTo(data.sendTo || false);
         setAlertPreference(data.alertPreference || []);
         if (data?.groups?.length > 0) {
           setAlertPreference((prev) => [...new Set([...prev, "group"])]);
@@ -283,8 +283,13 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
     if (pref === "group") {
       setShowGroupDropdown((prev) => !prev); 
     }
+
     if (pref === "onlyme") {
-      setSendTo((prev) => !prev); 
+      setSendTo((prev) => {
+        const newSendTo = !prev;
+        console.log("Updated sendTo:", newSendTo); 
+        return newSendTo;
+      });
     }
   };
 
