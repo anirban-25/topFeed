@@ -15,14 +15,19 @@ import {
   TabPanel,
 } from "@material-tailwind/react";
 import { IoIosArrowDropdown, IoIosCloseCircle } from "react-icons/io";
+import { FaTelegram } from "react-icons/fa6";
 import { FaXTwitter } from "react-icons/fa6";
-import { db, app } from '@/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db, app } from "@/firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
-  const [selectedNotificationLevels, setSelectedNotificationLevels] = useState([]);
+  const [selectedNotificationLevels, setSelectedNotificationLevels] = useState(
+    []
+  );
+  const [existingData, setExistingData] = useState(null);
+  const [telegramAccountName, setTelegramAccountName] = useState("");
   const [alertPreference, setAlertPreference] = useState([]);
   const [showGroupDropdown, setShowGroupDropdown] = useState(false);
   const [currentView, setCurrentView] = useState("main");
@@ -35,31 +40,85 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
   const auth = getAuth(app);
   const hasFetched = useRef(false);
 
+  const handleDeleteGroup = async (groupId) => {
+    if (user) {
+      try {
+        const notificationsRef = doc(db, "notifications", user.uid);
+        const docSnap = await getDoc(notificationsRef);
+
+        if (docSnap.exists()) {
+          const existingData = docSnap.data();
+          const existingGroups = existingData.groups || [];
+
+          // Filter out the group to delete
+          const updatedGroups = existingGroups.filter(
+            (group) => group.id !== groupId
+          );
+
+          // Update Firestore
+          await updateDoc(notificationsRef, {
+            ...existingData,
+            groups: updatedGroups,
+          });
+
+          // Update local state
+          setExistingData((prevData) => ({
+            ...prevData,
+            groups: updatedGroups,
+          }));
+
+          console.log("Group deleted successfully");
+        }
+      } catch (error) {
+        console.error("Error deleting group:", error);
+      }
+    }
+  };
   const handleSubmit = async () => {
     if (user) {
       try {
         const notificationsRef = doc(db, "notifications", user.uid);
-        
-        // Find the selected group details
-        const selectedGroup = groups.find(group => group.id.toString() === selectedGroupId.toString());
-        
-        // Only add the group ID if it's not already in sendTo
-        const updatedSendTo = existingSendTo.includes(selectedGroupId) 
-          ? existingSendTo 
-          : [...existingSendTo, selectedGroupId];
-
-        const updateData = {
-          notificationLevels: selectedNotificationLevels,
-          sendTo: updatedSendTo,
-        };
-
-        // Only add group_name if a group is selected
-        if (selectedGroup?.name) {
-          updateData.group_name = selectedGroup.name;
+        const docSnap = await getDoc(notificationsRef);
+        const selectedGroup = groups.find(
+          (group) => group.id.toString() === selectedGroupId.toString()
+        );
+  
+        if (!selectedGroup) {
+          console.error("Selected group not found");
+          return;
         }
-
-        await updateDoc(notificationsRef, updateData);
-        console.log("Notification settings updated successfully");
+  
+        const existingData = docSnap.exists() ? docSnap.data() : {};
+        const existingGroups = existingData.groups || [];
+        const groupExists = existingGroups.some(
+          (group) => group.id === selectedGroup.id
+        );
+  
+        if (!groupExists) {
+          const updatedGroups = [
+            ...existingGroups,
+            {
+              id: selectedGroup.id,
+              name: selectedGroup.name,
+            },
+          ];
+  
+          const updatedData = {
+            ...existingData,
+            groups: updatedGroups,
+            selectedNotificationLevels,
+          };
+  
+          // Update Firestore
+          await updateDoc(notificationsRef, updatedData);
+  
+          // Update local state immediately
+          setExistingData(updatedData);
+  
+          console.log("Notification settings updated successfully");
+        } else {
+          console.log("Group already exists, skipping addition");
+        }
       } catch (error) {
         console.error("Error updating notification settings:", error);
       }
@@ -73,10 +132,10 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       const response = await fetch(
         `https://api.telegram.org/bot${process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN}/getUpdates`
       );
-  
+
       const telegramData = await response.json();
       console.log("telegram API response:", telegramData);
-  
+
       if (!telegramData.ok) {
         console.error("error from telegram API:", telegramData);
         return [];
@@ -88,12 +147,12 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
           update.my_chat_member.from &&
           update.my_chat_member.from.id === telegramUserId
       );
-  
+
       const groupStatusMap = updates.reduce((result, update) => {
         const chatId = update.my_chat_member.chat.id;
         const chatTitle = update.my_chat_member.chat.title;
         const chatStatus = update.my_chat_member.new_chat_member.status;
-  
+
         if (!result[chatId]) {
           result[chatId] = { id: chatId, name: chatTitle, status: chatStatus };
         } else {
@@ -101,14 +160,14 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
             result[chatId].status = "left";
           }
         }
-  
+
         return result;
       }, {});
-  
+
       const filteredGroups = Object.values(groupStatusMap).filter(
         (group) => group.status === "member"
       );
-  
+
       console.log("Filtered Groups:", filteredGroups);
       return filteredGroups;
     } catch (error) {
@@ -121,9 +180,10 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
     try {
       const notificationsDoc = doc(db, "notifications", userId);
       const docSnap = await getDoc(notificationsDoc);
-      
+
       if (docSnap.exists()) {
         const data = docSnap.data();
+        setExistingData(data); // Add this line
         setSelectedNotificationLevels(data.notificationLevels || []);
         setExistingSendTo(data.sendTo || []);
         setAlertPreference(data.alertPreference || []);
@@ -138,23 +198,30 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       if (user && !hasFetched.current) {
         hasFetched.current = true;
         setUser(user);
-
+  
         try {
           const notificationsDoc = doc(db, "notifications", user.uid);
           const docSnap = await getDoc(notificationsDoc);
-
+  
           if (docSnap.exists()) {
             const data = docSnap.data();
             const telegramUserId = data?.telegramUserId;
             setExistingSendTo(data?.sendTo || []);
             setExistingGroupName(data?.group_name || "");
-            
-            // If we have a group_name, pre-select the group in alert preferences
-            if (data?.group_name) {
+            setExistingData(data);
+            setTelegramAccountName(data?.telegramAccount || "");
+  
+            // Check if sendTo exists and set "onlyme" checkbox
+            if (data?.sendTo?.length > 0) {
+              setAlertPreference(prev => prev.includes("onlyme") ? prev : [...prev, "onlyme"]);
+            }
+  
+            // Existing groups check
+            if (data?.groups?.length > 0) {
               setAlertPreference(prev => prev.includes("group") ? prev : [...prev, "group"]);
               setShowGroupDropdown(true);
             }
-
+  
             if (telegramUserId) {
               console.log("Telegram User ID:", telegramUserId);
               setLoadingGroups(true);
@@ -164,15 +231,13 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
             } else {
               console.warn("No Telegram User ID found for the user.");
             }
-          } else {
-            console.warn("No notifications document found in Firestore.");
           }
         } catch (error) {
           console.error("Error fetching Telegram User ID:", error);
         }
       }
     });
-
+  
     return () => unsubscribe();
   }, [auth]);
 
@@ -195,7 +260,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         : [...prev, pref];
 
       if (pref === "group") {
-        setShowGroupDropdown(!prev.includes("group")); 
+        setShowGroupDropdown(!prev.includes("group"));
       }
       return newPrefs;
     });
@@ -203,7 +268,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
 
   const mainView = (
     <>
-      <DialogHeader className="flex justify-between items-center">
+      <DialogHeader className="flex overflow-y-scroll justify-between items-center">
         <Typography variant="h5" className="font-semibold">
           Notification Settings
         </Typography>
@@ -225,11 +290,13 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
               className: "bg-blue-500/10 shadow-none !text-blue-500",
             }}
           >
-            {[{
+            {[
+              {
                 label: "Twitter",
                 value: "twitter",
                 icon: FaXTwitter,
-              }].map(({ label, value, icon }) => (
+              },
+            ].map(({ label, value, icon }) => (
               <Tab key={value} value={value}>
                 <div className="flex items-center gap-2 py-1">
                   {createElement(icon, { className: "w-5 h-5" })}
@@ -255,7 +322,10 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                           onChange={() => handleNotificationLevelChange(level)}
                           className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
                         />
-                        <label htmlFor={level} className="capitalize text-gray-700">
+                        <label
+                          htmlFor={level}
+                          className="capitalize text-gray-700"
+                        >
                           {level}
                         </label>
                       </div>
@@ -277,7 +347,10 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                           onChange={() => handleAlertPreferenceChange("group")}
                           className="w-4 h-4 rounded text-blue-500 border-gray-300 focus:ring-blue-500"
                         />
-                        <label htmlFor="group" className="text-gray-700 cursor-pointer">
+                        <label
+                          htmlFor="group"
+                          className="text-gray-700 cursor-pointer"
+                        >
                           Group
                         </label>
                       </div>
@@ -289,11 +362,54 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                           onChange={() => handleAlertPreferenceChange("onlyme")}
                           className="w-4 h-4 rounded text-blue-500 border-gray-300 focus:ring-blue-500"
                         />
-                        <label htmlFor="onlyme" className="text-gray-700 cursor-pointer">
+                        <label
+                          htmlFor="onlyme"
+                          className="text-gray-700 cursor-pointer"
+                        >
                           Only Me
                         </label>
                       </div>
                     </div>
+                    {telegramAccountName && (
+                      <div className="mb-4   items-center ">
+                        <h4 className="text-sm font-kumbh-sans-medium mb-2 text-gray-700 ">Connected Account</h4>
+                        <div className="p-2 bg-white rounded-lg border border-gray-200">
+                          <div className="flex items-center space-x-2">
+                            <FaTelegram className="text-blue-500 text-xl md:text-2xl" />
+                            <span className="text-sm text-gray-800">@{telegramAccountName}</span>
+                          </div>
+                        </div>
+                      </div>
+                     )}
+                    {/* Connected Groups Display */}
+                    {existingData?.groups?.length>0 && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">
+                          Connected Groups
+                        </h4>
+                        <div className="space-y-2">
+                          {existingData?.groups?.map((group) => (
+                            <div
+                              key={group.id}
+                              className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-200"
+                            >
+                              <span className="text-sm text-gray-800">
+                                {group.name}
+                              </span>
+                              <Button
+                                variant="text"
+                                color="red"
+                                size="sm"
+                                className="p-2"
+                                onClick={() => handleDeleteGroup(group.id)}
+                              >
+                                <IoIosCloseCircle className="w-5 h-5" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {showGroupDropdown &&
                       (groups.length === 0 ? (
                         <Button
@@ -327,23 +443,35 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                             >
                               <option value="">Select a group</option>
                               {groups.map((group) => {
-                                const isSelected = group.name === existingGroupName;
+                                const isSelected =
+                                  group.name === existingGroupName;
                                 // If this group matches the existing group_name, pre-select it
                                 if (isSelected && !selectedGroupId) {
                                   setSelectedGroupId(group.id.toString());
                                 }
                                 return (
-                                  <option 
-                                    key={group.id} 
+                                  <option
+                                    key={group.id}
                                     value={group.id}
-                                    className={isSelected ? "font-bold text-blue-600" : ""}
-                                    style={isSelected ? {backgroundColor: '#EBF8FF'} : {}}
+                                    className={
+                                      isSelected
+                                        ? "font-bold text-blue-600"
+                                        : ""
+                                    }
+                                    style={
+                                      isSelected
+                                        ? { backgroundColor: "#EBF8FF" }
+                                        : {}
+                                    }
                                   >
-                                    {group.name} {isSelected ? '(Current)' : ''}
+                                    {group.name} {isSelected ? "(Current)" : ""}
                                   </option>
                                 );
                               })}
-                              <option value="addBot" className="text-blue-600 font-medium">
+                              <option
+                                value="addBot"
+                                className="text-blue-600 font-medium"
+                              >
                                 + Add Bot to Group
                               </option>
                             </select>
@@ -392,7 +520,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
           color="gray"
           onClick={() => setCurrentView("main")}
         >
-          <IoIosCloseCircle className="text-2xl text-gray-700"/>
+          <IoIosCloseCircle className="text-2xl text-gray-700" />
         </Button>
       </DialogHeader>
       <DialogBody divider className="space-y-6">
@@ -402,24 +530,40 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
 
         <div className="space-y-6">
           <div className="flex items-start gap-4">
-            <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">1</div>
+            <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">
+              1
+            </div>
             <div>
-              <Typography className="font-medium mb-2">Edit the group and go to add new members</Typography>
+              <Typography className="font-medium mb-2">
+                Edit the group and go to add new members
+              </Typography>
               <Card className="w-full bg-gray-50">
                 <CardBody className="p-2">
-                  <img src="/api/placeholder/300/100" alt="Step 2" className="rounded-lg" />
+                  <img
+                    src="/api/placeholder/300/100"
+                    alt="Step 2"
+                    className="rounded-lg"
+                  />
                 </CardBody>
               </Card>
             </div>
           </div>
 
           <div className="flex items-start gap-4">
-            <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">3</div>
+            <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">
+              3
+            </div>
             <div>
-              <Typography className="font-medium mb-2">Search for @favtut_bot</Typography>
+              <Typography className="font-medium mb-2">
+                Search for @favtut_bot
+              </Typography>
               <Card className="w-full bg-gray-50">
                 <CardBody className="p-2">
-                  <img src="/api/placeholder/300/100" alt="Step 3" className="rounded-lg" />
+                  <img
+                    src="/api/placeholder/300/100"
+                    alt="Step 3"
+                    className="rounded-lg"
+                  />
                 </CardBody>
               </Card>
             </div>
@@ -443,7 +587,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       open={["xs", "sm", "md", "lg", "xl", "xxl"].includes(size)}
       size={size || "md"}
       handler={handleOpen}
-      className="bg-white/90 backdrop-blur-sm"
+      className="bg-white/90  max-h-[90vh] overflow-scroll flex flex-col backdrop-blur-sm"
     >
       {currentView === "main" ? mainView : telegramView}
     </Dialog>
