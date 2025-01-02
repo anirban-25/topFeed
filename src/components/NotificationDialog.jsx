@@ -29,10 +29,12 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
   );
   const [existingData, setExistingData] = useState(null);
   const [telegramAccountName, setTelegramAccountName] = useState("");
-  const [alertPreference, setAlertPreference] = useState([]);
+  // const [alertPreference, setAlertPreference] = useState([]);
   const [showGroupDropdown, setShowGroupDropdown] = useState(false);
   const [currentView, setCurrentView] = useState("main");
   const [groups, setGroups] = useState([]);
+  const [isGroupSelected, setIsGroupSelected] = useState(false);
+  const [isOnlyMeSelected, setIsOnlyMeSelected] = useState(false);
   const [loadingGroups, setLoadingGroups] = useState(false);
   const [user, setUser] = useState(null);
   const [selectedGroupId, setSelectedGroupId] = useState("");
@@ -52,35 +54,91 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
           const existingData = docSnap.data();
           const existingGroups = existingData.groups || [];
 
-          // Filter out the group to delete
           const updatedGroups = existingGroups.filter(
             (group) => group.id !== groupId
           );
 
-          // Update Firestore
           await updateDoc(notificationsRef, {
             ...existingData,
             groups: updatedGroups,
           });
 
-          // Update local state
           setExistingData((prevData) => ({
             ...prevData,
             groups: updatedGroups,
           }));
 
-          console.log("Group deleted successfully");
+          // Update group selection state if all groups are removed
+          if (updatedGroups.length === 0) {
+            setIsGroupSelected(false);
+            setShowGroupDropdown(false);
+          }
         }
       } catch (error) {
         console.error("Error deleting group:", error);
       }
     }
   };
+
   const handleCopy = () => {
     navigator.clipboard.writeText("@TopFeedAI_bot");
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000); 
+    setTimeout(() => setCopied(false), 2000);
   };
+
+  //   const handleSubmit = async () => {
+  //   if (user) {
+  //     try {
+  //       const notificationsRef = doc(db, "notifications", user.uid);
+  //       const docSnap = await getDoc(notificationsRef);
+  //       const selectedGroup = groups.find(
+  //         (group) => group.id.toString() === selectedGroupId.toString()
+  //       );
+
+  //       if (!selectedGroup) {
+  //         console.error("Selected group not found");
+  //         // return;
+  //       }
+
+  //       const existingData = docSnap.exists() ? docSnap.data() : {};
+  //       const existingGroups = existingData.groups || [];
+  //       const groupExists = existingGroups.some(
+  //         (group) => group.id === selectedGroup.id
+  //       );
+
+  //       if (!groupExists) {
+  //         const updatedGroups = [
+  //           ...existingGroups,
+  //           {
+  //             id: selectedGroup.id,
+  //             name: selectedGroup.name,
+  //           },
+  //         ];
+
+  //         const updatedData = {
+  //           ...existingData,
+  //           groups: updatedGroups,
+  //           notificationLevels: selectedNotificationLevels,
+  //           sendTo: sendTo,
+  //         };
+
+  //         // Update Firestore
+  //         await updateDoc(notificationsRef, updatedData);
+
+  //         // Update local state immediately
+  //         setExistingData(updatedData);
+
+  //         console.log("Notification settings updated successfully");
+  //       } else {
+  //         console.log("Group already exists, skipping addition");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error updating notification settings:", error);
+  //     }
+  //   }
+  //   handleOpen(null);
+  // };
+
   const handleSubmit = async () => {
     if (user) {
       try {
@@ -89,44 +147,43 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         const selectedGroup = groups.find(
           (group) => group.id.toString() === selectedGroupId.toString()
         );
-  
-        if (!selectedGroup) {
-          console.error("Selected group not found");
-          return;
-        }
-  
+
         const existingData = docSnap.exists() ? docSnap.data() : {};
         const existingGroups = existingData.groups || [];
         const groupExists = existingGroups.some(
-          (group) => group.id === selectedGroup.id
+          (group) => group.id === selectedGroup?.id
         );
-  
-        if (!groupExists) {
-          const updatedGroups = [
-            ...existingGroups,
-            {
-              id: selectedGroup.id,
-              name: selectedGroup.name,
-            },
-          ];
-  
-          const updatedData = {
-            ...existingData,
-            groups: updatedGroups,
-            selectedNotificationLevels,
-            sendTo: sendTo,
-          };
-  
-          // Update Firestore
-          await updateDoc(notificationsRef, updatedData);
-  
-          // Update local state immediately
-          setExistingData(updatedData);
-  
-          console.log("Notification settings updated successfully");
-        } else {
-          console.log("Group already exists, skipping addition");
-        }
+
+        try {
+          if (selectedGroup && !groupExists) {
+            const updatedGroups = [
+              ...existingGroups,
+              {
+                id: selectedGroup.id,
+                name: selectedGroup.name,
+              },
+            ];
+
+            const updatedData = {
+              ...existingData,
+              groups: updatedGroups,
+              notificationLevels: selectedNotificationLevels,
+              sendTo,
+            };
+
+            await updateDoc(notificationsRef, updatedData);
+            setExistingData(updatedData);
+          } else {
+            const updateOthers = {
+              ...existingData,
+
+              notificationLevels: selectedNotificationLevels,
+              sendTo,
+            };
+            await updateDoc(notificationsRef, updateOthers);
+            setExistingData(updatedData);
+          }
+        } catch (error) {}
       } catch (error) {
         console.error("Error updating notification settings:", error);
       }
@@ -136,13 +193,11 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
 
   const fetchGroups = async (telegramUserId) => {
     try {
-      console.log("fetching telegram updates...");
       const response = await fetch(
         `https://api.telegram.org/bot${process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN}/getUpdates`
       );
 
       const telegramData = await response.json();
-      console.log("telegram API response:", telegramData);
 
       if (!telegramData.ok) {
         console.error("error from telegram API:", telegramData);
@@ -176,12 +231,11 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         (group) => group.status === "member"
       );
 
-      console.log("Filtered Groups:", filteredGroups);
       if (filteredGroups.length > 0) {
         setGroups(filteredGroups);
-        setAlertPreference((prev) => [...new Set([...prev, "group"])]);
+        setIsGroupSelected(true);
       }
-      
+
       return filteredGroups;
     } catch (error) {
       console.error("Error fetching Telegram groups:", error);
@@ -196,60 +250,49 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
 
       if (docSnap.exists()) {
         const data = docSnap.data();
-        setExistingData(data); // Add this line
+        setExistingData(data);
         setSelectedNotificationLevels(data.notificationLevels || []);
         setSendTo(data.sendTo || false);
-        setAlertPreference(data.alertPreference || []);
+        setIsOnlyMeSelected(data.sendTo || false);
+
         if (data?.groups?.length > 0) {
-          setAlertPreference((prev) => [...new Set([...prev, "group"])]);
-          setShowGroupDropdown(true); 
-        }
-        if (data?.sendTo === true) {
-          setAlertPreference((prev) => [...new Set([...prev, "onlyme"])]); 
+          setIsGroupSelected(true);
+          setShowGroupDropdown(true);
         }
       }
     } catch (error) {
       console.error("Error fetching notification settings:", error);
     }
   };
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user && !hasFetched.current) {
         hasFetched.current = true;
         setUser(user);
-  
+
         try {
           const notificationsDoc = doc(db, "notifications", user.uid);
           const docSnap = await getDoc(notificationsDoc);
-  
+
           if (docSnap.exists()) {
             const data = docSnap.data();
             const telegramUserId = data?.telegramUserId;
-            setSendTo(data?.sendTo );
+            setSendTo(data?.sendTo || false);
+            setIsOnlyMeSelected(data?.sendTo || false);
             setExistingGroupName(data?.group_name || "");
             setExistingData(data);
             setTelegramAccountName(data?.telegramAccount || "");
-  
-            // Check if sendTo exists and set "onlyme" checkbox
-            if (data?.sendTo=== true) {
-              setAlertPreference(prev => prev.includes("onlyme") ? prev : [...prev, "onlyme"]);
-            }
-  
-            // Existing groups check
+
             if (data?.groups?.length > 0) {
-              setAlertPreference(prev => prev.includes("group") ? prev : [...prev, "group"]);
+              setIsGroupSelected(true);
               setShowGroupDropdown(true);
             }
-  
+
             if (telegramUserId) {
-              console.log("Telegram User ID:", telegramUserId);
               setLoadingGroups(true);
               const fetchedGroups = await fetchGroups(telegramUserId);
               setGroups(fetchedGroups);
               setLoadingGroups(false);
-            } else {
-              console.warn("No Telegram User ID found for the user.");
             }
           }
         } catch (error) {
@@ -257,7 +300,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         }
       }
     });
-  
+
     return () => unsubscribe();
   }, [auth]);
 
@@ -271,25 +314,16 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
     setSelectedNotificationLevels((prev) =>
       prev.includes(level) ? prev.filter((l) => l !== level) : [...prev, level]
     );
+    console.log(selectedNotificationLevels);
   };
 
-  const handleAlertPreferenceChange = (pref) => {
-    setAlertPreference((prev) =>
-      prev.includes(pref)
-        ? prev.filter((p) => p !== pref) 
-        : [...prev, pref] 
-    );
-  
+  const handlePreferenceChange = (pref) => {
     if (pref === "group") {
-      setShowGroupDropdown((prev) => !prev); 
-    }
-
-    if (pref === "onlyme") {
-      setSendTo((prev) => {
-        const newSendTo = !prev;
-        console.log("Updated sendTo:", newSendTo); 
-        return newSendTo;
-      });
+      setIsGroupSelected(!isGroupSelected);
+      setShowGroupDropdown(!showGroupDropdown);
+    } else if (pref === "onlyme") {
+      setIsOnlyMeSelected(!isOnlyMeSelected);
+      setSendTo(!sendTo);
     }
   };
 
@@ -370,8 +404,8 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                         <input
                           type="checkbox"
                           id="group"
-                          checked={alertPreference.includes("group")}
-                          onChange={() => handleAlertPreferenceChange("group")}
+                          checked={isGroupSelected}
+                          onChange={() => handlePreferenceChange("group")}
                           className="w-4 h-4 rounded text-blue-500 border-gray-300 focus:ring-blue-500"
                         />
                         <label
@@ -385,8 +419,8 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                         <input
                           type="checkbox"
                           id="onlyme"
-                          checked={alertPreference.includes("onlyme")}
-                          onChange={() => handleAlertPreferenceChange("onlyme")}
+                          checked={isOnlyMeSelected}
+                          onChange={() => handlePreferenceChange("onlyme")}
                           className="w-4 h-4 rounded text-blue-500 border-gray-300 focus:ring-blue-500"
                         />
                         <label
@@ -399,17 +433,21 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                     </div>
                     {telegramAccountName && (
                       <div className="mb-4   items-center ">
-                        <h4 className="text-sm font-kumbh-sans-medium mb-2 text-gray-700 ">Connected Account</h4>
+                        <h4 className="text-sm font-kumbh-sans-medium mb-2 text-gray-700 ">
+                          Connected Account
+                        </h4>
                         <div className="p-2 bg-white rounded-lg border border-gray-200">
                           <div className="flex items-center space-x-2">
                             <FaTelegram className="text-blue-500 text-xl md:text-2xl" />
-                            <span className="text-sm text-gray-800">@{telegramAccountName}</span>
+                            <span className="text-sm text-gray-800">
+                              @{telegramAccountName}
+                            </span>
                           </div>
                         </div>
                       </div>
-                     )}
+                    )}
                     {/* Connected Groups Display */}
-                    {existingData?.groups?.length>0 && (
+                    {existingData?.groups?.length > 0 && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-gray-700 mb-2">
                           Connected Groups
@@ -468,7 +506,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                               }}
                               value={selectedGroupId}
                             >
-                              
+                              <option value="">Select a group</option>
                               {groups.map((group) => {
                                 const isSelected =
                                   group.name === existingGroupName;
@@ -524,12 +562,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         >
           Cancel
         </Button>
-        <Button
-          variant="gradient"
-          color="blue"
-          onClick={handleSubmit}
-          disabled={alertPreference.length === 0}
-        >
+        <Button variant="gradient" color="blue" onClick={handleSubmit}>
           Save Changes
         </Button>
       </DialogFooter>
@@ -553,9 +586,10 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       <div className="overflow-y-auto max-h-[70vh] px-4">
         <DialogBody divider className="space-y-6">
           <Typography className="text-gray-700">
-            Please follow the steps below to add the TopFeed bot to your Telegram Group:
+            Please follow the steps below to add the TopFeed bot to your
+            Telegram Group:
           </Typography>
-  
+
           <div className="space-y-6">
             <div className="flex items-start gap-4">
               <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">
@@ -576,7 +610,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                 </Card>
               </div>
             </div>
-  
+
             <div className="flex items-start gap-4">
               <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">
                 2
@@ -596,7 +630,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
                 </Card>
               </div>
             </div>
-  
+
             <div className="flex items-start gap-4">
               <div className="flex-none w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500">
                 3
@@ -604,25 +638,22 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
               <div>
                 <Typography className="font-medium mb-2">
                   In the search bar, find the bot with the username
-                  
-                  
-                    <div className="flex text-gray-800 font-mono text-sm">
-                    
+                  <div className="flex text-gray-800 font-mono text-sm">
                     <button
                       className={`px-3 py-2 items-center border rounded-md 
-                        ${copied ? "bg-green-200 text-green-800" : "bg-gray-300 text-blue-500 hover:text-blue-700"}`}
+                        ${
+                          copied
+                            ? "bg-green-200 text-green-800"
+                            : "bg-gray-300 text-blue-500 hover:text-blue-700"
+                        }`}
                       onClick={handleCopy}
                     >
                       <span className="inline-flex items-center gap-2">
                         <HiMiniClipboardDocumentList />
                         {copied ? "Copied to Clipboard!" : "@TopFeedAI_bot"}
                       </span>
-                      </button>
-                    
-                    </div>
-                    
-                  
-                
+                    </button>
+                  </div>
                 </Typography>
                 <Card className="w-full bg-gray-50 max-w-sm">
                   <CardBody className="p-2">
@@ -644,20 +675,22 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
           className="bg-blue-400 px-3 py-1 rounded-md text-white font-kumbh-sans-medium"
           onClick={async () => {
             if (user && existingData?.telegramUserId) {
-              setLoadingGroups(true); 
-              const fetchedGroups = await fetchGroups(existingData.telegramUserId);
+              setLoadingGroups(true);
+              const fetchedGroups = await fetchGroups(
+                existingData.telegramUserId
+              );
               setGroups(fetchedGroups);
               setLoadingGroups(false);
-            } 
+            }
             setCurrentView("main");
-        }}
+          }}
         >
           Confirm and Verify
         </button>
       </DialogFooter>
     </>
   );
-  
+
   return (
     <Dialog
       open={["xs", "sm", "md", "lg", "xl", "xxl"].includes(size)}
