@@ -144,65 +144,63 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       try {
         const notificationsRef = doc(db, "notifications", user.uid);
         const docSnap = await getDoc(notificationsRef);
+        const existingData = docSnap.exists() ? docSnap.data() : {};
         const selectedGroup = groups.find(
           (group) => group.id.toString() === selectedGroupId.toString()
         );
-
-        const existingData = docSnap.exists() ? docSnap.data() : {};
+  
         const existingGroups = existingData.groups || [];
         const groupExists = existingGroups.some(
           (group) => group.id === selectedGroup?.id
         );
-
-        try {
-          if (selectedGroup && !groupExists) {
-            if (!isGroupSelected) {
-              console.log("heyeyeyyeye");
-              const updatedData = {
-                ...existingData,
-                groups: [],
-                notificationLevels: selectedNotificationLevels,
-                sendTo,
-              };
-
-              await updateDoc(notificationsRef, updatedData);
-              setExistingData(updatedData);
-            } else {
-              const updatedGroups = [
-                ...existingGroups,
-                {
-                  id: selectedGroup.id,
-                  name: selectedGroup.name,
-                },
-              ];
-
-              const updatedData = {
-                ...existingData,
-                groups: updatedGroups,
-                notificationLevels: selectedNotificationLevels,
-                sendTo,
-              };
-
-              await updateDoc(notificationsRef, updatedData);
-              setExistingData(updatedData);
-            }
-          } else {
-            const updateOthers = {
-              ...existingData,
-
-              notificationLevels: selectedNotificationLevels,
-              sendTo,
-            };
-            await updateDoc(notificationsRef, updateOthers);
-            setExistingData(updatedData);
-          }
-        } catch (error) {}
+  
+        if (!isGroupSelected) {
+          // When no group is selected, clear `groups` and update Firestore
+          const updatedData = {
+            ...existingData,
+            groups: [], // Clear groups
+            notificationLevels: selectedNotificationLevels,
+            sendTo,
+          };
+  
+          await updateDoc(notificationsRef, updatedData);
+          setGroups([]); // Clear groups in local state
+          setExistingData(updatedData);
+        } else if (selectedGroup && !groupExists) {
+          // When a new group is added
+          const updatedGroups = [
+            ...existingGroups,
+            { id: selectedGroup.id, name: selectedGroup.name },
+          ];
+  
+          const updatedData = {
+            ...existingData,
+            groups: updatedGroups,
+            notificationLevels: selectedNotificationLevels,
+            sendTo,
+          };
+  
+          await updateDoc(notificationsRef, updatedData);
+          setGroups(updatedGroups); // Update groups in local state
+          setExistingData(updatedData);
+        } else {
+          // Handle updating other fields without group changes
+          const updatedData = {
+            ...existingData,
+            notificationLevels: selectedNotificationLevels,
+            sendTo,
+          };
+  
+          await updateDoc(notificationsRef, updatedData);
+          setExistingData(updatedData);
+        }
       } catch (error) {
         console.error("Error updating notification settings:", error);
       }
     }
     handleOpen(null);
   };
+  
 
   const fetchGroups = async (telegramUserId) => {
     try {
