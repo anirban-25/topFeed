@@ -156,23 +156,38 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
 
         try {
           if (selectedGroup && !groupExists) {
-            const updatedGroups = [
-              ...existingGroups,
-              {
-                id: selectedGroup.id,
-                name: selectedGroup.name,
-              },
-            ];
+            if (!isGroupSelected) {
+              console.log(
+                "heyeyeyyeye"
+              )
+              const updatedData = {
+                ...existingData,
+                groups: [],
+                notificationLevels: selectedNotificationLevels,
+                sendTo,
+              };
 
-            const updatedData = {
-              ...existingData,
-              groups: updatedGroups,
-              notificationLevels: selectedNotificationLevels,
-              sendTo,
-            };
+              await updateDoc(notificationsRef, updatedData);
+              setExistingData(updatedData);
+            } else {
+              const updatedGroups = [
+                ...existingGroups,
+                {
+                  id: selectedGroup.id,
+                  name: selectedGroup.name,
+                },
+              ];
 
-            await updateDoc(notificationsRef, updatedData);
-            setExistingData(updatedData);
+              const updatedData = {
+                ...existingData,
+                groups: updatedGroups,
+                notificationLevels: selectedNotificationLevels,
+                sendTo,
+              };
+
+              await updateDoc(notificationsRef, updatedData);
+              setExistingData(updatedData);
+            }
           } else {
             const updateOthers = {
               ...existingData,
@@ -329,7 +344,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
 
   const mainView = (
     <>
-      <DialogHeader className="flex overflow-y-scroll justify-between items-center">
+      <DialogHeader className="flex  justify-between items-center">
         <Typography variant="h5" className="font-semibold">
           Notification Settings
         </Typography>
