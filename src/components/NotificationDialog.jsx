@@ -157,9 +157,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
         try {
           if (selectedGroup && !groupExists) {
             if (!isGroupSelected) {
-              console.log(
-                "heyeyeyyeye"
-              )
+              console.log("heyeyeyyeye");
               const updatedData = {
                 ...existingData,
                 groups: [],
@@ -249,6 +247,7 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       if (filteredGroups.length > 0) {
         setGroups(filteredGroups);
         setIsGroupSelected(true);
+        setShowGroupDropdown(true);
       }
 
       return filteredGroups;
