@@ -32,9 +32,6 @@ const HeroSection = () => {
             Get Started
           </button>
         </Link>
-        <button className="bg-[#3D3D3D] text-white text-sm px-3 md:px-6 py-2 rounded-md">
-          Learn More
-        </button>
       </div>
       <div className="text-center text-[#8D8D8D] text-xs md:text-sm mt-4 flex justify-center space-x-3 items-center">
         No credit card required &nbsp;
