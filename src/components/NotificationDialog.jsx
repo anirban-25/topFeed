@@ -191,8 +191,8 @@ const SocialMediaDialog = ({ size, handleOpen, handleDisconnect }) => {
       if (filteredGroups.length > 0) {
         
         setGroups(filteredGroups);
-        // setIsGroupSelected(true);
-        // setShowGroupDropdown(true);
+        setIsGroupSelected(true);
+        setShowGroupDropdown(true);
       }
 
       return filteredGroups;
