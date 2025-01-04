@@ -28,9 +28,9 @@ import { useAppContext } from "@/contexts/AppContext";
 const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
   const { twitterLoader, setTwitterLoader } = useAppContext();
   const [newTopic, setNewTopic] = useState("");
-  
+
   const [tags, setTags] = useState([]);
-  
+
   const [inputValue, setInputValue] = useState("");
   const [twitterUrls, setTwitterUrls] = useState([""]);
   const [errors, setErrors] = useState([]);
@@ -45,7 +45,13 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
   const [maxAccounts, setMaxAccounts] = useState(3);
 
   const user = auth.currentUser;
-
+  const handleAddClick = () => {
+    if (inputValue.trim() && tags.length < getMaxTagsForPlan(userPlan)) {
+      if (!tags.includes(inputValue.trim())) {
+        handleKeyDown({ key: 'Enter', preventDefault: () => {} });
+      }
+    }
+  };
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsAuthChecked(true);
@@ -405,20 +411,36 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
                   ))}
                 </div>
 
-                <div className="flex space-x-3">
+                <div className="flex flex-col md:flex-row gap-3">
                   <input
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className={`border w-[50%] rounded-lg p-2 shadow-md font-kumbh-sans-medium text-gray-800 ${
+                    className={`border w-full md:w-1/2 rounded-lg p-2 shadow-md font-kumbh-sans-medium text-gray-800 ${
                       topicError ? "border-red-500" : "border-[#CECECE]"
                     }`}
                     placeholder="Type and press Enter"
                     disabled={tags.length >= getMaxTagsForPlan(userPlan)}
                   />
 
+                  <button
+                    onClick={handleAddClick}
+                    className={`md:hidden px-4 py-2 rounded-lg transition-colors ${
+                      inputValue.trim() &&
+                      tags.length < getMaxTagsForPlan(userPlan)
+                        ? "bg-blue-500 text-white hover:bg-blue-600"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    disabled={
+                      !inputValue.trim() ||
+                      tags.length >= getMaxTagsForPlan(userPlan)
+                    }
+                  >
+                    Add Topic
+                  </button>
                 </div>
+
                 {topicError && (
                   <p className="mt-2 text-sm text-red-600">{topicError}</p>
                 )}
@@ -525,7 +547,6 @@ const TwitterFeedDialog = ({ size, handleOpen, onFeedCreated }) => {
         </button>
         <button
           className={`cursor-pointer border px-4 py-1 rounded-md font-kumbh-sans-semibold ${
-             
             twitterUrls.every((url) => url.trim() !== "") &&
             saveStatus.every((status) => status === "success")
               ? "bg-[#146EF5] text-white border-[#146EF5] hover:bg-[#0E5AD7]"
