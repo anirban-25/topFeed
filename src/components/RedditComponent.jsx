@@ -251,7 +251,7 @@ const RedditComponent = () => {
         };
         let tempPlan = undefined;
         if (plan) {
-          tempPlan = plan
+          tempPlan = plan;
           console.log(plan);
         } else {
           console.log("no plan");
@@ -263,7 +263,9 @@ const RedditComponent = () => {
             tempPlan = userData.plan;
           }
         }
-        setRemainingRefreshes(tempPlan ? planLimits[tempPlan] - isRefreshCount : 0);
+        setRemainingRefreshes(
+          tempPlan ? planLimits[tempPlan] - isRefreshCount : 0
+        );
 
         console.log("sfnskfns", isRefreshCount);
 
@@ -430,44 +432,47 @@ const RedditComponent = () => {
 
   return (
     <div className="font-kumbh-sans-Medium px-3 py-8 md:p-8">
-      <div className=" w-full flex justify-items-center md:justify-end mb-6 items-center gap-x-4 ">
-        <div className="relative flex items-center">
-          <IoSearch className="absolute left-3 text-gray-500" />
+      <div className="w-full flex flex-wrap items-center justify-end gap-2 mb-6">
+        {/* Search bar with flexible width */}
+        <div className="relative flex-1 min-w-0 max-w-xs">
+          <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
             type="text"
             placeholder="Search in feed..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 border border-[#CECECE] text-sm rounded-lg px-4 py-2"
+            className="w-full pl-10 border border-[#CECECE] text-sm rounded-lg px-4 py-2"
           />
         </div>
+
+        {/* Refresh button */}
         <button
-          className="bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg ml-4"
+          className="bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg whitespace-nowrap"
           onClick={() => handleRefresh(null)}
         >
-          <div className="hidden text-sm md:block font-kumbh-sans-medium">
+          <span className="hidden text-sm md:block font-kumbh-sans-medium">
             Update Instant Refresh
-          </div>
-          <div className="md:hidden font-kumbh-sans-medium">Refresh</div>
+          </span>
+          <span className="md:hidden font-kumbh-sans-medium">Refresh</span>
         </button>
 
-        <div className="relative inline-block">
+        {/* Info button with tooltip */}
+        <div className="relative">
           <button
-            className="text-gray-500 hover:text-blue-500"
+            className="text-gray-500 hover:text-blue-500 p-2"
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
           >
             <AiOutlineInfoCircle size={24} />
           </button>
           {hovered && (
-            <div className="absolute bg-gray-800 text-white text-sm rounded p-2 shadow-lg top-0 left-5 z-10 whitespace-nowrap transform -translate-x-full -translate-y-full font-kumbh-sans-medium">
+            <div className="absolute bg-gray-800 text-white text-sm rounded p-2 shadow-lg right-0 top-full mt-2 z-10 whitespace-nowrap font-kumbh-sans-medium">
               {remainingRefreshes} refreshes left
             </div>
           )}
         </div>
+        <RedditMasonryLayout filteredRedditData={filteredData} />
       </div>
-
-      <RedditMasonryLayout filteredRedditData={filteredData} />
     </div>
   );
 };
