@@ -47,6 +47,8 @@ const RedditComponent = () => {
   const [showInfoButton, setShowInfoButton] = useState(false);
   const router = useRouter();
   const auth = getAuth(app);
+  const [showTooltip, setShowTooltip] = useState(false);
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -116,7 +118,13 @@ const RedditComponent = () => {
     // Cleanup: unsubscribe when component unmounts
     return () => unsubscribe();
   }, [user]);
-
+  const planLimits = {
+    free: 10,
+    Starter: 20,
+    Growth: 50,
+    Scale: 80,
+  };
+  const isMaxReached = isRefreshCount >= planLimits[plan];
   const handleRefresh = async (cleanedTopics) => {
     setRedditLoading(true);
 
@@ -141,12 +149,7 @@ const RedditComponent = () => {
 
     const userPlan = plan;
 
-    const planLimits = {
-      free: 10,
-      Starter: 20,
-      Growth: 50,
-      Scale: 80,
-    };
+    
 
     if (isRefreshCount >= planLimits[userPlan]) {
       alert(`You have reached the refresh limit for your ${userPlan} plan.`);
@@ -446,15 +449,24 @@ const RedditComponent = () => {
         </div>
 
         {/* Refresh button */}
-        <button
-          className="bg-[#146EF5] hover:bg-blue-900 text-white px-4 py-2 rounded-lg whitespace-nowrap"
-          onClick={() => handleRefresh(null)}
-        >
-          <span className="hidden text-sm md:block font-kumbh-sans-medium">
-            Update Instant Refresh
-          </span>
-          <span className="md:hidden font-kumbh-sans-medium">Refresh</span>
-        </button>
+        <div className="relative inline-block">
+          <button
+            className={`${
+              isMaxReached
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-[#146EF5] hover:bg-blue-900"
+            } text-white px-4 py-2 rounded-lg whitespace-nowrap`}
+            onClick={() => !isMaxReached && onRefresh()}
+            disabled={isMaxReached}
+          >
+            <span className="hidden text-sm md:block font-kumbh-sans-medium">
+              Update Instant Refresh
+            </span>
+            <span className="md:hidden font-kumbh-sans-medium">Refresh</span>
+          </button>
+
+          
+        </div>
 
         {/* Info button with tooltip */}
         <div className="relative">
