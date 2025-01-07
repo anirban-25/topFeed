@@ -456,7 +456,7 @@ const RedditComponent = () => {
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-[#146EF5] hover:bg-blue-900"
             } text-white px-4 py-2 rounded-lg whitespace-nowrap`}
-            onClick={() => !isMaxReached && onRefresh()}
+            onClick={() => !isMaxReached && handleRefresh()}
             disabled={isMaxReached}
           >
             <span className="hidden text-sm md:block font-kumbh-sans-medium">
