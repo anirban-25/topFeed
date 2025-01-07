@@ -25,6 +25,9 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { useAppContext } from "@/contexts/AppContext";
 
 const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
+  const REDDIT_CLIENT_ID = process.env.NEXT_PUBLIC_REDDIT_CLIENT_ID;
+  const REDDIT_CLIENT_SECRET = process.env.NEXT_PUBLIC_REDDIT_CLIENT_SECRET;
+
   const { setRedditDataFetch, feedSetting } = useAppContext();
   const [topics, setTopics] = useState([]);
   const [newTopic, setNewTopic] = useState("");
@@ -45,10 +48,10 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
           "user_reddits",
           "latest_analysis"
         );
-  
+
         const retryFetch = async (retries = 5) => {
           const docSnapshot = await getDoc(latestAnalysisRef);
-  
+
           if (docSnapshot.exists()) {
             const docData = docSnapshot.data();
             console.log(docData.subreddits);
@@ -62,7 +65,7 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
             console.log("No data found in 'latest_analysis' after 10 seconds");
           }
         };
-  
+
         await retryFetch();
       }
     } catch (error) {
@@ -79,14 +82,48 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
     console.log(feedSetting);
     fetchLastUpdatedSubreddits();
   }, [feedSetting]);
+  const getRedditAccessToken = async () => {
+    const auth = Buffer.from(
+      `${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`
+    ).toString("base64");
+
+    try {
+      const response = await axios.post(
+        "https://www.reddit.com/api/v1/access_token",
+        "grant_type=client_credentials",
+        {
+          headers: {
+            Authorization: `Basic ${auth}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+
+      return response.data.access_token;
+    } catch (error) {
+      console.error("Error getting Reddit access token:", error);
+      throw error;
+    }
+  };
 
   useEffect(() => {
     if (newTopic) {
       const fetchSuggestions = async () => {
         try {
+          // Get access token
+          const accessToken = await getRedditAccessToken();
+
+          // Use the access token to make the API request
           const response = await axios.get(
-            `https://www.reddit.com/subreddits/search.json?q=${newTopic}`
+            `https://oauth.reddit.com/subreddits/search.json?q=${newTopic}`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                // Removed User-Agent header since it causes browser warning
+              },
+            }
           );
+
           setSuggestions(
             response.data.data.children.map(
               (child) => child.data.display_name_prefixed
@@ -94,9 +131,14 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
           );
         } catch (error) {
           console.error("Error fetching subreddit suggestions:", error);
+          setSuggestions([]); // Clear suggestions on error
         }
       };
-      fetchSuggestions();
+
+      // Add debounce to prevent too many API calls
+      const timeoutId = setTimeout(fetchSuggestions, 300);
+
+      return () => clearTimeout(timeoutId);
     } else {
       setSuggestions([]);
     }
@@ -134,12 +176,12 @@ const CreateFeedPopup = ({ open, handleOpen, handleSubmit }) => {
         "user_reddits",
         "latest_analysis"
       );
-      
+
       try {
         await updateDoc(latestAnalysisRef, {
           subreddits: cleanedTopics,
         });
-        
+
         setLoading(false);
         console.log("Document successfully updated");
       } catch (error) {
