@@ -7,8 +7,12 @@ import { AppProvider } from "@/contexts/AppContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "TopFeed",
-  description: "",
+  title: "TopFeed AI | Find Trending Topics from Reddit and X",
+  description: "TopFeed AI can summarize news from Reddit discussions and tweets from X. Find trending topics with personalized insights for your business in real-time.",
+  robots: {
+    index: true,
+    follow: true
+  }
 };
 
 export default function RootLayout({
@@ -19,7 +23,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="robots" content="noindex" />
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-T6C8KG03Q6"
