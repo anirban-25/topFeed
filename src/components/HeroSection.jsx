@@ -1,8 +1,28 @@
-import React from "react";
+"use client";
+import React, { useEffect }  from "react";
 import { PiStarFourFill } from "react-icons/pi";
 import Link from "next/link";
 import Image from "next/image";
 const HeroSection = () => {
+  useEffect(() => {
+    // Load the chatbot script dynamically
+    const script = document.createElement("script");
+    script.src = "https://chatclient.ai/api/embed";
+    script.defer = true;
+    script.id = "chatbot-widget-script";
+
+    // Add chatbot config to the window object
+    window.chatBotConfig = {
+      chatbotId: "fac36407-8109-4d3a-9628-e5c3402f0742",
+    };
+
+    document.body.appendChild(script);
+
+    // Cleanup script on component unmount
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
   return (
     <div className=" relative">
       <h1 className="flex text-2xl md:text-6xl text-center justify-center font-kumbh-sans-bold mt-10 text-white ">
@@ -26,6 +46,7 @@ const HeroSection = () => {
           provide the latest Tweets from X which is really ‘relevant’ to you.
         </h3>
       </div>
+      <div id="chatbot-container" className="flex justify-center mt-6"></div>
       <div className="flex justify-center mt-16 space-x-4">
         <Link href="/login">
           <button className="bg-[#146EF5] text-white text-sm px-3 md:px-6 py-2 rounded-md">
