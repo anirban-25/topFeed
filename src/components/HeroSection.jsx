@@ -25,6 +25,7 @@ const HeroSection = () => {
   }, []);
   return (
     <div className=" relative">
+      <div id="chatbot-container"></div>
       <h1 className="flex text-2xl md:text-6xl text-center justify-center font-kumbh-sans-bold mt-10 text-white ">
         <div className="">
           <span>All The </span>
@@ -46,7 +47,7 @@ const HeroSection = () => {
           provide the latest Tweets from X which is really ‘relevant’ to you.
         </h3>
       </div>
-      <div id="chatbot-container" className="flex justify-center mt-6"></div>
+      
       <div className="flex justify-center mt-16 space-x-4">
         <Link href="/login">
           <button className="bg-[#146EF5] text-white text-sm px-3 md:px-6 py-2 rounded-md">
