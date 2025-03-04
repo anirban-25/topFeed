@@ -104,7 +104,7 @@ const DashboardHeader = () => {
       }
       // Send the POST request to the API
       const response = await fetch(
-        "https://us-central1-topfeed-123.cloudfunctions.net/feedAPI/api/reddit/process",
+        "https://us-central1-stonkvibes-bd62e.cloudfunctions.net/feedAPI/api/reddit/process",
         {
           method: "POST",
           headers: {
